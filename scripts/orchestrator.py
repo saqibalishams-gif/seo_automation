@@ -1,0 +1,68 @@
+import argparse
+import json
+from collections import Counter
+import traceback
+import time
+from utils.logger import get_logger
+from utils.db import init_db
+from agents.discovery_agent import DiscoveryAgent
+from pipelines.content_pipeline import run_single_candidate
+
+logger = get_logger("orchestrator")
+
+def run(target_market: str, max_volume: int, dry_run: bool):
+    logger.info(f"Starting orchestration run (Market: {target_market}, Max Volume: {max_volume}, Dry Run: {dry_run})")
+    init_db()
+    
+    discovery = DiscoveryAgent()
+    candidates = discovery.discover_candidates()
+    
+    processed = 0
+    metrics = Counter()
+    
+    for candidate in candidates:
+        if processed >= max_volume:
+            logger.info(f"Reached max volume of {max_volume}. Stopping run.")
+            break
+            
+        logger.info(f"Processing candidate: {candidate.game_name}")
+        
+        try:
+            start_time = time.time()
+            draft, status = run_single_candidate(candidate, target_market=target_market, dry_run=dry_run)
+            metrics[status] += 1
+            duration = time.time() - start_time
+            
+            if status == "SUCCESS":
+                processed += 1
+                from config.settings import settings
+                wp_post_url = f"{settings.wp_url.rstrip('/')}/?p={draft}" if draft else "Unknown URL"
+                logger.info(f"Successfully processed and drafted {candidate.game_name}. Published at: {wp_post_url}. Duration: {duration:.2f}s")
+                if candidate.airtable_record_id:
+                    if not dry_run:
+                        discovery.update_status(candidate.airtable_record_id, "Published")
+                    else:
+                        discovery.update_status(candidate.airtable_record_id, "New", "Dry Run Success")
+            else:
+                if candidate.airtable_record_id:
+                    discovery.update_status(candidate.airtable_record_id, "Failed", f"Pipeline Status: {status}")
+        except Exception as e:
+            metrics["UNHANDLED_EXCEPTION"] += 1
+            logger.error(f"Unhandled exception processing {candidate.game_name}: {e}")
+            logger.error(traceback.format_exc())
+            if candidate.airtable_record_id:
+                discovery.update_status(candidate.airtable_record_id, "Failed", "Unhandled Exception")
+            
+    logger.info(f"Orchestration run complete. Total drafts pushed: {processed}")
+    logger.info(f"Run Summary Metrics: {json.dumps(dict(metrics))}")
+    return processed
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Autonomous Casino Content Orchestrator")
+    parser.add_argument("--market", type=str, default="UK", help="Target market for compliance check")
+    parser.add_argument("--volume", type=int, default=2, help="Maximum number of drafts to push per run")
+    parser.add_argument("--dry-run", action="store_true", help="Run without mutating external APIs (WordPress)")
+    
+    args = parser.parse_args()
+    
+    run(target_market=args.market, max_volume=args.volume, dry_run=args.dry_run)

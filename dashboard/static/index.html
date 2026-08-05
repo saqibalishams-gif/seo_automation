@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Automation Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>SEO Auto</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Overview</a>
+                <a href="#history" class="nav-item">Publish History</a>
+                <a href="#runner" class="nav-item">Automation Runner</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h2>Dashboard Overview</h2>
+            </header>
+
+            <!-- Stats Row -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Published</h3>
+                    <p class="stat-value" id="stat-published">...</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Trusted Facts Validated</h3>
+                    <p class="stat-value" id="stat-facts">...</p>
+                </div>
+            </section>
+
+            <!-- Add Airtable Link Section -->
+            <section id="add-link" class="add-link-section glass-panel" style="margin-bottom: 2rem;">
+                <h3>Submit New Game Link to Airtable</h3>
+                <form id="link-form" class="run-form">
+                    <div class="form-group">
+                        <label for="url">Game URL (Required)</label>
+                        <input type="url" id="url" name="url" placeholder="https://example.com/slot..." required style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="game_name">Game Name (Optional)</label>
+                            <input type="text" id="game_name" name="game_name" placeholder="Leave blank for AI extraction" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="provider">Provider (Optional)</label>
+                            <input type="text" id="provider" name="provider" placeholder="Leave blank for AI extraction" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">Article Images</h4>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem;">Upload images here. They will be pushed to WordPress and saved in Airtable.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="featured_image">Featured Image</label>
+                            <input type="file" id="featured_image" name="featured_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
+                        </div>
+                        <div class="form-group">
+                            <label for="description_image">Description Image</label>
+                            <input type="file" id="description_image" name="description_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
+                        </div>
+                        <div class="form-group">
+                            <label for="login_image">Login & Registration Image</label>
+                            <input type="file" id="login_image" name="login_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
+                        </div>
+                        <div class="form-group">
+                            <label for="transaction_image">Transaction Image</label>
+                            <input type="file" id="transaction_image" name="transaction_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="link-btn" style="margin-top: 1.5rem; background: #10b981;">
+                        <span class="btn-text">Send to Airtable</span>
+                    </button>
+                </form>
+                <div id="link-status" class="status-msg hidden" style="margin-top: 1rem;"></div>
+            </section>
+
+            <!-- Automation Runner Section -->
+            <section id="runner" class="runner-section glass-panel">
+                <h3>Trigger Automation Run</h3>
+                <form id="run-form" class="run-form">
+                    <div class="form-group">
+                        <label for="market">Target Market</label>
+                        <select id="market" name="market">
+                            <option value="UK">UK (United Kingdom)</option>
+                            <option value="SE">SE (Sweden)</option>
+                            <option value="ON">ON (Ontario)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="volume">Volume (Drafts)</label>
+                        <input type="number" id="volume" name="volume" value="2" min="1" max="100">
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="dry_run" name="dry_run" checked>
+                        <label for="dry_run">Dry Run (Do not publish to WordPress)</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="run-btn">
+                        <span class="btn-text">Run Automation</span>
+                    </button>
+                </form>
+                <div id="run-status" class="status-msg hidden"></div>
+            </section>
+
+            <!-- Live Flow Terminal Section -->
+            <section id="live-flow" class="terminal-section glass-panel" style="margin-top: 2rem;">
+                <h3>Live Flow Monitor</h3>
+                <div class="terminal-window" style="background: #0f172a; color: #10b981; font-family: monospace; padding: 1rem; border-radius: 8px; height: 300px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                    <div id="terminal-content">Waiting for automation logs...</div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="history-section glass-panel">
+                <h3>Recent Publish History</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Game Name</th>
+                                <th>Provider</th>
+                                <th>Article ID</th>
+                                <th>Published At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- Dynamic rows go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
