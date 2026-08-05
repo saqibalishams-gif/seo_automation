@@ -77,8 +77,9 @@ def run_orchestrator(config: RunConfig):
     ]
     if config.dry_run:
         cmd.append("--dry-run")
-        
-    subprocess.Popen(cmd, cwd=BASE_DIR)
+    log_file = os.path.join(BASE_DIR, 'data', 'orchestrator.log')
+    with open(log_file, 'a') as f:
+        subprocess.Popen(cmd, cwd=BASE_DIR, stdout=f, stderr=subprocess.STDOUT)
 
 @app.post("/api/run")
 def trigger_run(config: RunConfig, background_tasks: BackgroundTasks):
