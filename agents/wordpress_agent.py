@@ -161,30 +161,32 @@ class WordPressAgent:
                     if clean_p:
                         appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
 
-                # Flatten the dictionary for PHP $_POST array syntax
                 meta_payload = {
                     "post_id": int(article_id),
-                    "datos_informacion[app_status]": "new",
-                    "datos_informacion[descripcion]": appyn_desc,
-                    "datos_informacion[version]": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
-                    "datos_informacion[tamano]": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
-                    "datos_informacion[fecha_actualizacion]": "Just now",
-                    "datos_informacion[requerimientos]": "Android",
-                    "datos_informacion[descargas]": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
-                    "datos_informacion[categoria_app]": "GAMES",
-                    "datos_informacion[os]": "ANDROID",
-                    "datos_informacion[offer][amount]": "",
-                    "datos_informacion[offer][currency]": "USD",
-                    "datos_download[option]": "links",
-                    "datos_download[type]": "apk",
-                    "datos_download[0][link]": "#",
-                    "datos_download[0][texto]": "DOWNLOAD APK"
+                    "datos_informacion": {
+                        "app_status": "new",
+                        "descripcion": appyn_desc,
+                        "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
+                        "tamano": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
+                        "fecha_actualizacion": "Just now",
+                        "requerimientos": "Android",
+                        "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
+                        "categoria_app": "GAMES",
+                        "os": "ANDROID",
+                        "offer": {"amount": "", "currency": "USD"}
+                    },
+                    "datos_download": {
+                        "option": "links",
+                        "type": "apk",
+                        "0": {
+                            "link": "#",
+                            "texto": "DOWNLOAD APK"
+                        }
+                    }
                 }
-                meta_url = f"{self.wp_url}/wp-json/appyn/v1/update-meta"
+                meta_url = f"{self.wp_url}/wp-json/seo-automation/v1/update-meta"
                 try:
-                    # Use data= instead of json= to force application/x-www-form-urlencoded
-                    # This ensures $_POST is populated on the PHP side.
-                    request_with_retry('POST', meta_url, data=meta_payload, headers=headers, auth=self.auth, timeout=15)
+                    request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
                     logger.info("Successfully updated Appyn meta.")
                 except Exception as e:
                     logger.warning(f"Failed to update Appyn meta (Does this site have the Appyn theme?): {e}")
