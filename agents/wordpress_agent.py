@@ -2,6 +2,7 @@ import json
 import os
 import re
 import random
+import xmlrpc.client
 from typing import Dict, Any, Optional
 from bs4 import BeautifulSoup
 from utils.logger import get_logger
@@ -150,20 +151,22 @@ class WordPressAgent:
                 logger.error(f"Failed to parse JSON from WordPress. Status: {response.status_code}, Response: {response.text[:500]}")
                 return None
                 
-            article_id = str(data.get('id', ''))
-            
-            # Theme Specific Meta Updates
-            if self.theme_type == 'appyn':
-                appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-                p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
-                if p_match:
-                    clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
-                    if clean_p:
-                        appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
+            # Theme and SEO Meta Updates via XML-RPC
+            xmlrpc_url = self.wp_url.rstrip('/') + '/xmlrpc.php'
+            try:
+                server = xmlrpc.client.ServerProxy(xmlrpc_url)
+                custom_fields = []
+                
+                # Appyn Meta
+                if self.theme_type == 'appyn':
+                    appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
+                    p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
+                    if p_match:
+                        clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
+                        if clean_p:
+                            appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
 
-                meta_payload = {
-                    "post_id": article_id,
-                    "datos_informacion": {
+                    appyn_dict = {
                         "app_status": "new",
                         "descripcion": appyn_desc,
                         "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
@@ -172,60 +175,35 @@ class WordPressAgent:
                         "requerimientos": "Android",
                         "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
                         "categoria_app": "GAMES",
-                        "os": "ANDROID",
-                        "offer": {"amount": "", "currency": "USD"}
-                    },
-                    "datos_download": {
-                        "option": "links",
-                        "type": "apk",
-                        "0": {
-                            "link": "#",
-                            "texto": "DOWNLOAD APK"
-                        }
+                        "os": "ANDROID"
                     }
-                }
-                meta_url = f"{self.wp_url}/wp-json/appyn/v1/update-meta"
-                try:
-                    request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
-                    logger.info("Successfully updated Appyn meta.")
-                except Exception as e:
-                    logger.warning(f"Failed to update Appyn meta (Does this site have the Appyn theme?): {e}")
-            else:
-                logger.info(f"Skipping Appyn meta update. Theme is set to {self.theme_type}.")
-            
-            # SEO Plugin Specific Updates
-            if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
-                meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-                if self.seo_plugin == 'rankmath':
-                    rankmath_payload = {
-                        "objectType": "post",
-                        "objectID": int(article_id),
-                        "meta": {
-                            "rank_math_focus_keyword": draft.focus_keyword,
-                            "rank_math_description": meta_desc
-                        }
-                    }
-                    rankmath_url = f"{self.wp_url}/wp-json/rankmath/v1/updateMeta"
-                    try:
-                        rm_resp = request_with_retry('POST', rankmath_url, json=rankmath_payload, headers=headers, auth=self.auth, timeout=15)
-                        logger.info(f"RankMath updateMeta response: {rm_resp.status_code}")
-                    except Exception as e:
-                        logger.error(f"Failed to update RankMath meta: {e}")
-                elif self.seo_plugin == 'yoast':
-                    yoast_url = f"{self.wp_url}/wp-json/wp/v2/posts/{article_id}"
-                    yoast_payload = {
-                        "meta": {
-                            "yoast_wpseo_focuskw": draft.focus_keyword,
-                            "yoast_wpseo_metadesc": meta_desc
-                        }
-                    }
-                    try:
-                        request_with_retry('POST', yoast_url, json=yoast_payload, headers=headers, auth=self.auth, timeout=15)
-                        logger.info("Successfully updated Yoast focus keyword.")
-                    except Exception as e:
-                        logger.error(f"Failed to update Yoast meta: {e}")
-                else:
-                    logger.info(f"Skipping SEO meta update. Plugin is set to {self.seo_plugin}.")
+                    
+                    # Serialize to PHP format manually
+                    parts = [f"a:{len(appyn_dict)}:{{"]
+                    for k, v in appyn_dict.items():
+                        k_b = str(k).encode('utf-8')
+                        v_b = str(v).encode('utf-8')
+                        parts.append(f's:{len(k_b)}:"{k_b.decode("utf-8")}";s:{len(v_b)}:"{v_b.decode("utf-8")}";')
+                    parts.append("}")
+                    datos_info_serialized = "".join(parts)
+                    
+                    custom_fields.append({'key': 'datos_informacion', 'value': datos_info_serialized})
+
+                # SEO Meta
+                if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
+                    meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
+                    if self.seo_plugin == 'rankmath':
+                        custom_fields.append({'key': 'rank_math_focus_keyword', 'value': draft.focus_keyword})
+                        custom_fields.append({'key': 'rank_math_description', 'value': meta_desc})
+                    elif self.seo_plugin == 'yoast':
+                        custom_fields.append({'key': 'yoast_wpseo_focuskw', 'value': draft.focus_keyword})
+                        custom_fields.append({'key': 'yoast_wpseo_metadesc', 'value': meta_desc})
+                        
+                if custom_fields:
+                    server.wp.editPost(1, self.auth[0], self.auth[1], int(article_id), {'custom_fields': custom_fields})
+                    logger.info(f"Successfully pushed {len(custom_fields)} custom fields via XML-RPC.")
+            except Exception as e:
+                logger.error(f"Failed to push custom fields via XML-RPC: {e}")
             logger.info(f"Successfully pushed draft. WP Post ID: {article_id}")
             return article_id
         except Exception as e:
