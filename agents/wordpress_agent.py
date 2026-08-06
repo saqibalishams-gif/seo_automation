@@ -151,6 +151,8 @@ class WordPressAgent:
                 logger.error(f"Failed to parse JSON from WordPress. Status: {response.status_code}, Response: {response.text[:500]}")
                 return None
                 
+            article_id = str(data.get('id', ''))
+            
             # Theme and SEO Meta Updates via XML-RPC
             xmlrpc_url = self.wp_url.rstrip('/') + '/xmlrpc.php'
             try:
