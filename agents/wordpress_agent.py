@@ -155,11 +155,13 @@ class WordPressAgent:
             # Theme Specific Meta Updates
             if self.theme_type == 'appyn':
                 appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-                p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
-                if p_match:
-                    clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
-                    if clean_p:
-                        appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
+                if not appyn_desc:
+                    import html
+                    clean_body = re.sub(r'<[^>]+>', ' ', final_body)
+                    clean_body = html.unescape(clean_body).strip()
+                    clean_body = re.sub(r'\s+', ' ', clean_body)
+                    if clean_body:
+                        appyn_desc = clean_body[:300] + ('...' if len(clean_body) > 300 else '')
 
                 meta_payload = {
                     "post_id": int(article_id),
