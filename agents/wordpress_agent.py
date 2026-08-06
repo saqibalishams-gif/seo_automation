@@ -150,6 +150,8 @@ class WordPressAgent:
                 logger.error(f"Failed to parse JSON from WordPress. Status: {response.status_code}, Response: {response.text[:500]}")
                 return None
                 
+            article_id = str(data.get('id', ''))
+            
             # Theme Specific Meta Updates
             if self.theme_type == 'appyn':
                 appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
