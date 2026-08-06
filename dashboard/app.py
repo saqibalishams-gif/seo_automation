@@ -39,6 +39,8 @@ class SettingsUpdate(BaseModel):
     wp_url: str
     wp_username: str
     wp_app_password: str
+    theme_type: str = "standard"
+    seo_plugin: str = "none"
 
 @app.get("/")
 def read_root():
@@ -115,9 +117,9 @@ def update_settings(settings: SettingsUpdate, user_id: int = Depends(get_current
     with get_db_connection() as conn:
         conn.execute("""
             UPDATE user_settings 
-            SET wp_url=?, wp_username=?, wp_app_password=?
+            SET wp_url=?, wp_username=?, wp_app_password=?, theme_type=?, seo_plugin=?
             WHERE user_id=?
-        """, (settings.wp_url, settings.wp_username, settings.wp_app_password, user_id))
+        """, (settings.wp_url, settings.wp_username, settings.wp_app_password, settings.theme_type, settings.seo_plugin, user_id))
         conn.commit()
     return {"message": "Settings updated"}
 
@@ -125,7 +127,7 @@ def update_settings(settings: SettingsUpdate, user_id: int = Depends(get_current
 def get_settings(user_id: int = Depends(get_current_user_id)):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT wp_url, wp_username, wp_app_password FROM user_settings WHERE user_id = ?", (user_id,))
+        cursor.execute("SELECT wp_url, wp_username, wp_app_password, theme_type, seo_plugin FROM user_settings WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
         return dict(row) if row else {}
 

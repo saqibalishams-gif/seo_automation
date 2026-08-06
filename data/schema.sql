@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS user_settings (
     wp_url TEXT,
     wp_username TEXT,
     wp_app_password TEXT,
+    theme_type TEXT DEFAULT 'standard',
+    seo_plugin TEXT DEFAULT 'none',
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 

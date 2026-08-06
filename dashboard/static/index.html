@@ -6,198 +6,229 @@
     <title>SEO Automation Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css?v=2">
 </head>
 <body>
+    <!-- Background Blobs -->
+    <div class="bg-blobs">
+        <div class="blob blob-orange"></div>
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-orange-lt"></div>
+    </div>
+
     <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <div class="logo-icon"></div>
+        
+        <!-- Header Bar -->
+        <header class="glass-panel header-bar">
+            <div class="brand-section">
+                <div class="status-dot-container"><div class="status-dot"></div></div>
                 <h1>SEO Auto</h1>
             </div>
-            <nav class="nav-menu">
-                <a href="#" class="nav-item active">Overview</a>
-                <a href="#history" class="nav-item">Publish History</a>
-                <a href="#runner" class="nav-item">Automation Runner</a>
-                <button id="settings-btn" class="nav-item text-left w-full mt-4" style="background: none; border: none; cursor: pointer; color: #cbd5e1; font-family: inherit; font-size: 1rem; padding: 0.75rem 1rem;">⚙ Settings</button>
-                <button id="logout-btn" class="nav-item text-left w-full mt-auto" style="background: none; border: none; cursor: pointer; color: #ef4444; font-family: inherit; font-size: 1rem; padding: 0.75rem 1rem;">Log Out</button>
-            </nav>
+            <div class="status-pills">
+                <div class="status-pill" id="header-wp-status">Checking WordPress...</div>
+                <div class="status-pill" id="header-theme-status">Theme: --</div>
+                <div class="status-pill" id="header-seo-status">SEO: --</div>
+                <button id="nav-setup" style="background: none; border: none; cursor: pointer; color: var(--accent-orange); font-weight: bold; margin-left: 10px;">⚙ Setup</button>
+                <button id="nav-overview" style="background: none; border: none; cursor: pointer; color: var(--accent-blue-text); font-weight: bold; margin-left: 10px;">Overview</button>
+                <button id="logout-btn" style="background: none; border: none; cursor: pointer; color: #A03B24; font-weight: bold; margin-left: 10px;">Log Out</button>
+            </div>
+        </header>
+
+        <!-- Main Column -->
+        <main class="main-column">
+            
+            <!-- Setup Wizard (Hidden by default) -->
+            <section id="setup" class="glass-panel hidden">
+                <h3 class="panel-header">System Configuration</h3>
+                <form id="setup-form" class="run-form">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>WordPress URL</label>
+                            <input type="url" id="set_wp_url" placeholder="https://example.com" required>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="form-group">
+                            <label>WordPress Username</label>
+                            <input type="text" id="set_wp_username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>WordPress App Password</label>
+                            <input type="password" id="set_wp_password" required>
+                        </div>
+                    </div>
+                    
+                    <h3 class="panel-header" style="margin-top: 1rem;">Theme & Plugins</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="form-group">
+                            <label>Active Theme</label>
+                            <select id="set_theme_type">
+                                <option value="standard">Standard (GeneratePress, Astra, etc)</option>
+                                <option value="appyn">Appyn (APK Theme)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>SEO Plugin</label>
+                            <select id="set_seo_plugin">
+                                <option value="none">None</option>
+                                <option value="rankmath">RankMath</option>
+                                <option value="yoast">Yoast SEO</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 0;">
+                        <span class="btn-text">Save Configuration</span>
+                    </button>
+                    <div id="setup-status" class="status-msg hidden"></div>
+                </form>
+            </section>
+
+            <!-- Overview View -->
+            <div id="overview-view" style="display: contents;">
+                
+                <!-- Stats Row -->
+                <section class="stats-row">
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-published">0</div>
+                        <div class="stat-label">Published</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-queue">0</div>
+                        <div class="stat-label">In Queue</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-facts">0</div>
+                        <div class="stat-label">Facts Verified</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-errors">0</div>
+                        <div class="stat-label">Error Rate</div>
+                    </div>
+                </section>
+
+                <!-- Automation Runner Panel -->
+                <section class="glass-panel">
+                    <h3 class="panel-header">Automation Runner</h3>
+                    <form id="run-form" class="inline-form">
+                        <div class="form-group">
+                            <label for="market">Market</label>
+                            <select id="market" name="market">
+                                <option value="UK">UK (United Kingdom)</option>
+                                <option value="SE">SE (Sweden)</option>
+                                <option value="ON">ON (Ontario)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="volume">Volume</label>
+                            <input type="number" id="volume" name="volume" value="2" min="1" max="100">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="dry_run" name="dry_run" checked>
+                            <label for="dry_run">Dry Run</label>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="run-btn">
+                            <span class="btn-text">Run Batch</span>
+                        </button>
+                    </form>
+                    <div id="run-status" class="status-msg hidden"></div>
+                </section>
+
+                <!-- Add Link Section -->
+                <section class="glass-panel">
+                    <h3 class="panel-header">Manual Queue Entry</h3>
+                    <form id="link-form" class="inline-form">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="url">Game URL</label>
+                            <input type="url" id="url" name="url" placeholder="https://example.com/slot" required>
+                        </div>
+                        <button type="submit" class="btn-primary" id="link-btn">
+                            <span class="btn-text">Add to Queue</span>
+                        </button>
+                    </form>
+                    <div id="link-status" class="status-msg hidden"></div>
+                </section>
+
+                <!-- Unified Link Queue / History Panel -->
+                <section class="glass-panel">
+                    <h3 class="panel-header">Activity & Queue History</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Game / URL</th>
+                                    <th>Status</th>
+                                    <th>Reason / Details</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="unified-tbody">
+                                <tr><td colspan="4" style="text-align:center">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Live Flow Monitor -->
+                <section class="glass-panel">
+                    <h3 class="panel-header">Live Flow Monitor</h3>
+                    <div class="terminal-window" id="terminal-content">
+                        Waiting for logs...
+                    </div>
+                </section>
+
+            </div> <!-- End Overview View -->
+
+        </main>
+
+        <!-- Sidebar Column -->
+        <aside class="sidebar-column">
+            <div class="glass-panel agent-card">
+                
+                <div class="agent-avatar">
+                    <!-- Simple vector avatar -->
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="8" r="4" fill="currentColor"/>
+                        <path d="M6 21V19C6 16.7909 7.79086 15 10 15H14C16.2091 15 18 16.7909 18 19V21" fill="currentColor"/>
+                        <path d="M4 11V14C4 15.1046 4.89543 16 6 16H6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M20 11V14C20 15.1046 19.1046 16 18 16H17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="6" cy="11" r="2" fill="currentColor"/>
+                        <circle cx="18" cy="11" r="2" fill="currentColor"/>
+                    </svg>
+                </div>
+
+                <div class="agent-name">System Agent</div>
+                <div class="agent-role">Orchestrator</div>
+
+                <div class="agent-status">
+                    <div class="status-dot-blue"></div>
+                    <span id="agent-status-text">Online, standing by</span>
+                </div>
+
+                <div class="speech-bubble" id="agent-speech">
+                    Hello! I'm monitoring the queue. Add a URL or run a batch to get started.
+                </div>
+
+                <div class="mini-stats">
+                    <div class="mini-stat-tile">
+                        <div class="mini-stat-val" id="mini-stat-items">0</div>
+                        <div class="mini-stat-lbl">Items this run</div>
+                    </div>
+                    <div class="mini-stat-tile">
+                        <div class="mini-stat-val" id="mini-stat-errors">0</div>
+                        <div class="mini-stat-lbl">Errors</div>
+                    </div>
+                </div>
+
+            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="header">
-                <h2>Dashboard Overview</h2>
-            </header>
-
-            <!-- Stats Row -->
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Published</h3>
-                    <p class="stat-value" id="stat-published">...</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Trusted Facts Validated</h3>
-                    <p class="stat-value" id="stat-facts">...</p>
-                </div>
-            </section>
-
-            <!-- Add Link Section -->
-            <section id="add-link" class="add-link-section glass-panel" style="margin-bottom: 2rem;">
-                <h3>Submit New Game Link to Queue</h3>
-                <form id="link-form" class="run-form">
-                    <div class="form-group">
-                        <label for="url">Game URL (Required)</label>
-                        <input type="url" id="url" name="url" placeholder="https://example.com/slot..." required style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="game_name">Game Name (Optional)</label>
-                            <input type="text" id="game_name" name="game_name" placeholder="Leave blank for AI extraction" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="provider">Provider (Optional)</label>
-                            <input type="text" id="provider" name="provider" placeholder="Leave blank for AI extraction" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.2); color: white;">
-                        </div>
-                    </div>
-                    
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">Article Images</h4>
-                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem;">Upload images here. They will be pushed to WordPress and saved in Airtable.</p>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label for="featured_image">Featured Image</label>
-                            <input type="file" id="featured_image" name="featured_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
-                        </div>
-                        <div class="form-group">
-                            <label for="description_image">Description Image</label>
-                            <input type="file" id="description_image" name="description_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
-                        </div>
-                        <div class="form-group">
-                            <label for="login_image">Login & Registration Image</label>
-                            <input type="file" id="login_image" name="login_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
-                        </div>
-                        <div class="form-group">
-                            <label for="transaction_image">Transaction Image</label>
-                            <input type="file" id="transaction_image" name="transaction_image" accept="image/jpeg, image/png, image/webp" style="width: 100%; padding: 0.5rem; color: white;">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary" id="link-btn" style="margin-top: 1.5rem; background: #10b981;">
-                        <span class="btn-text">Add to Queue</span>
-                    </button>
-                </form>
-                <div id="link-status" class="status-msg hidden" style="margin-top: 1rem;"></div>
-            </section>
-
-            <!-- Automation Runner Section -->
-            <section id="runner" class="runner-section glass-panel">
-                <h3>Trigger Automation Run</h3>
-                <form id="run-form" class="run-form">
-                    <div class="form-group">
-                        <label for="market">Target Market</label>
-                        <select id="market" name="market">
-                            <option value="UK">UK (United Kingdom)</option>
-                            <option value="SE">SE (Sweden)</option>
-                            <option value="ON">ON (Ontario)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="volume">Volume (Drafts)</label>
-                        <input type="number" id="volume" name="volume" value="2" min="1" max="100">
-                    </div>
-
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="dry_run" name="dry_run" checked>
-                        <label for="dry_run">Dry Run (Do not publish to WordPress)</label>
-                    </div>
-
-                    <button type="submit" class="btn-primary" id="run-btn">
-                        <span class="btn-text">Run Automation</span>
-                    </button>
-                </form>
-                <div id="run-status" class="status-msg hidden"></div>
-            </section>
-
-            <!-- Live Flow Terminal Section -->
-            <section id="live-flow" class="terminal-section glass-panel" style="margin-top: 2rem;">
-                <h3>Live Flow Monitor</h3>
-                <div class="terminal-window" style="background: #0f172a; color: #10b981; font-family: monospace; padding: 1rem; border-radius: 8px; height: 300px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
-                    <div id="terminal-content">Waiting for automation logs...</div>
-                </div>
-            </section>
-
-            <!-- Queued Links Section -->
-            <section id="queued-links" class="history-section glass-panel" style="margin-top: 2rem;">
-                <h3>Internal Link Queue</h3>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>URL / Game</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                                <th>Added At</th>
-                            </tr>
-                        </thead>
-                        <tbody id="queue-tbody">
-                            <!-- Dynamic rows go here -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- History Section -->
-            <section id="history" class="history-section glass-panel">
-                <h3>Recent Publish History</h3>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Game Name</th>
-                                <th>Provider</th>
-                                <th>Article ID</th>
-                                <th>Published At</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-tbody">
-                            <!-- Dynamic rows go here -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
     </div>
     
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center;">
-        <div class="bg-gray-800 p-8 rounded shadow-lg w-full max-w-lg" style="background: #1e293b; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; color: white;">
-            <h2 style="margin-bottom: 1rem;">User API Settings</h2>
-            <form id="settings-form">
-                <div class="form-group">
-                    <label>WordPress URL</label>
-                    <input type="text" id="set_wp_url" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
-                </div>
-                <div class="form-group">
-                    <label>WordPress Username</label>
-                    <input type="text" id="set_wp_username" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
-                </div>
-                <div class="form-group">
-                    <label>WordPress App Password</label>
-                    <input type="password" id="set_wp_password" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" id="close-settings" style="padding: 0.5rem 1rem; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
-                    <button type="submit" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=2"></script>
 </body>
 </html>
