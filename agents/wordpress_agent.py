@@ -125,56 +125,12 @@ class WordPressAgent:
             img_tag = create_img_tag(wp_images['featured']['url'], f"{draft.title} Featured")
             final_body = str(img_tag) + final_body
         
-        # Compile the unified meta dictionary for the main POST payload
-        post_meta = {}
-        
-        # RankMath/Yoast Meta
-        if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
-            meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-            if self.seo_plugin == 'rankmath':
-                post_meta["rank_math_focus_keyword"] = draft.focus_keyword
-                post_meta["rank_math_description"] = meta_desc
-            elif self.seo_plugin == 'yoast':
-                post_meta["yoast_wpseo_focuskw"] = draft.focus_keyword
-                post_meta["yoast_wpseo_metadesc"] = meta_desc
-
-        # Appyn Meta
-        if self.theme_type == 'appyn':
-            appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-            p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
-            if p_match:
-                clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
-                if clean_p:
-                    appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
-
-            post_meta["datos_informacion"] = {
-                "app_status": "new",
-                "descripcion": appyn_desc,
-                "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
-                "tamano": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
-                "fecha_actualizacion": "Just now",
-                "requerimientos": "Android",
-                "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
-                "categoria_app": "GAMES",
-                "os": "ANDROID",
-                "offer": {"amount": "", "currency": "USD"}
-            }
-            post_meta["datos_download"] = {
-                "option": "links",
-                "type": "apk",
-                "0": {
-                    "link": "#",
-                    "texto": "DOWNLOAD APK"
-                }
-            }
-
         payload = {
             "title": draft.title,
             "content": final_body,
             "status": "draft",
             "categories": [2, 4, 7],
-            "excerpt": draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else "",
-            "meta": post_meta
+            "excerpt": draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
         }
         
         if 'featured' in wp_images:
@@ -195,6 +151,81 @@ class WordPressAgent:
                 return None
                 
             article_id = str(data.get('id', ''))
+            
+            # Theme Specific Meta Updates
+            if self.theme_type == 'appyn':
+                appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
+                p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
+                if p_match:
+                    clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
+                    if clean_p:
+                        appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
+
+                meta_payload = {
+                    "post_id": article_id,
+                    "datos_informacion": {
+                        "app_status": "new",
+                        "descripcion": appyn_desc,
+                        "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
+                        "tamano": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
+                        "fecha_actualizacion": "Just now",
+                        "requerimientos": "Android",
+                        "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
+                        "categoria_app": "GAMES",
+                        "os": "ANDROID",
+                        "offer": {"amount": "", "currency": "USD"}
+                    },
+                    "datos_download": {
+                        "option": "links",
+                        "type": "apk",
+                        "0": {
+                            "link": "#",
+                            "texto": "DOWNLOAD APK"
+                        }
+                    }
+                }
+                meta_url = f"{self.wp_url}/wp-json/appyn/v1/update-meta"
+                try:
+                    request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
+                    logger.info("Successfully updated Appyn meta.")
+                except Exception as e:
+                    logger.warning(f"Failed to update Appyn meta (Does this site have the Appyn theme?): {e}")
+            else:
+                logger.info(f"Skipping Appyn meta update. Theme is set to {self.theme_type}.")
+            
+            # SEO Plugin Specific Updates
+            if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
+                meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
+                if self.seo_plugin == 'rankmath':
+                    rankmath_payload = {
+                        "objectType": "post",
+                        "objectID": int(article_id),
+                        "meta": {
+                            "rank_math_focus_keyword": draft.focus_keyword,
+                            "rank_math_description": meta_desc
+                        }
+                    }
+                    rankmath_url = f"{self.wp_url}/wp-json/rankmath/v1/updateMeta"
+                    try:
+                        rm_resp = request_with_retry('POST', rankmath_url, json=rankmath_payload, headers=headers, auth=self.auth, timeout=15)
+                        logger.info(f"RankMath updateMeta response: {rm_resp.status_code}")
+                    except Exception as e:
+                        logger.error(f"Failed to update RankMath meta: {e}")
+                elif self.seo_plugin == 'yoast':
+                    yoast_url = f"{self.wp_url}/wp-json/wp/v2/posts/{article_id}"
+                    yoast_payload = {
+                        "meta": {
+                            "yoast_wpseo_focuskw": draft.focus_keyword,
+                            "yoast_wpseo_metadesc": meta_desc
+                        }
+                    }
+                    try:
+                        request_with_retry('POST', yoast_url, json=yoast_payload, headers=headers, auth=self.auth, timeout=15)
+                        logger.info("Successfully updated Yoast focus keyword.")
+                    except Exception as e:
+                        logger.error(f"Failed to update Yoast meta: {e}")
+                else:
+                    logger.info(f"Skipping SEO meta update. Plugin is set to {self.seo_plugin}.")
             logger.info(f"Successfully pushed draft. WP Post ID: {article_id}")
             return article_id
         except Exception as e:
