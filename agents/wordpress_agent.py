@@ -187,12 +187,14 @@ class WordPressAgent:
             
             # SEO Plugin Specific Updates
             if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
+                meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
                 if self.seo_plugin == 'rankmath':
                     rankmath_payload = {
                         "objectType": "post",
                         "objectID": int(article_id),
                         "meta": {
-                            "rank_math_focus_keyword": draft.focus_keyword
+                            "rank_math_focus_keyword": draft.focus_keyword,
+                            "rank_math_description": meta_desc
                         }
                     }
                     rankmath_url = f"{self.wp_url}/wp-json/rankmath/v1/updateMeta"
@@ -202,11 +204,12 @@ class WordPressAgent:
                     except Exception as e:
                         logger.error(f"Failed to update RankMath meta: {e}")
                 elif self.seo_plugin == 'yoast':
-                    # Yoast uses standard WordPress REST API meta fields for focus keyword
+                    # Yoast uses standard WordPress REST API meta fields
                     yoast_url = f"{self.wp_url}/wp-json/wp/v2/posts/{article_id}"
                     yoast_payload = {
                         "meta": {
-                            "yoast_wpseo_focuskw": draft.focus_keyword
+                            "yoast_wpseo_focuskw": draft.focus_keyword,
+                            "yoast_wpseo_metadesc": meta_desc
                         }
                     }
                     try:
