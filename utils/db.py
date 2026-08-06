@@ -5,8 +5,12 @@ from utils.logger import get_logger
 
 logger = get_logger("db_utils")
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'history.db')
-SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'schema.sql')
+# Default to the data directory in the repo, but allow overriding via environment variable
+DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data'))
+os.makedirs(DATA_DIR, exist_ok=True)
+
+DB_PATH = os.path.join(DATA_DIR, 'history.db')
+SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'schema.sql')
 
 @contextmanager
 def get_db_connection(db_path=DB_PATH):
