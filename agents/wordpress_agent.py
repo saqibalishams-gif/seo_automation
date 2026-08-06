@@ -1,5 +1,7 @@
 import json
 import os
+import re
+import random
 from typing import Dict, Any, Optional
 from bs4 import BeautifulSoup
 from utils.logger import get_logger
@@ -153,16 +155,25 @@ class WordPressAgent:
             
             # Theme Specific Meta Updates
             if self.theme_type == 'appyn':
+                # Extract first paragraph from body for Appyn description
+                appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
+                p_match = re.search(r'<p>(.*?)</p>', final_body, re.IGNORECASE | re.DOTALL)
+                if p_match:
+                    # Remove any inner HTML tags and truncate to 300 chars
+                    clean_p = re.sub(r'<[^>]+>', '', p_match.group(1)).strip()
+                    if clean_p:
+                        appyn_desc = clean_p[:300] + ('...' if len(clean_p) > 300 else '')
+
                 meta_payload = {
                     "post_id": article_id,
                     "datos_informacion": {
                         "app_status": "new",
-                        "descripcion": draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else "",
-                        "version": "1.0.0",
-                        "tamano": "Varies with device",
+                        "descripcion": appyn_desc,
+                        "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
+                        "tamano": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
                         "fecha_actualizacion": "Just now",
                         "requerimientos": "Android",
-                        "descargas": "1K+",
+                        "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
                         "categoria_app": "GAMES",
                         "os": "ANDROID",
                         "offer": {"amount": "", "currency": "USD"}
