@@ -17,7 +17,8 @@ app = FastAPI(title="SEO Automation Dashboard")
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, 'data', 'history.db')
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(BASE_DIR, 'data'))
+DB_PATH = os.path.join(DATA_DIR, 'history.db')
 STATIC_DIR = os.path.join(os.path.dirname(__file__), 'static')
 
 # Ensure static directory exists
