@@ -138,15 +138,49 @@
                     <div id="run-status" class="status-msg hidden"></div>
                 </section>
 
-                <!-- Add Link Section -->
                 <section class="glass-panel">
                     <h3 class="panel-header">Manual Queue Entry</h3>
-                    <form id="link-form" class="inline-form">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="url">Game URL</label>
-                            <input type="url" id="url" name="url" placeholder="https://example.com/slot" required>
+                    <form id="link-form" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="inline-form">
+                            <div class="form-group" style="flex: 2;">
+                                <label for="url">Game URL (Required)</label>
+                                <input type="url" id="url" name="url" placeholder="https://example.com/slot..." required>
+                            </div>
                         </div>
-                        <button type="submit" class="btn-primary" id="link-btn">
+                        <div class="inline-form">
+                            <div class="form-group">
+                                <label for="game_name">Game Name (Optional)</label>
+                                <input type="text" id="game_name" name="game_name" placeholder="Leave blank for AI extraction">
+                            </div>
+                            <div class="form-group">
+                                <label for="provider">Provider (Optional)</label>
+                                <input type="text" id="provider" name="provider" placeholder="Leave blank for AI extraction">
+                            </div>
+                        </div>
+                        
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">Article Images</h4>
+                        <div class="inline-form">
+                            <div class="form-group">
+                                <label for="featured_image">Featured Image</label>
+                                <input type="file" id="featured_image" name="featured_image" accept="image/jpeg, image/png, image/webp">
+                            </div>
+                            <div class="form-group">
+                                <label for="description_image">Description Image</label>
+                                <input type="file" id="description_image" name="description_image" accept="image/jpeg, image/png, image/webp">
+                            </div>
+                        </div>
+                        <div class="inline-form">
+                            <div class="form-group">
+                                <label for="login_image">Login Image</label>
+                                <input type="file" id="login_image" name="login_image" accept="image/jpeg, image/png, image/webp">
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction_image">Transaction Image</label>
+                                <input type="file" id="transaction_image" name="transaction_image" accept="image/jpeg, image/png, image/webp">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="link-btn" style="align-self: flex-start;">
                             <span class="btn-text">Add to Queue</span>
                         </button>
                     </form>
