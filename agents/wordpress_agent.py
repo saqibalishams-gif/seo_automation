@@ -173,7 +173,11 @@ class WordPressAgent:
                 }
             }
             meta_url = f"{self.wp_url}/wp-json/appyn/v1/update-meta"
-            request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
+            try:
+                request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
+                logger.info("Successfully updated Appyn meta.")
+            except Exception as e:
+                logger.warning(f"Failed to update Appyn meta (Does this site have the Appyn theme?): {e}")
             
             # RankMath SEO Meta
             if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
