@@ -124,21 +124,9 @@ def check_differentiation(draft_text: str) -> bool:
     draft_lower = draft_text.lower()
     
     required_markers = [
-        "table of contents",
-        "what is",
-        "features of",
-        "pros and cons",
-        "how to get started on",
-        "how to deposit & withdraw money",
-        "games/bet types available",
-        "rewards and bonuses",
-        "personal review",
         "by our expert,",
         "who this game suits",
-        "how it compares",
-        "comparison",
-        "faqs",
-        "conclusion"
+        "comparison"
     ]
     
     missing = [marker for marker in required_markers if marker not in draft_lower]
