@@ -6,9 +6,9 @@ from utils.db import get_db_connection, init_db, DB_PATH
 
 logger = get_logger("history_agent")
 
-def check_candidate(game_name: str, provider: str, db_path=DB_PATH) -> bool:
+def check_candidate(game_name: str, provider: str, user_id: int, db_path=DB_PATH) -> bool:
     """
-    Pre-research gate: check if a game from a provider was published within the last 180 days.
+    Pre-research gate: check if a game from a provider was published within the last 180 days for a specific user.
     Returns False (skip) if already covered within 180 days.
     Returns True (proceed) if not covered, or covered > 180 days ago.
     """
@@ -17,8 +17,8 @@ def check_candidate(game_name: str, provider: str, db_path=DB_PATH) -> bool:
     with get_db_connection(db_path) as conn:
         cursor = conn.execute(
             '''SELECT published_at FROM publish_history 
-               WHERE LOWER(game_name) = LOWER(?) AND LOWER(provider) = LOWER(?)''',
-            (game_name, provider)
+               WHERE user_id = ? AND LOWER(game_name) = LOWER(?) AND LOWER(provider) = LOWER(?)''',
+            (user_id, game_name, provider)
         )
         row = cursor.fetchone()
         

@@ -46,18 +46,6 @@ class Settings:
             "https://firstlookgames.com/releases" # If available
         ]
         
-    @property
-    def airtable_api_key(self) -> str:
-        return get_env_var("AIRTABLE_API_KEY", required=True)
-        
-    @property
-    def airtable_base_id(self) -> str:
-        return get_env_var("AIRTABLE_BASE_ID", required=True)
-        
-    @property
-    def airtable_table_name(self) -> str:
-        value = os.getenv("AIRTABLE_TABLE_NAME")
-        return value if value else "Links"
 
 # Global settings instance
 settings = Settings()

@@ -11,7 +11,7 @@ from agents.wordpress_agent import WordPressAgent
 
 logger = get_logger("content_pipeline")
 
-def run_single_candidate(candidate: Candidate, target_market: str, db_path: str = None, dry_run: bool = False) -> Tuple[Optional[ArticleDraft], str]:
+def run_single_candidate(candidate: Candidate, target_market: str, user_id: int, user_settings: dict, db_path: str = None, dry_run: bool = False) -> Tuple[Optional[ArticleDraft], str]:
     """
     Runs a single candidate through the strict Phase 8 pipeline sequence.
     Returns a tuple of (draft, status_reason).
@@ -20,7 +20,7 @@ def run_single_candidate(candidate: Candidate, target_market: str, db_path: str 
     kwargs = {'db_path': db_path} if db_path else {}
     
     # 1. History Gate (Phase 2)
-    if not check_candidate(candidate.game_name, candidate.provider, **kwargs):
+    if not check_candidate(candidate.game_name, candidate.provider, user_id, **kwargs):
         logger.info(f"Pipeline stopped: {candidate.game_name} blocked by History Gate.")
         return None, "BLOCKED_HISTORY"
         
@@ -29,7 +29,7 @@ def run_single_candidate(candidate: Candidate, target_market: str, db_path: str 
     context = research_agent.gather_context(candidate)
     
     # 3. Content Drafting (Phase 4) & Differentiation (Phase 5)
-    trusted_facts = get_trusted_facts(candidate.game_name, candidate.provider, **kwargs)
+    trusted_facts = get_trusted_facts(candidate.game_name, candidate.provider, user_id, **kwargs)
     if not trusted_facts:
         logger.warning(f"No trusted facts found for {candidate.game_name}. AI will invent suitable facts.")
         trusted_facts = {}
@@ -43,7 +43,7 @@ def run_single_candidate(candidate: Candidate, target_market: str, db_path: str 
         
     # 4. Fact Verification (Phase 3)
     proposed_claims = {k: v for k, v in trusted_facts.items() if v is not None}
-    status, diff = verify_claims(candidate.game_name, candidate.provider, proposed_claims, **kwargs)
+    status, diff = verify_claims(candidate.game_name, candidate.provider, proposed_claims, user_id, **kwargs)
     if status != 'MATCH':
         logger.error(f"Pipeline stopped: Fact verification failed with status {status}.")
         return None, f"FAILED_FACT_VERIFICATION_{status}"
@@ -62,7 +62,7 @@ def run_single_candidate(candidate: Candidate, target_market: str, db_path: str 
         logger.info(f"DRY RUN: Would have pushed draft for {candidate.game_name} to WordPress.")
         article_id = "dry_run_id"
     else:
-        wp_agent = WordPressAgent()
+        wp_agent = WordPressAgent(user_settings=user_settings)
         article_id = wp_agent.push_draft(draft, images=local_images)
         if not article_id:
             logger.error("Pipeline stopped: Failed to push to WordPress.")

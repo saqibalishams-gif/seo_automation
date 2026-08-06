@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(linkForm);
             
             try {
-                const response = await fetch('/api/airtable/link', {
+                const response = await fetch('/api/links', {
                     method: 'POST',
                     body: formData // fetch automatically sets the Content-Type to multipart/form-data with boundary
                 });
@@ -91,15 +91,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusMsg.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.querySelector('.btn-text').textContent = 'Send to Airtable';
+                btn.querySelector('.btn-text').textContent = 'Add to Queue';
+                fetchQueue();
             }
         });
     }
 });
 
+async function fetchQueue() {
+    try {
+        const response = await fetch('/api/links/status');
+        if (response.status === 401) return;
+        const data = await response.json();
+        
+        const tbody = document.getElementById('queue-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        if (!data.error && data.length > 0) {
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-size: 0.9rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; max-width: 250px; white-space: nowrap;" title="${item.url}">${item.url}</div>
+                        ${item.game_name ? `<div style="font-size: 0.8rem; color: #94a3b8;">${item.game_name} (${item.provider || 'Unknown'})</div>` : ''}
+                    </td>
+                    <td><span class="badge" style="background: ${item.status === 'New' ? '#3b82f6' : item.status === 'Published' ? '#10b981' : '#ef4444'}">${item.status}</span></td>
+                    <td><div style="font-size: 0.8rem; color: #94a3b8; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.status_reason || '-'}">${item.status_reason || '-'}</div></td>
+                    <td style="font-size: 0.85rem; color: #cbd5e1;">${new Date(item.created_at).toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No queued links found.</td></tr>';
+        }
+    } catch (error) {
+        console.error('Failed to fetch queue:', error);
+    }
+}
+
 async function fetchStats() {
     try {
         const response = await fetch('/api/stats');
+        
+        if (response.status === 401) {
+            window.location.href = '/login.html';
+            return;
+        }
+        
+        fetchQueue();
+        
         const data = await response.json();
         
         if (!data.error) {
@@ -202,4 +243,63 @@ async function fetchLogs() {
 // Start polling immediately so they can see existing logs
 document.addEventListener('DOMContentLoaded', () => {
     startLogPolling();
+    
+    // Settings Logic
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettings = document.getElementById('close-settings');
+    const settingsForm = document.getElementById('settings-form');
+    
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', async () => {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('set_wp_url').value = data.wp_url || '';
+                document.getElementById('set_wp_username').value = data.wp_username || '';
+                document.getElementById('set_wp_password').value = data.wp_app_password || '';
+                
+                settingsModal.style.display = 'flex';
+            }
+        });
+    }
+    
+    if (closeSettings) {
+        closeSettings.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+    }
+    
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                wp_url: document.getElementById('set_wp_url').value,
+                wp_username: document.getElementById('set_wp_username').value,
+                wp_app_password: document.getElementById('set_wp_password').value
+            };
+            
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            
+            if (res.ok) {
+                alert('Settings saved successfully!');
+                settingsModal.style.display = 'none';
+            } else {
+                alert('Failed to save settings.');
+            }
+        });
+    }
+    
+    // Logout Logic
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        });
+    }
 });

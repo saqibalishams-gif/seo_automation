@@ -10,11 +10,17 @@ from pipelines.content_pipeline import run_single_candidate
 
 logger = get_logger("orchestrator")
 
-def run(target_market: str, max_volume: int, dry_run: bool):
-    logger.info(f"Starting orchestration run (Market: {target_market}, Max Volume: {max_volume}, Dry Run: {dry_run})")
+def run(target_market: str, max_volume: int, dry_run: bool, user_id: int):
+    logger.info(f"Starting orchestration run (Market: {target_market}, Max Volume: {max_volume}, Dry Run: {dry_run}, User ID: {user_id})")
     init_db()
     
-    discovery = DiscoveryAgent()
+    from dashboard.auth import get_user_settings
+    user_settings = get_user_settings(user_id)
+    if not user_settings:
+        logger.error(f"Failed to find user settings for User ID: {user_id}")
+        return 0
+    
+    discovery = DiscoveryAgent(user_id=user_id, user_settings=user_settings)
     candidates = discovery.discover_candidates()
     
     processed = 0
@@ -29,14 +35,13 @@ def run(target_market: str, max_volume: int, dry_run: bool):
         
         try:
             start_time = time.time()
-            draft, status = run_single_candidate(candidate, target_market=target_market, dry_run=dry_run)
+            draft, status = run_single_candidate(candidate, target_market=target_market, user_id=user_id, user_settings=user_settings, dry_run=dry_run)
             metrics[status] += 1
             duration = time.time() - start_time
             
             if status == "SUCCESS":
                 processed += 1
-                from config.settings import settings
-                wp_post_url = f"{settings.wp_url.rstrip('/')}/?p={draft}" if draft else "Unknown URL"
+                wp_post_url = f"{user_settings.get('wp_url', '').rstrip('/')}/?p={draft}" if draft else "Unknown URL"
                 logger.info(f"Successfully processed and drafted {candidate.game_name}. Published at: {wp_post_url}. Duration: {duration:.2f}s")
                 if candidate.airtable_record_id:
                     if not dry_run:
@@ -62,7 +67,8 @@ if __name__ == "__main__":
     parser.add_argument("--market", type=str, default="UK", help="Target market for compliance check")
     parser.add_argument("--volume", type=int, default=2, help="Maximum number of drafts to push per run")
     parser.add_argument("--dry-run", action="store_true", help="Run without mutating external APIs (WordPress)")
+    parser.add_argument("--user-id", type=int, required=True, help="User ID running the automation")
     
     args = parser.parse_args()
     
-    run(target_market=args.market, max_volume=args.volume, dry_run=args.dry_run)
+    run(target_market=args.market, max_volume=args.volume, dry_run=args.dry_run, user_id=args.user_id)

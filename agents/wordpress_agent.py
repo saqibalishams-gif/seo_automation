@@ -10,9 +10,11 @@ from agents.content_agent import ArticleDraft
 logger = get_logger("wordpress_agent")
 
 class WordPressAgent:
-    def __init__(self):
-        self.wp_url = settings.wp_url.rstrip('/')
-        self.auth = (settings.wp_username, settings.wp_app_password)
+    def __init__(self, user_settings: dict):
+        if not user_settings.get('wp_url') or not user_settings.get('wp_username') or not user_settings.get('wp_app_password'):
+            raise ValueError("WordPress credentials not fully configured for this user.")
+        self.wp_url = user_settings['wp_url'].rstrip('/')
+        self.auth = (user_settings['wp_username'], user_settings['wp_app_password'])
         
     def upload_media(self, file_path: str) -> Optional[Dict[str, Any]]:
         """

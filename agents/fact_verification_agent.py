@@ -4,14 +4,16 @@ from utils.db import get_db_connection, DB_PATH
 
 logger = get_logger("fact_verification")
 
-def get_trusted_facts(game_name: str, provider: str, db_path=DB_PATH) -> Dict[str, Any]:
-    """Retrieve facts for a game from the trusted database."""
+def get_trusted_facts(game_name: str, provider: str, user_id: int, db_path=DB_PATH) -> Dict[str, Any]:
+    """
+    Checks the local database for previously verified facts for this user.
+    """
     with get_db_connection(db_path) as conn:
         cursor = conn.execute(
             '''SELECT rtp, volatility, max_win, release_date, min_bet, max_bet 
                FROM trusted_facts 
-               WHERE LOWER(game_name) = LOWER(?) AND LOWER(provider) = LOWER(?)''',
-            (game_name, provider)
+               WHERE user_id = ? AND LOWER(game_name) = LOWER(?) AND LOWER(provider) = LOWER(?)''',
+            (user_id, game_name, provider)
         )
         row = cursor.fetchone()
         
@@ -19,13 +21,14 @@ def get_trusted_facts(game_name: str, provider: str, db_path=DB_PATH) -> Dict[st
             return dict(row)
         return {}
 
-def verify_claims(game_name: str, provider: str, proposed_claims: Dict[str, Any], db_path=DB_PATH) -> Tuple[str, Dict[str, Any]]:
+def verify_claims(game_name: str, provider: str, proposed_claims: Dict[str, Any], user_id: int, db_path=DB_PATH) -> Tuple[str, Dict[str, Any]]:
     """
-    Deterministically compares proposed claims against trusted facts.
-    Returns a tuple: (status, diff_report)
-    Statuses: 'MATCH', 'MISMATCH', 'UNAVAILABLE'
+    Verifies proposed facts against CasinoDataAPI or local trusted_facts for this user.
     """
-    trusted = get_trusted_facts(game_name, provider, db_path)
+    if not proposed_claims:
+        return 'MATCH', {}
+        
+    trusted = get_trusted_facts(game_name, provider, user_id, db_path)
     
     if not trusted:
         logger.info(f"Fact check bypassed for {provider} - {game_name} because no trusted facts exist.")

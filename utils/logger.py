@@ -16,8 +16,7 @@ class SensitiveDataFilter(logging.Filter):
         super().__init__()
         self.sensitive_strings = [
             settings.groq_api_key,
-            settings.wp_app_password,
-            settings.airtable_api_key
+            settings.wp_app_password
         ]
         # Remove empty strings to avoid replacing everything
         self.sensitive_strings = [s for s in self.sensitive_strings if s]

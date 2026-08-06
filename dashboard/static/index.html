@@ -21,6 +21,8 @@
                 <a href="#" class="nav-item active">Overview</a>
                 <a href="#history" class="nav-item">Publish History</a>
                 <a href="#runner" class="nav-item">Automation Runner</a>
+                <button id="settings-btn" class="nav-item text-left w-full mt-4" style="background: none; border: none; cursor: pointer; color: #cbd5e1; font-family: inherit; font-size: 1rem; padding: 0.75rem 1rem;">⚙ Settings</button>
+                <button id="logout-btn" class="nav-item text-left w-full mt-auto" style="background: none; border: none; cursor: pointer; color: #ef4444; font-family: inherit; font-size: 1rem; padding: 0.75rem 1rem;">Log Out</button>
             </nav>
         </aside>
 
@@ -42,9 +44,9 @@
                 </div>
             </section>
 
-            <!-- Add Airtable Link Section -->
+            <!-- Add Link Section -->
             <section id="add-link" class="add-link-section glass-panel" style="margin-bottom: 2rem;">
-                <h3>Submit New Game Link to Airtable</h3>
+                <h3>Submit New Game Link to Queue</h3>
                 <form id="link-form" class="run-form">
                     <div class="form-group">
                         <label for="url">Game URL (Required)</label>
@@ -85,7 +87,7 @@
                     </div>
 
                     <button type="submit" class="btn-primary" id="link-btn" style="margin-top: 1.5rem; background: #10b981;">
-                        <span class="btn-text">Send to Airtable</span>
+                        <span class="btn-text">Add to Queue</span>
                     </button>
                 </form>
                 <div id="link-status" class="status-msg hidden" style="margin-top: 1rem;"></div>
@@ -129,6 +131,26 @@
                 </div>
             </section>
 
+            <!-- Queued Links Section -->
+            <section id="queued-links" class="history-section glass-panel" style="margin-top: 2rem;">
+                <h3>Internal Link Queue</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>URL / Game</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                                <th>Added At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-tbody">
+                            <!-- Dynamic rows go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- History Section -->
             <section id="history" class="history-section glass-panel">
                 <h3>Recent Publish History</h3>
@@ -149,6 +171,31 @@
                 </div>
             </section>
         </main>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center;">
+        <div class="bg-gray-800 p-8 rounded shadow-lg w-full max-w-lg" style="background: #1e293b; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; color: white;">
+            <h2 style="margin-bottom: 1rem;">User API Settings</h2>
+            <form id="settings-form">
+                <div class="form-group">
+                    <label>WordPress URL</label>
+                    <input type="text" id="set_wp_url" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
+                </div>
+                <div class="form-group">
+                    <label>WordPress Username</label>
+                    <input type="text" id="set_wp_username" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
+                </div>
+                <div class="form-group">
+                    <label>WordPress App Password</label>
+                    <input type="password" id="set_wp_password" style="width:100%; padding: 0.5rem; margin-bottom: 1rem; background: #0f172a; color: white; border: 1px solid #334155;">
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" id="close-settings" style="padding: 0.5rem 1rem; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <script src="/static/app.js"></script>
