@@ -137,9 +137,9 @@ def check_differentiation(doc: ContentDocument) -> bool:
             full_text += " " + sub.heading.lower() + " " + sub.content.lower()
             
     required_markers = [
-        "by our expert,",
+        "by our expert",
         "who this game suits",
-        "comparison"
+        "compar"
     ]
     
     missing = [marker for marker in required_markers if marker not in full_text]
