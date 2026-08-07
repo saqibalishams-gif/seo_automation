@@ -190,21 +190,36 @@ def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
             if draft_record.status == "published":
                 raise HTTPException(status_code=400, detail="Draft is already published")
                 
-            site = db.query(WordPressSite).filter(WordPressSite.id == draft_record.site_id).first()
-            if not site:
-                raise HTTPException(status_code=400, detail="No WordPress site connected to this draft")
+            site_profile = {}
+            if draft_record.site_id:
+                site = db.query(WordPressSite).filter(WordPressSite.id == draft_record.site_id).first()
+                if site:
+                    site_profile = {
+                        "site_url": site.site_url,
+                        "username": site.username,
+                        "app_password": site.app_password,
+                        "editor_type": site.editor_type,
+                        "seo_plugin": site.seo_plugin,
+                        "active_theme": site.active_theme
+                    }
+                    
+            if not site_profile:
+                from dashboard.auth import get_user_settings
+                user_settings = get_user_settings(user_id)
+                if not user_settings or not user_settings.get('wp_url'):
+                    raise HTTPException(status_code=400, detail="No WordPress site configured in settings.")
+                    
+                site_profile = {
+                    "site_url": user_settings.get('wp_url', ''),
+                    "username": user_settings.get('wp_username', ''),
+                    "app_password": user_settings.get('wp_app_password', ''),
+                    "editor_type": user_settings.get('editor_type', 'classic'),
+                    "seo_plugin": user_settings.get('seo_plugin', 'none'),
+                    "active_theme": user_settings.get('theme_type', 'standard')
+                }
                 
             doc_data = json.loads(draft_record.document_json)
             doc = ContentDocument(**doc_data)
-            
-            site_profile = {
-                "site_url": site.site_url,
-                "username": site.username,
-                "app_password": site.app_password,
-                "editor_type": site.editor_type,
-                "seo_plugin": site.seo_plugin,
-                "active_theme": site.active_theme
-            }
             
             wp_publisher = WordPressPublisher(site_profile=site_profile)
             article_id = wp_publisher.publish(doc)
