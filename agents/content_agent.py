@@ -30,7 +30,8 @@ class ContentAgent:
             "5. You MUST maintain a Keyword Density of around 1% to 1.5%.\n"
             "6. You MUST include at least one DoFollow external link to an authoritative resource.\n"
             "7. You MUST include at least one internal link.\n"
-            "8. You MUST bold important LSI keywords using HTML <strong> tags ONLY. Do NOT use **markdown**.\n\n"
+            "8. You MUST bold important LSI keywords using HTML <strong> tags ONLY. Do NOT use **markdown**.\n"
+            "9. The TOTAL word count of the generated content MUST be strictly between 1500 and 2000 words. Make sections highly detailed and comprehensive to meet this requirement.\n\n"
             "OUTPUT FORMAT: You MUST return a valid JSON object matching the following structure exactly:\n"
             "{\n"
             '  "title": "A catchy title including the Focus Keyword, a power word, and 2026",\n'
