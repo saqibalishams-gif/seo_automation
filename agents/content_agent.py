@@ -31,7 +31,7 @@ class ContentAgent:
             "6. You MUST include at least one DoFollow external link to an authoritative resource.\n"
             "7. You MUST include at least one internal link.\n"
             "8. You MUST bold important LSI keywords using HTML <strong> tags ONLY. Do NOT use **markdown**.\n"
-            "9. The TOTAL word count of the generated content MUST be strictly between 1500 and 2000 words. Make sections highly detailed and comprehensive to meet this requirement.\n\n"
+            "9. MANDATORY LENGTH REQUIREMENT: The total word count MUST exceed 1500 words. To achieve this, EACH SECTION must contain at least 250-300 words of detailed, descriptive text. Do not summarize; write extensively.\n\n"
             "OUTPUT FORMAT: You MUST return a valid JSON object matching the following structure exactly:\n"
             "{\n"
             '  "title": "A catchy title including the Focus Keyword, a power word, and 2026",\n'
@@ -40,7 +40,7 @@ class ContentAgent:
             '    "meta_description": "1-2 sentence catchy SEO meta description starting with the Focus Keyword",\n'
             '    "meta_title": "Optimized SEO title"\n'
             '  },\n'
-            '  "introduction": "2-3 short paragraphs introducing the game/platform (use <p> tags)",\n'
+            '  "introduction": "2-3 long paragraphs introducing the game/platform (use <p> tags)",\n'
             '  "sections": [\n'
             '    {\n'
             '      "heading": "Features of Game",\n'
@@ -53,15 +53,15 @@ class ContentAgent:
             '  "faqs": [\n'
             '    {"question": "Is it safe?", "answer": "Yes..."}\n'
             '  ],\n'
-            '  "conclusion": "2 short paragraphs, ending with a responsible-gaming reminder (use <p> tags)"\n'
+            '  "conclusion": "2 long paragraphs, ending with a responsible-gaming reminder (use <p> tags)"\n'
             "}\n\n"
             "MANDATORY SECTIONS (Ensure these headings exist in the sections array):\n"
-            "1. Features\n"
-            "2. Pros and Cons (use <ul> for lists in content)\n"
-            "3. How to Get Started (Register, Login, Download)\n"
-            "4. How to Deposit & Withdraw Money\n"
-            "5. Games/Bet Types Available\n"
-            "6. Rewards and Bonuses\n"
+            "1. Features (Must be at least 300 words)\n"
+            "2. Pros and Cons (use <ul> for lists in content, must be at least 200 words)\n"
+            "3. How to Get Started (Register, Login, Download) (Must be at least 250 words)\n"
+            "4. How to Deposit & Withdraw Money (Must be at least 250 words)\n"
+            "5. Games/Bet Types Available (Must be at least 250 words)\n"
+            "6. Rewards and Bonuses (Must be at least 200 words)\n"
             "7. Personal Review (MUST begin the content with the exact phrase 'By our expert,')\n"
             "8. Who This Game Suits (MUST use this exact heading text)\n"
             "9. How It Compares (MUST include the word 'comparison' in the content)\n\n"

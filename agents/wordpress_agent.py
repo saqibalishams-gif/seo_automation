@@ -18,7 +18,20 @@ class WordPressPublisher(BaseWordPressAdapter):
     def publish(self, doc: ContentDocument) -> Optional[str]:
         logger.info(f"Starting publish process for '{doc.title}' to {self.site_url}")
         
-        # 1. Format Payload using Editor Adapter
+        # 1. Upload Images and update document references BEFORE formatting
+        featured_image_id = None
+        for key, path in list(doc.images.items()):
+            if not str(path).startswith('http'):
+                upload_result = self.upload_media(path)
+                if upload_result:
+                    doc.images[key] = upload_result['url']
+                    if key == 'featured':
+                        featured_image_id = upload_result['id']
+                else:
+                    logger.warning(f"Failed to upload image '{key}', removing from document.")
+                    del doc.images[key]
+                    
+        # 2. Format Payload using Editor Adapter
         editor_type = self.profile.get('editor_type', 'classic').lower()
         if editor_type == 'gutenberg':
             logger.info("Using Gutenberg Editor Adapter")
@@ -28,27 +41,12 @@ class WordPressPublisher(BaseWordPressAdapter):
             payload = ClassicEditorAdapter.format_content(doc)
             
         # Add categories if provided in mapping
-        # In a full implementation, we'd map string categories to IDs. For now, use doc categories if int, or fallback to default.
-        payload["categories"] = doc.categories if doc.categories else [2, 4, 7] # Fallback for backward compatibility
+        payload["categories"] = doc.categories if doc.categories else [2, 4, 7] 
         
-        # Add featured image if available
-        if 'featured' in doc.images:
-            payload["featured_media"] = doc.images['featured'] # Assuming ID is passed here, but Universal Model passes URL currently.
-            # We need to upload images first!
+        # Add featured image ID to the post metadata
+        if featured_image_id:
+            payload["featured_media"] = featured_image_id
             
-        # 2. Upload Images and update document references
-        for key, path in doc.images.items():
-            if not str(path).startswith('http'):
-                upload_result = self.upload_media(path)
-                if upload_result:
-                    if key == 'featured':
-                        payload["featured_media"] = upload_result['id']
-                    else:
-                        # For other images, we would inject their URLs into the payload.
-                        # The formatting adapters handle basic injection for featured, but complex injection
-                        # should ideally happen after upload.
-                        pass
-        
         # 3. Push Base Post
         post_id = self._push_post(payload)
         if not post_id:
