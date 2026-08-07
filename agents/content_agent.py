@@ -98,17 +98,34 @@ class ContentAgent:
             
             sections = []
             for sec in data.get("sections", []):
-                subsections = [Section(**sub) for sub in sec.get("subsections", [])]
-                sections.append(Section(heading=sec.get("heading", ""), content=sec.get("content", ""), subsections=subsections))
+                subsections = []
+                for sub in sec.get("subsections", []):
+                    sub_c = sub.get("content", "")
+                    if isinstance(sub_c, list):
+                        sub_c = "\n".join(sub_c)
+                    subsections.append(Section(heading=sub.get("heading", ""), content=sub_c, subsections=[]))
+                
+                sec_c = sec.get("content", "")
+                if isinstance(sec_c, list):
+                    sec_c = "\n".join(sec_c)
+                sections.append(Section(heading=sec.get("heading", ""), content=sec_c, subsections=subsections))
                 
             faqs = [FAQ(**faq) for faq in data.get("faqs", [])]
             
+            intro_data = data.get("introduction", "")
+            if isinstance(intro_data, list):
+                intro_data = "\n".join(intro_data)
+                
+            conc_data = data.get("conclusion", "")
+            if isinstance(conc_data, list):
+                conc_data = "\n".join(conc_data)
+                
             doc = ContentDocument(
                 title=data.get("title", f"Ultimate {clean_game_name} Review"),
                 seo_metadata=seo,
-                introduction=data.get("introduction", ""),
+                introduction=intro_data,
                 sections=sections,
-                conclusion=data.get("conclusion", ""),
+                conclusion=conc_data,
                 faqs=faqs,
                 custom_fields={"verified_facts": verified_facts}
             )
