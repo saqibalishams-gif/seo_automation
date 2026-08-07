@@ -34,9 +34,9 @@ class ImageAgent:
             elif img.mode != 'RGB':
                 img = img.convert('RGB')
                 
-            # Resize exactly to 87x172 as requested
-            img_resized = img.resize((87, 172), Image.Resampling.LANCZOS)
-            
+            # Maintain aspect ratio and high quality (max 1200px)
+            img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
+            img_resized = img            
             save_path = os.path.join(self.tmp_dir, filename)
             img_resized.save(save_path, 'JPEG', quality=90)
             logger.info(f"Saved resized image to {save_path}")
