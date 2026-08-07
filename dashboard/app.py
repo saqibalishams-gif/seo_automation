@@ -264,13 +264,22 @@ async def add_link(
 ):
     try:
         from dashboard.auth import get_user_settings
-        from agents.wordpress_agent import WordPressAgent
+        from agents.wordpress_agent import WordPressPublisher
         
         user_settings = get_user_settings(user_id)
         if not user_settings:
             return {"error": "User API settings missing. Please configure settings first."}
             
-        wp_agent = WordPressAgent(user_settings=user_settings)
+        site_profile = {
+            "site_url": user_settings.get('wp_url', ''),
+            "username": user_settings.get('wp_username', ''),
+            "app_password": user_settings.get('wp_app_password', ''),
+            "editor_type": user_settings.get('editor_type', 'classic'),
+            "seo_plugin": user_settings.get('seo_plugin', 'none'),
+            "active_theme": user_settings.get('theme_type', 'standard')
+        }
+            
+        wp_publisher = WordPressPublisher(site_profile=site_profile)
         
         # Save temp files and upload to WP to get public URLs
         temp_dir = os.path.join(BASE_DIR, 'data', 'tmp_uploads')
@@ -284,7 +293,7 @@ async def add_link(
             with open(temp_path, "wb") as buffer:
                 shutil.copyfileobj(upload_file.file, buffer)
                 
-            wp_data = wp_agent.upload_media(temp_path)
+            wp_data = wp_publisher.upload_media(temp_path)
             if wp_data and 'url' in wp_data:
                 return wp_data['url']
             return None
