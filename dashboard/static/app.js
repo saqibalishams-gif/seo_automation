@@ -99,27 +99,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startLogPolling();
 
-    // Setup Wizard Logic
     const navOverview = document.getElementById('nav-overview');
     const navSetup = document.getElementById('nav-setup');
+    const navDrafts = document.getElementById('nav-drafts');
     
     const overviewView = document.getElementById('overview-view');
     const setupView = document.getElementById('setup');
+    const draftsView = document.getElementById('drafts-view');
     
     function switchTab(tabId) {
         if (tabId === 'overview') {
             overviewView.style.display = 'contents';
             setupView.classList.add('hidden');
+            draftsView.style.display = 'none';
             fetchStats();
         } else if (tabId === 'setup') {
             setupView.classList.remove('hidden');
             overviewView.style.display = 'none';
+            draftsView.style.display = 'none';
             loadSettings();
+        } else if (tabId === 'drafts') {
+            draftsView.style.display = 'contents';
+            overviewView.style.display = 'none';
+            setupView.classList.add('hidden');
+            fetchDrafts();
         }
     }
     
     if(navOverview) navOverview.addEventListener('click', (e) => { e.preventDefault(); switchTab('overview'); });
     if(navSetup) navSetup.addEventListener('click', (e) => { e.preventDefault(); switchTab('setup'); });
+    if(navDrafts) navDrafts.addEventListener('click', (e) => { e.preventDefault(); switchTab('drafts'); });
     
     async function loadSettings() {
         try {
@@ -373,3 +382,117 @@ async function fetchLogs() {
         console.error('Failed to fetch logs:', error);
     }
 }
+
+// --- DRAFTS LOGIC ---
+
+let currentDraftId = null;
+
+async function fetchDrafts() {
+    try {
+        const response = await fetch('/api/drafts');
+        if (!response.ok) return;
+        const data = await response.json();
+        
+        const tbody = document.getElementById('drafts-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No pending drafts.</td></tr>';
+            return;
+        }
+        
+        data.forEach(draft => {
+            const title = draft.document ? draft.document.title : (draft.game_name || 'Unknown');
+            const timeStr = new Date(draft.created_at).toLocaleString();
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div style="font-weight: 700; color: var(--text-primary); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${title}">${title}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${draft.provider || ''}</div>
+                </td>
+                <td><span class="badge new">Draft</span></td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${timeStr}</td>
+                <td>
+                    <button class="btn-primary btn-preview" data-id="${draft.id}" style="padding: 4px 10px; font-size: 0.8rem; background: var(--accent-blue-bg); color: var(--accent-blue-text);">Preview</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            
+            // Attach data to button to avoid re-fetching
+            tr.querySelector('.btn-preview').addEventListener('click', () => {
+                showDraftPreview(draft);
+            });
+        });
+    } catch (error) {
+        console.error('Failed to fetch drafts:', error);
+    }
+}
+
+function showDraftPreview(draft) {
+    currentDraftId = draft.id;
+    const panel = document.getElementById('draft-preview-panel');
+    const content = document.getElementById('draft-preview-content');
+    const statusMsg = document.getElementById('publish-status');
+    
+    panel.classList.remove('hidden');
+    statusMsg.classList.add('hidden');
+    
+    if (!draft.document) {
+        content.innerHTML = "<p>Error: Document structure missing.</p>";
+        return;
+    }
+    
+    // Render a simplified preview
+    let html = `<h2>${draft.document.title}</h2>`;
+    html += `<div><strong>SEO Target:</strong> ${draft.document.seo_metadata.focus_keyword}</div>`;
+    html += `<div><strong>Meta Desc:</strong> ${draft.document.seo_metadata.meta_description}</div><hr/>`;
+    html += `<p>${draft.document.introduction}</p>`;
+    
+    draft.document.sections.forEach(sec => {
+        html += `<h3>${sec.heading}</h3><p>${sec.content}</p>`;
+    });
+    
+    content.innerHTML = html;
+}
+
+document.getElementById('btn-close-preview')?.addEventListener('click', () => {
+    document.getElementById('draft-preview-panel').classList.add('hidden');
+    currentDraftId = null;
+});
+
+document.getElementById('btn-publish-draft')?.addEventListener('click', async () => {
+    if (!currentDraftId) return;
+    
+    const btn = document.getElementById('btn-publish-draft');
+    const statusMsg = document.getElementById('publish-status');
+    
+    btn.disabled = true;
+    btn.textContent = 'Publishing...';
+    
+    try {
+        const response = await fetch(`/api/publish/${currentDraftId}`, { method: 'POST' });
+        const data = await response.json();
+        
+        statusMsg.classList.remove('hidden');
+        if (response.ok) {
+            statusMsg.textContent = "Success! " + (data.message || "");
+            statusMsg.className = "status-msg success";
+            setTimeout(() => {
+                document.getElementById('draft-preview-panel').classList.add('hidden');
+                fetchDrafts();
+            }, 3000);
+        } else {
+            statusMsg.textContent = data.detail || "Failed to publish.";
+            statusMsg.className = "status-msg error";
+        }
+    } catch(e) {
+        statusMsg.classList.remove('hidden');
+        statusMsg.textContent = "Network error.";
+        statusMsg.className = "status-msg error";
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Publish to WordPress';
+    }
+});

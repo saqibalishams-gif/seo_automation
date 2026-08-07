@@ -155,6 +155,83 @@ def get_history(user_id: int = Depends(get_current_user_id)):
     except Exception as e:
         return {"error": str(e)}
 
+from utils.db_models import SessionLocal, ContentDraft, WordPressSite
+import json
+
+@app.get("/api/drafts")
+def get_drafts(user_id: int = Depends(get_current_user_id)):
+    try:
+        with SessionLocal() as db:
+            drafts = db.query(ContentDraft).filter(ContentDraft.user_id == user_id, ContentDraft.status == "draft").all()
+            return [
+                {
+                    "id": d.id,
+                    "game_name": d.game_name,
+                    "provider": d.provider,
+                    "created_at": d.created_at,
+                    "document": json.loads(d.document_json) if d.document_json else None
+                }
+                for d in drafts
+            ]
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/api/publish/{draft_id}")
+def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
+    try:
+        from core.universal_model import ContentDocument
+        from agents.wordpress_agent import WordPressPublisher
+        
+        with SessionLocal() as db:
+            draft_record = db.query(ContentDraft).filter(ContentDraft.id == draft_id, ContentDraft.user_id == user_id).first()
+            if not draft_record:
+                raise HTTPException(status_code=404, detail="Draft not found")
+                
+            if draft_record.status == "published":
+                raise HTTPException(status_code=400, detail="Draft is already published")
+                
+            site = db.query(WordPressSite).filter(WordPressSite.id == draft_record.site_id).first()
+            if not site:
+                raise HTTPException(status_code=400, detail="No WordPress site connected to this draft")
+                
+            doc_data = json.loads(draft_record.document_json)
+            doc = ContentDocument(**doc_data)
+            
+            site_profile = {
+                "site_url": site.site_url,
+                "username": site.username,
+                "app_password": site.app_password,
+                "editor_type": site.editor_type,
+                "seo_plugin": site.seo_plugin,
+                "active_theme": site.active_theme
+            }
+            
+            wp_publisher = WordPressPublisher(site_profile=site_profile)
+            article_id = wp_publisher.publish(doc)
+            
+            if not article_id:
+                raise HTTPException(status_code=500, detail="Failed to publish to WordPress. Check logs.")
+                
+            # Update Draft
+            draft_record.status = "published"
+            
+            # Insert into History
+            db.execute(
+                "INSERT INTO publish_history (user_id, game_name, provider, article_id) VALUES (?, ?, ?, ?)",
+                (user_id, draft_record.game_name, draft_record.provider, article_id)
+            )
+            
+            db.commit()
+            
+            # Optional: Update Airtable if it was connected (Would need the record ID from candidate)
+            # Currently we don't save the airtable record id in ContentDraft, so we skip it for now.
+            
+            return {"message": f"Successfully published. Post ID: {article_id}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 def run_orchestrator(config: RunConfig, user_id: int):
     # Run the orchestrator script using the same Python executable, passing user_id
     cmd = [

@@ -7,6 +7,7 @@ from utils.logger import get_logger
 from utils.db import init_db
 from agents.discovery_agent import DiscoveryAgent
 from pipelines.content_pipeline import run_single_candidate
+from utils.db_models import SessionLocal, ContentDraft, WordPressSite
 
 logger = get_logger("orchestrator")
 
@@ -41,11 +42,28 @@ def run(target_market: str, max_volume: int, dry_run: bool, user_id: int):
             
             if status == "SUCCESS":
                 processed += 1
-                wp_post_url = f"{user_settings.get('wp_url', '').rstrip('/')}/?p={draft}" if draft else "Unknown URL"
-                logger.info(f"Successfully processed and drafted {candidate.game_name}. Published at: {wp_post_url}. Duration: {duration:.2f}s")
+                
+                # Save draft to database
+                with SessionLocal() as db:
+                    # Get the default site ID
+                    site = db.query(WordPressSite).filter(WordPressSite.user_id == user_id).first()
+                    site_id = site.id if site else None
+                    
+                    new_draft = ContentDraft(
+                        user_id=user_id,
+                        site_id=site_id,
+                        game_name=candidate.game_name,
+                        provider=candidate.provider,
+                        document_json=draft.model_dump_json(),
+                        status="draft"
+                    )
+                    db.add(new_draft)
+                    db.commit()
+                
+                logger.info(f"Successfully processed and drafted {candidate.game_name}. Pending Review. Duration: {duration:.2f}s")
                 if candidate.airtable_record_id:
                     if not dry_run:
-                        discovery.update_status(candidate.airtable_record_id, "Published")
+                        discovery.update_status(candidate.airtable_record_id, "Pending Review")
                     else:
                         discovery.update_status(candidate.airtable_record_id, "New", "Dry Run Success")
             else:

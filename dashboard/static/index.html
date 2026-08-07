@@ -31,6 +31,7 @@
                 <div class="status-pill" id="header-seo-status">SEO: --</div>
                 <button id="nav-setup" style="background: none; border: none; cursor: pointer; color: var(--accent-orange); font-weight: bold; margin-left: 10px;">⚙ Setup</button>
                 <button id="nav-overview" style="background: none; border: none; cursor: pointer; color: var(--accent-blue-text); font-weight: bold; margin-left: 10px;">Overview</button>
+                <button id="nav-drafts" style="background: none; border: none; cursor: pointer; color: #10B981; font-weight: bold; margin-left: 10px;">Review Drafts</button>
                 <button id="logout-btn" style="background: none; border: none; cursor: pointer; color: #A03B24; font-weight: bold; margin-left: 10px;">Log Out</button>
             </div>
         </header>
@@ -216,6 +217,39 @@
                 </section>
 
             </div> <!-- End Overview View -->
+
+            <!-- Drafts View (Hidden by default) -->
+            <div id="drafts-view" style="display: none;">
+                <section class="glass-panel">
+                    <h3 class="panel-header">Ready for Review</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Game / Title</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drafts-tbody">
+                                <tr><td colspan="4" style="text-align:center">Loading drafts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <section id="draft-preview-panel" class="glass-panel hidden" style="margin-top: 20px;">
+                    <h3 class="panel-header">Draft Preview</h3>
+                    <div id="draft-preview-content" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; font-size: 0.9rem; max-height: 400px; overflow-y: auto;">
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button id="btn-publish-draft" class="btn-primary" style="background: #10B981;">Publish to WordPress</button>
+                        <button id="btn-close-preview" class="btn-primary" style="background: #6B7280;">Close</button>
+                        <span id="publish-status" class="status-msg hidden" style="margin-left: auto;"></span>
+                    </div>
+                </section>
+            </div> <!-- End Drafts View -->
 
         </main>
 

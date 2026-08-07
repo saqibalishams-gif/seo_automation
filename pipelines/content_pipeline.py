@@ -3,15 +3,16 @@ from utils.logger import get_logger
 from agents.discovery_agent import Candidate
 from agents.history_agent import check_candidate
 from agents.research_agent import ResearchAgent
-from agents.content_agent import ContentAgent, check_differentiation, ArticleDraft
+from agents.content_agent import ContentAgent, check_differentiation
 from agents.fact_verification_agent import verify_claims, get_trusted_facts
 from agents.image_agent import ImageAgent
 from agents.compliance_agent import check_market_allowlist
-from agents.wordpress_agent import WordPressAgent
+from agents.wordpress_agent import WordPressPublisher
+from core.universal_model import ContentDocument
 
 logger = get_logger("content_pipeline")
 
-def run_single_candidate(candidate: Candidate, target_market: str, user_id: int, user_settings: dict, db_path: str = None, dry_run: bool = False) -> Tuple[Optional[ArticleDraft], str]:
+def run_single_candidate(candidate: Candidate, target_market: str, user_id: int, user_settings: dict, db_path: str = None, dry_run: bool = False) -> Tuple[Optional[ContentDocument], str]:
     """
     Runs a single candidate through the strict Phase 8 pipeline sequence.
     Returns a tuple of (draft, status_reason).
@@ -37,7 +38,7 @@ def run_single_candidate(candidate: Candidate, target_market: str, user_id: int,
     content_agent = ContentAgent()
     draft = content_agent.draft_article(candidate, context, trusted_facts)
     
-    if not check_differentiation(draft.body):
+    if not check_differentiation(draft):
         logger.error("Pipeline stopped: Draft failed editorial differentiation check.")
         return None, "FAILED_DIFFERENTIATION"
         
@@ -57,16 +58,10 @@ def run_single_candidate(candidate: Candidate, target_market: str, user_id: int,
         logger.info(f"Pipeline stopped: Market '{target_market}' blocked by Compliance Gate.")
         return None, "BLOCKED_COMPLIANCE"
         
-    # 7. WordPress Publisher (Phase 7)
-    if dry_run:
-        logger.info(f"DRY RUN: Would have pushed draft for {candidate.game_name} to WordPress.")
-        article_id = "dry_run_id"
-    else:
-        wp_agent = WordPressAgent(user_settings=user_settings)
-        article_id = wp_agent.push_draft(draft, images=local_images)
-        if not article_id:
-            logger.error("Pipeline stopped: Failed to push to WordPress.")
-            return None, "FAILED_WP_PUSH"
-        
-    logger.info(f"Pipeline completed successfully for {candidate.game_name}.")
+    # Attach local images to draft document
+    draft.images = local_images
+    
+    # In the Universal Workflow, we STOP here and return the Draft for user review.
+    # The actual publishing happens in a separate manual step via the Dashboard.
+    logger.info(f"Pipeline completed successfully for {candidate.game_name}. Returning Draft for Review.")
     return draft, "SUCCESS"

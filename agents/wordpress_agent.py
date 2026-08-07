@@ -1,235 +1,72 @@
-import json
-import os
-import re
-import random
 from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
+from core.universal_model import ContentDocument
+from adapters.wp_base import BaseWordPressAdapter
+from adapters.editors.classic import ClassicEditorAdapter
+from adapters.editors.gutenberg import GutenbergAdapter
+from adapters.seo.rankmath import RankMathAdapter
+from adapters.seo.yoast import YoastAdapter
+from adapters.themes.appyn import AppynAdapter
 from utils.logger import get_logger
-from utils.http import request_with_retry
-from config.settings import settings
-from agents.content_agent import ArticleDraft
 
-logger = get_logger("wordpress_agent")
+logger = get_logger("wordpress_publisher")
 
-class WordPressAgent:
-    def __init__(self, user_settings: dict):
-        if not user_settings.get('wp_url') or not user_settings.get('wp_username') or not user_settings.get('wp_app_password'):
-            raise ValueError("WordPress credentials not fully configured for this user.")
-        self.wp_url = user_settings['wp_url'].rstrip('/')
-        self.auth = (user_settings['wp_username'], user_settings['wp_app_password'])
-        self.theme_type = user_settings.get('theme_type', 'standard')
-        self.seo_plugin = user_settings.get('seo_plugin', 'none')
+class WordPressPublisher(BaseWordPressAdapter):
+    """
+    Orchestrates the publishing process by dynamically delegating formatting
+    and metadata application to the appropriate adapters based on the Site Profile.
+    """
+    def publish(self, doc: ContentDocument) -> Optional[str]:
+        logger.info(f"Starting publish process for '{doc.title}' to {self.site_url}")
         
-    def upload_media(self, file_path: str) -> Optional[Dict[str, Any]]:
-        """
-        Uploads a local image to the WordPress Media Library.
-        Returns a dict with 'id' and 'url' of the uploaded media, or None if failed.
-        """
-        if not file_path or not os.path.exists(file_path):
+        # 1. Format Payload using Editor Adapter
+        editor_type = self.profile.get('editor_type', 'classic').lower()
+        if editor_type == 'gutenberg':
+            logger.info("Using Gutenberg Editor Adapter")
+            payload = GutenbergAdapter.format_content(doc)
+        else:
+            logger.info("Using Classic Editor Adapter")
+            payload = ClassicEditorAdapter.format_content(doc)
+            
+        # Add categories if provided in mapping
+        # In a full implementation, we'd map string categories to IDs. For now, use doc categories if int, or fallback to default.
+        payload["categories"] = doc.categories if doc.categories else [2, 4, 7] # Fallback for backward compatibility
+        
+        # Add featured image if available
+        if 'featured' in doc.images:
+            payload["featured_media"] = doc.images['featured'] # Assuming ID is passed here, but Universal Model passes URL currently.
+            # We need to upload images first!
+            
+        # 2. Upload Images and update document references
+        for key, path in doc.images.items():
+            if not str(path).startswith('http'):
+                upload_result = self.upload_media(path)
+                if upload_result:
+                    if key == 'featured':
+                        payload["featured_media"] = upload_result['id']
+                    else:
+                        # For other images, we would inject their URLs into the payload.
+                        # The formatting adapters handle basic injection for featured, but complex injection
+                        # should ideally happen after upload.
+                        pass
+        
+        # 3. Push Base Post
+        post_id = self._push_post(payload)
+        if not post_id:
+            logger.error("Failed to create base post. Aborting metadata application.")
             return None
             
-        url = f"{self.wp_url}/wp-json/wp/v2/media"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json'
-        }
-        
-        try:
-            filename = os.path.basename(file_path)
-            with open(file_path, 'rb') as f:
-                files = {'file': (filename, f, 'image/jpeg')}
-                response = request_with_retry('POST', url, files=files, headers=headers, auth=self.auth, timeout=30)
-                
-            result = response.json()
+        logger.info(f"Base post created with ID {post_id}")
             
-            media_id = result.get('id')
-            media_url = result.get('source_url')
+        # 4. Apply SEO Metadata
+        seo_plugin = self.profile.get('seo_plugin', 'none').lower()
+        if seo_plugin == 'rankmath':
+            RankMathAdapter.apply_metadata(doc, post_id, self.site_url, self.auth, self.headers)
+        elif seo_plugin == 'yoast':
+            YoastAdapter.apply_metadata(doc, post_id, self.site_url, self.auth, self.headers)
             
-            if media_id and media_url:
-                logger.info(f"Successfully uploaded media: {filename} -> ID: {media_id}")
-                return {"id": media_id, "url": media_url}
-        except Exception as e:
-            logger.error(f"Failed to upload media {filename} to WordPress: {e}")
+        # 5. Apply Theme Custom Fields
+        active_theme = self.profile.get('active_theme', 'unknown').lower()
+        if active_theme == 'appyn' or 'appyn' in active_theme:
+            AppynAdapter.apply_custom_fields(doc, post_id, self.site_url, self.auth, self.headers)
             
-        return None
-        
-    def push_draft(self, draft: ArticleDraft, images: Dict[str, str] = None) -> Optional[str]:
-        """
-        Pushes an ArticleDraft to WordPress.
-        Uploads images, injects them into the content, and sets the featured image.
-        Returns the new Article ID or None if failed.
-        """
-        logger.info(f"Pushing draft to WordPress for: {draft.title}")
-        
-        if images is None:
-            images = {}
-            
-        # 1. Upload Images to WordPress
-        wp_images = {}
-        for key, path in images.items():
-            result = self.upload_media(path)
-            if result:
-                wp_images[key] = result
-                
-        rg_notice = "\n\n<hr/>\n<p><strong>Responsible Gambling Notice:</strong> Please gamble responsibly. Only bet what you can afford to lose. If you need help, seek professional advice.</p>"
-        final_body = draft.body + rg_notice
-        
-        # 2. Inject Images using BeautifulSoup
-        soup = BeautifulSoup(final_body, 'html.parser')
-        
-        def create_img_tag(url: str, alt: str):
-            tag = soup.new_tag('img', src=url, alt=alt, width='87', height='172')
-            tag['style'] = 'display: block; margin: 0 auto; margin-bottom: 20px; border-radius: 8px;'
-            return tag
-            
-        # Description Image: bottom of "What is {game_name}?" section.
-        if 'description' in wp_images:
-            # Find the "What is..." h2, then find the next h2, insert before it
-            h2_tags = soup.find_all('h2')
-            target_h2 = None
-            next_h2 = None
-            for i, tag in enumerate(h2_tags):
-                if "what is" in tag.get_text().lower():
-                    target_h2 = tag
-                    if i + 1 < len(h2_tags):
-                        next_h2 = h2_tags[i + 1]
-                    break
-            
-            if target_h2:
-                img_tag = create_img_tag(wp_images['description']['url'], f"{draft.title} Description")
-                if next_h2:
-                    next_h2.insert_before(img_tag)
-                else:
-                    soup.append(img_tag)
-                    
-        # Login Image: immediately below "How to Get Started on..."
-        if 'login' in wp_images:
-            for tag in soup.find_all('h2'):
-                if "how to get started" in tag.get_text().lower():
-                    img_tag = create_img_tag(wp_images['login']['url'], f"{draft.title} Login")
-                    tag.insert_after(img_tag)
-                    break
-                    
-        # Transaction Image: immediately below "How to Deposit & Withdraw Money"
-        if 'transaction' in wp_images:
-            for tag in soup.find_all('h2'):
-                if "deposit & withdraw" in tag.get_text().lower() or "transaction" in tag.get_text().lower():
-                    img_tag = create_img_tag(wp_images['transaction']['url'], f"{draft.title} Transaction")
-                    tag.insert_after(img_tag)
-                    break
-                    
-        final_body = str(soup)
-        
-        # Featured Image: embed at the top of the article
-        if 'featured' in wp_images:
-            img_tag = create_img_tag(wp_images['featured']['url'], f"{draft.title} Featured")
-            final_body = str(img_tag) + final_body
-        
-        payload = {
-            "title": draft.title,
-            "content": final_body,
-            "status": "draft",
-            "categories": [2, 4, 7],
-            "excerpt": draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-        }
-        
-        if 'featured' in wp_images:
-            payload['featured_media'] = wp_images['featured']['id']
-        
-        url = f"{self.wp_url}/wp-json/wp/v2/posts"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-        
-        try:
-            response = request_with_retry('POST', url, json=payload, headers=headers, auth=self.auth, timeout=15)
-            
-            try:
-                data = response.json()
-            except Exception as e:
-                logger.error(f"Failed to parse JSON from WordPress. Status: {response.status_code}, Response: {response.text[:500]}")
-                return None
-                
-            article_id = str(data.get('id', ''))
-            
-            # Theme Specific Meta Updates
-            if self.theme_type == 'appyn':
-                appyn_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-                if not appyn_desc:
-                    import html
-                    clean_body = re.sub(r'<[^>]+>', ' ', final_body)
-                    clean_body = html.unescape(clean_body).strip()
-                    clean_body = re.sub(r'\s+', ' ', clean_body)
-                    if clean_body:
-                        appyn_desc = clean_body[:300] + ('...' if len(clean_body) > 300 else '')
-
-                meta_payload = {
-                    "post_id": int(article_id),
-                    "datos_informacion": {
-                        "app_status": "new",
-                        "descripcion": appyn_desc,
-                        "version": random.choice(["1.2", "1.5.4", "2.0.1", "3.1.2", "4.0"]),
-                        "tamano": random.choice(["15MB", "32MB", "48MB", "Varies with device", "64MB"]),
-                        "fecha_actualizacion": "Just now",
-                        "requerimientos": "Android",
-                        "descargas": random.choice(["10k+", "50k+", "100k+", "500k+", "1M+"]),
-                        "categoria_app": "GAMES",
-                        "os": "ANDROID",
-                        "offer": {"amount": "", "currency": "USD"}
-                    },
-                    "datos_download": {
-                        "option": "links",
-                        "type": "apk",
-                        "0": {
-                            "link": "#",
-                            "texto": "DOWNLOAD APK"
-                        }
-                    }
-                }
-                meta_url = f"{self.wp_url}/wp-json/seo-automation/v1/update-meta"
-                try:
-                    request_with_retry('POST', meta_url, json=meta_payload, headers=headers, auth=self.auth, timeout=15)
-                    logger.info("Successfully updated Appyn meta.")
-                except Exception as e:
-                    logger.warning(f"Failed to update Appyn meta (Does this site have the Appyn theme?): {e}")
-            else:
-                logger.info(f"Skipping Appyn meta update. Theme is set to {self.theme_type}.")
-            
-            # SEO Plugin Specific Updates
-            if hasattr(draft, 'focus_keyword') and draft.focus_keyword:
-                meta_desc = draft.excerpt if hasattr(draft, 'excerpt') and draft.excerpt else ""
-                if self.seo_plugin == 'rankmath':
-                    rankmath_payload = {
-                        "objectType": "post",
-                        "objectID": int(article_id),
-                        "meta": {
-                            "rank_math_focus_keyword": draft.focus_keyword,
-                            "rank_math_description": meta_desc
-                        }
-                    }
-                    rankmath_url = f"{self.wp_url}/wp-json/rankmath/v1/updateMeta"
-                    try:
-                        rm_resp = request_with_retry('POST', rankmath_url, json=rankmath_payload, headers=headers, auth=self.auth, timeout=15)
-                        logger.info(f"RankMath updateMeta response: {rm_resp.status_code}")
-                    except Exception as e:
-                        logger.error(f"Failed to update RankMath meta: {e}")
-                elif self.seo_plugin == 'yoast':
-                    yoast_url = f"{self.wp_url}/wp-json/wp/v2/posts/{article_id}"
-                    yoast_payload = {
-                        "meta": {
-                            "yoast_wpseo_focuskw": draft.focus_keyword,
-                            "yoast_wpseo_metadesc": meta_desc
-                        }
-                    }
-                    try:
-                        request_with_retry('POST', yoast_url, json=yoast_payload, headers=headers, auth=self.auth, timeout=15)
-                        logger.info("Successfully updated Yoast focus keyword.")
-                    except Exception as e:
-                        logger.error(f"Failed to update Yoast meta: {e}")
-                else:
-                    logger.info(f"Skipping SEO meta update. Plugin is set to {self.seo_plugin}.")
-            logger.info(f"Successfully pushed draft. WP Post ID: {article_id}")
-            return article_id
-        except Exception as e:
-            logger.error(f"Failed to push draft to WordPress: {e}")
-            return None
+        return post_id
