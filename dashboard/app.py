@@ -230,11 +230,14 @@ def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
             # Update Draft
             draft_record.status = "published"
             
-            # Insert into History
-            db.execute(
-                "INSERT INTO publish_history (user_id, game_name, provider, article_id) VALUES (?, ?, ?, ?)",
-                (user_id, draft_record.game_name, draft_record.provider, article_id)
+            from utils.db_models import PublishHistory
+            new_history = PublishHistory(
+                user_id=user_id,
+                game_name=draft_record.game_name,
+                provider=draft_record.provider,
+                article_id=article_id
             )
+            db.add(new_history)
             
             db.commit()
             

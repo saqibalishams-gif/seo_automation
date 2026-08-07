@@ -78,6 +78,7 @@ class ContentAgent:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.7,
+                max_tokens=8000,
                 response_format={"type": "json_object"}
             )
             raw_json = response.choices[0].message.content
