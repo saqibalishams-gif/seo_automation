@@ -40,8 +40,8 @@ class ContentAgent:
             "6. You MUST include at least one DoFollow external link to an authoritative resource (e.g. <a href='https://en.wikipedia.org/wiki/Slot_machine'>Slot machines</a>).\n"
             "7. You MUST include at least one internal link (e.g. <a href='/category/games/'>more games</a>).\n\n"
             "8. You MUST keep sentences short and readable (Flesch Reading Ease > 60). Use short paragraphs (max 3-4 sentences).\n"
-            "9. You MUST bold important LSI keywords and phrases naturally throughout the text to boost the RankMath score.\n\n"
-            "OUTPUT FORMAT: Pure HTML only (h2, h3, p, ul, li, table where noted). No markdown, no ```html fences.\n"
+            "9. You MUST bold important LSI keywords and phrases naturally throughout the text using HTML <strong> tags to boost the RankMath score. NEVER use markdown stars like **word**.\n\n"
+            "OUTPUT FORMAT: Pure HTML only (h2, h3, p, ul, li, strong). Absolutely NO markdown. Do NOT use ** for bolding.\n"
             "The VERY FIRST line MUST be a <title> tag containing the Focus Keyword near the beginning, AND a power word (e.g. Best, Ultimate), AND a positive sentiment word (e.g. Awesome, Great), AND a number (e.g. 2026). Example: <title>Best {game_name} Review 2026: Awesome Features</title>\n"
             "The SECOND line MUST be an <excerpt> tag containing a catchy 1-2 sentence SEO meta description starting with the Focus Keyword. Example: <excerpt>{game_name} is the most exciting...</excerpt>\n\n"
             "MANDATORY SECTION SKELETON (follow this exact order, using <h2> for top-level and <h3> for sub-sections. ALL <h2> and <h3> tags MUST include a descriptive 'id' attribute for anchor linking. DO NOT generate a Table of Contents):\n"
@@ -105,6 +105,9 @@ class ContentAgent:
         body_text = re.sub(r'<title>.*?</title>', '', draft_text, flags=re.IGNORECASE | re.DOTALL)
         body_text = re.sub(r'<excerpt>.*?</excerpt>', '', body_text, flags=re.IGNORECASE | re.DOTALL).strip()
             
+        # Convert any accidental markdown bold to HTML bold
+        body_text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', body_text)
+        
         clean_game_name = candidate.game_name.replace('-', ' ').title()
         draft = ArticleDraft(
             title=title,
