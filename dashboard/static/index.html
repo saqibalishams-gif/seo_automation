@@ -16,25 +16,36 @@
     </div>
 
     <div class="app-container">
-        <!-- Navigation Header Bar -->
+        <!-- Top Navigation Header Bar -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
                 <div class="status-dot-container"><div class="status-dot"></div></div>
-                <h1>SEO Auto Platform</h1>
+                <h1 style="font-size: 1.15rem;">SEO AUTO</h1>
             </div>
-            <div class="status-pills">
-                <div class="status-pill" id="user-plan-pill">Plan: FREE</div>
-                <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
-                <button id="nav-home" class="nav-btn active">🏠 Home</button>
+            <div class="status-pills" style="align-items: center;">
+                <!-- Primary Top Nav Items -->
+                <button id="nav-home" class="nav-btn active">🏠 Dashboard</button>
                 <button id="nav-create" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">✍ Create Article</button>
-                <button id="nav-templates" class="nav-btn">🎨 Templates</button>
-                <button id="nav-media" class="nav-btn">🖼 Media</button>
+                <button id="nav-templates" class="nav-btn">🎨 Formats</button>
                 <button id="nav-history" class="nav-btn">📜 History</button>
-                <button id="nav-settings" class="nav-btn">⚙ Settings</button>
-                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin</button>
-                <label class="dev-mode-toggle" style="font-size: 0.8rem; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-muted); margin-left: 10px;">
-                    <input type="checkbox" id="dev-mode-checkbox"> ⚙ Dev Mode
-                </label>
+                <button id="nav-websites" class="nav-btn">🌐 Websites</button>
+
+                <!-- Responsive / Minimizable "More ⋯" Dropdown -->
+                <div class="nav-dropdown-container">
+                    <button id="nav-more-btn" class="nav-btn">More ⋯</button>
+                    <div id="nav-more-menu" class="nav-dropdown-menu hidden">
+                        <button id="nav-media" class="nav-btn" style="width: 100%; text-align: left;">🖼 Media</button>
+                        <button id="nav-drafts" class="nav-btn" style="width: 100%; text-align: left;">📄 Drafts</button>
+                        <button id="nav-settings" class="nav-btn" style="width: 100%; text-align: left;">⚙ Settings</button>
+                        <button id="nav-admin" class="nav-btn hidden" style="width: 100%; text-align: left; color: #F59E0B;">⚡ Admin</button>
+                        <label class="dev-mode-toggle" style="font-size: 0.8rem; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-muted); padding: 6px 12px;">
+                            <input type="checkbox" id="dev-mode-checkbox"> ⚙ Dev Mode
+                        </label>
+                    </div>
+                </div>
+
+                <div class="status-pill" id="user-plan-pill" style="margin-left: 6px;">Plan: FREE</div>
+                <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
                 <button id="logout-btn" class="nav-btn btn-logout">Log Out</button>
             </div>
         </header>
@@ -420,7 +431,31 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 6: SETTINGS VIEW ================= -->
+            <!-- ================= VIEW 6: WEBSITES VIEW ================= -->
+            <div id="view-websites" class="tab-view hidden">
+                <section class="glass-panel">
+                    <h3 class="panel-header">🌐 Connected WordPress Websites</h3>
+                    <div id="websites-list-container" style="margin-bottom: 1.5rem;">
+                        <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong id="site_display_url" style="font-size: 1.1rem; color: var(--text-primary);">Configured WordPress Site</strong>
+                                <div id="site_display_user" style="font-size: 0.85rem; color: var(--text-secondary);">Connected</div>
+                            </div>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= VIEW 7: DRAFTS VIEW ================= -->
+            <div id="view-drafts" class="tab-view hidden">
+                <section class="glass-panel">
+                    <h3 class="panel-header">📄 Generated Article Drafts Pending Review</h3>
+                    <div id="drafts-container-page"><p style="color: var(--text-secondary);">Loading drafts...</p></div>
+                </section>
+            </div>
+
+            <!-- ================= VIEW 8: SETTINGS VIEW ================= -->
             <div id="view-settings" class="tab-view hidden">
                 <section class="glass-panel">
                     <h3 class="panel-header">⚙ WordPress Connection Settings</h3>

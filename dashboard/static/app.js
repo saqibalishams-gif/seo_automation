@@ -166,6 +166,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const navWebsites = document.getElementById("nav-websites");
+    const navDrafts = document.getElementById("nav-drafts");
+    const navMoreBtn = document.getElementById("nav-more-btn");
+    const navMoreMenu = document.getElementById("nav-more-menu");
+
+    if (navMoreBtn && navMoreMenu) {
+        navMoreBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            navMoreMenu.classList.toggle("hidden");
+        });
+        document.addEventListener("click", () => {
+            navMoreMenu.classList.add("hidden");
+        });
+    }
+
     // --- 1. CLEAN TABBED VIEW SWITCHER ---
 
     function switchTab(viewName, navBtn) {
@@ -173,11 +188,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetView = document.getElementById(`view-${viewName}`);
         if (targetView) targetView.classList.remove("hidden");
 
-        [navHome, navCreate, navTemplates, navMedia, navHistory, navSettings, navAdmin].forEach(b => {
+        [navHome, navCreate, navTemplates, navHistory, navWebsites, navMedia, navDrafts, navSettings, navAdmin].forEach(b => {
             if (b) b.classList.remove("active");
         });
         if (navBtn) navBtn.classList.add("active");
 
+        if (navMoreMenu) navMoreMenu.classList.add("hidden");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
         // Trigger specific view loaders
@@ -188,8 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
             goToStep(1);
         } else if (viewName === "templates") {
             loadTemplates();
+        } else if (viewName === "websites") {
+            loadWebsitesView();
         } else if (viewName === "media") {
             loadMediaGallery();
+        } else if (viewName === "drafts") {
+            loadDraftsPage();
         } else if (viewName === "history") {
             loadHistory();
         } else if (viewName === "settings") {
@@ -200,9 +220,44 @@ document.addEventListener("DOMContentLoaded", () => {
     if (navHome) navHome.addEventListener("click", () => switchTab("home", navHome));
     if (navCreate) navCreate.addEventListener("click", () => switchTab("create", navCreate));
     if (navTemplates) navTemplates.addEventListener("click", () => switchTab("templates", navTemplates));
-    if (navMedia) navMedia.addEventListener("click", () => switchTab("media", navMedia));
     if (navHistory) navHistory.addEventListener("click", () => switchTab("history", navHistory));
+    if (navWebsites) navWebsites.addEventListener("click", () => switchTab("websites", navWebsites));
+    if (navMedia) navMedia.addEventListener("click", () => switchTab("media", navMedia));
+    if (navDrafts) navDrafts.addEventListener("click", () => switchTab("drafts", navDrafts));
     if (navSettings) navSettings.addEventListener("click", () => switchTab("settings", navSettings));
+
+    async function loadWebsitesView() {
+        try {
+            const res = await fetch("/api/user/settings");
+            const data = await res.json();
+            const urlEl = document.getElementById("site_display_url");
+            const userEl = document.getElementById("site_display_user");
+            if (urlEl && data.wp_url) urlEl.textContent = data.wp_url;
+            if (userEl && data.wp_username) userEl.textContent = `Username: ${data.wp_username}`;
+        } catch (e) {}
+    }
+
+    async function loadDraftsPage() {
+        try {
+            const res = await fetch("/api/drafts");
+            const drafts = await res.json();
+            const container = document.getElementById("drafts-container-page");
+            if (!container || !Array.isArray(drafts)) return;
+            if (drafts.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary);">No drafts pending review.</p>`;
+                return;
+            }
+            container.innerHTML = drafts.map(d => `
+                <div style="background: white; border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 1.1rem; color: var(--text-primary);">${d.game_name} (${d.provider})</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${d.created_at}</div>
+                    </div>
+                    <button class="btn-primary publish-draft-btn" data-id="${d.id}" style="padding: 8px 16px; font-size: 0.9rem;">🚀 Publish to WP</button>
+                </div>
+            `).join("");
+        } catch (e) {}
+    }
 
     // --- 2. GUIDED WORKFLOW STEPPER MANAGER ---
 
