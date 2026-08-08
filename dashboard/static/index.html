@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=3">
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
     <div class="bg-blobs">
@@ -15,7 +15,7 @@
         <div class="blob blob-blue"></div>
     </div>
 
-    <div class="app-container">
+    <div class="app-container" style="max-width: 1300px;">
         <!-- Header Bar -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
@@ -26,10 +26,11 @@
                 <div class="status-pill" id="user-plan-pill">Plan: FREE</div>
                 <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
                 <button id="nav-overview" class="nav-btn">Overview</button>
+                <button id="nav-queue-url" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">🔗 Queue URL</button>
                 <button id="nav-jobs" class="nav-btn">Jobs & Timeline</button>
                 <button id="nav-drafts" class="nav-btn">Review Drafts</button>
                 <button id="nav-setup" class="nav-btn">⚙ Sites & Settings</button>
-                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin</button>
+                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin Console</button>
                 <button id="logout-btn" class="nav-btn btn-logout">Log Out</button>
             </div>
         </header>
@@ -46,44 +47,82 @@
                     <div class="stat-label">Pending Review</div>
                 </div>
                 <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="stat-links-queued">0</div>
+                    <div class="stat-label">Queued Target URLs</div>
+                </div>
+                <div class="glass-panel stat-tile">
                     <div class="stat-value" id="stat-quota-used">0%</div>
                     <div class="stat-label">Monthly Quota Used</div>
                 </div>
             </section>
 
-            <!-- Trigger New Run Panel -->
-            <section class="glass-panel">
-                <h3 class="panel-header">🚀 Start Autonomous Content Pipeline</h3>
-                <form id="run-form" class="run-form">
+            <!-- 1. Dedicated Target URL Input & Queue Form -->
+            <section id="url-queue-section" class="glass-panel">
+                <h3 class="panel-header">🔗 Enter Target Page / Game URL & Add to Queue</h3>
+                <form id="url-queue-form" enctype="multipart/form-data" class="run-form">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 2;">
-                            <label>Target Game Name</label>
-                            <input type="text" id="run_game_name" placeholder="e.g. Sweet Bonanza" required>
+                        <div class="form-group" style="flex: 3; min-width: 300px;">
+                            <label>Target Page URL (Paste Game URL or Article Link)</label>
+                            <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
                         </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label>Provider</label>
-                            <input type="text" id="run_provider" placeholder="e.g. Pragmatic Play" required>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
                             <label>Target Market</label>
-                            <select id="run_market">
+                            <select id="input_market" style="padding: 10px;">
                                 <option value="UK">UK (GC Compliance)</option>
                                 <option value="PK">PK (Pakistani Market)</option>
                             </select>
                         </div>
                     </div>
-                    <button type="submit" class="btn-primary" id="run-btn">
-                        <span class="btn-text">Enqueue Automation Job</span>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Game Name (Optional - AI extracts if blank)</label>
+                            <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Provider (Optional - AI extracts if blank)</label>
+                            <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Featured Image (Optional Upload)</label>
+                            <input type="file" id="input_featured_image" accept="image/*" style="font-size: 0.85rem; padding: 6px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btn-queue-url" style="margin-top: 0.5rem;">
+                        <span class="btn-text">🚀 Add URL to Queue & Start Automation</span>
                     </button>
-                    <div id="run-status" class="status-msg hidden"></div>
+                    <div id="url-queue-status" class="status-msg hidden"></div>
                 </form>
             </section>
 
-            <!-- Jobs & Timeline View -->
+            <!-- 2. Submissions & Link History Table -->
+            <section id="link-history-section" class="glass-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="panel-header" style="margin: 0;">📋 Queued URLs & Submissions History</h3>
+                    <button id="refresh-links-btn" class="nav-btn" style="color: #60A5FA;">🔄 Refresh History</button>
+                </div>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Target URL</th>
+                            <th>Game / Provider</th>
+                            <th>Status</th>
+                            <th>Reason / Details</th>
+                            <th>Submitted Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="links-tbody">
+                        <tr><td colspan="7" style="text-align: center;">Loading queued links...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 3. Jobs & Timeline Progression Section -->
             <section id="jobs-section" class="glass-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 class="panel-header" style="margin: 0;">Jobs & Stage Progression</h3>
-                    <select id="job-status-filter" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white;">
+                    <h3 class="panel-header" style="margin: 0;">⚡ Active Automation Jobs & Stage Timelines</h3>
+                    <select id="job-status-filter" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15); background: rgba(255,255,255,0.8); color: var(--text-primary);">
                         <option value="ALL">All Statuses</option>
                         <option value="QUEUED">Queued</option>
                         <option value="PROCESSING">Processing</option>
@@ -109,17 +148,17 @@
                 </table>
             </section>
 
-            <!-- Drafts Review Section -->
+            <!-- 4. Drafts Review Section -->
             <section id="drafts-section" class="glass-panel">
-                <h3 class="panel-header">📄 Drafts Pending Review</h3>
+                <h3 class="panel-header">📄 Generated Drafts Pending WordPress Review</h3>
                 <div id="drafts-container">
-                    <p style="color: rgba(255,255,255,0.6);">Loading drafts...</p>
+                    <p style="color: var(--text-secondary);">Loading drafts...</p>
                 </div>
             </section>
 
-            <!-- Sites & Settings Section -->
+            <!-- 5. Sites & Settings Section -->
             <section id="setup-section" class="glass-panel hidden">
-                <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
+                <h3 class="panel-header">⚙ Connected WordPress Sites & Integration Settings</h3>
                 <form id="setup-form" class="run-form">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 2;">
@@ -152,7 +191,7 @@
                             </select>
                         </div>
                     </div>
-                    <button type="submit" class="btn-primary">Save Settings</button>
+                    <button type="submit" class="btn-primary">Save Connection Settings</button>
                     <div id="setup-status" class="status-msg hidden"></div>
                 </form>
             </section>
@@ -164,7 +203,7 @@
         <div class="modal-content glass-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 id="modal-job-title" style="margin: 0;">Job Event Timeline</h3>
-                <button id="close-modal-btn" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <button id="close-modal-btn" style="background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
             <div id="timeline-events-container" class="timeline-container">
                 <!-- Timeline items rendered dynamically -->
@@ -172,6 +211,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3"></script>
+    <script src="/static/app.js?v=4"></script>
 </body>
 </html>

@@ -253,6 +253,7 @@ def trigger_run(config: RunConfig, user_id: int = Depends(get_current_user_id)):
     payload = {
         "job_id": job_id,
         "user_id": user_id,
+        "url": config.url,
         "game_name": config.game_name or "Sweet Bonanza",
         "provider": config.provider or "Pragmatic Play",
         "target_market": config.market,
@@ -421,18 +422,29 @@ def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
         log_audit_event(user_id, "POST_PUBLISHED", "ContentDraft", str(draft_id), details={"article_id": article_id})
         return {"message": f"Successfully published. WordPress Post ID: {article_id}"}
 
+class RunConfig(BaseModel):
+    url: Optional[str] = None
+    market: str = "UK"
+    volume: int = 2
+    game_name: Optional[str] = None
+    provider: Optional[str] = None
+    site_id: Optional[int] = None
+    dry_run: bool = False
+
 @app.post("/api/links")
 async def add_link(
     url: str = Form(...),
     game_name: str = Form(""),
     provider: str = Form(""),
+    market: str = Form("UK"),
     featured_image: UploadFile = File(None),
     description_image: UploadFile = File(None),
-    login_image: UploadFile = File(None),
-    transaction_image: UploadFile = File(None),
     user_id: int = Depends(get_current_user_id)
 ):
     try:
+        if not check_user_quota(user_id):
+            raise HTTPException(status_code=402, detail="Monthly article limit reached for your subscription plan.")
+            
         temp_dir = os.path.join(BASE_DIR, 'data', 'tmp_uploads')
         os.makedirs(temp_dir, exist_ok=True)
         
@@ -453,14 +465,50 @@ async def add_link(
         
         with get_db_connection() as conn:
             conn.execute("""
-                INSERT INTO links (user_id, url, game_name, provider, featured_image, description_image)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (user_id, url, game_name, provider, featured_url, desc_url))
+                INSERT INTO links (user_id, url, game_name, provider, featured_image, description_image, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (user_id, url, game_name or "Extracting...", provider or "Extracting...", featured_url, desc_url, 'New'))
             conn.commit()
             
-        return {"message": "Link queued successfully in database!"}
+        # Automatically enqueue job for the submitted link
+        job_id = f"job-{uuid.uuid4().hex[:12]}"
+        now = datetime.datetime.utcnow()
+        
+        with SessionLocal() as db:
+            new_job = Job(
+                id=job_id,
+                user_id=user_id,
+                game_name=game_name or "Pending Extraction",
+                provider=provider or "Pending Extraction",
+                target_market=market,
+                status="QUEUED",
+                current_stage="QUEUED",
+                created_at=now
+            )
+            db.add(new_job)
+            db.add(JobEvent(job_id=job_id, user_id=user_id, event_type="JOB_CREATED", stage="QUEUED", status="QUEUED", message=f"Queued URL: {url}"))
+            db.add(JobEvent(job_id=job_id, user_id=user_id, event_type="JOB_QUEUED", stage="QUEUED", status="QUEUED", message="Enqueued into Redis worker queue."))
+            db.commit()
+            
+        payload = {
+            "job_id": job_id,
+            "user_id": user_id,
+            "url": url,
+            "game_name": game_name,
+            "provider": provider,
+            "target_market": market,
+            "featured_image_url": featured_url,
+            "description_image_url": desc_url,
+            "dry_run": False
+        }
+        enqueue_job(job_id, payload)
+        log_audit_event(user_id, "URL_LINK_QUEUED", "Link", job_id, details={"url": url})
+        
+        return {"message": "Target URL queued and automation job enqueued successfully!", "job_id": job_id}
+    except HTTPException:
+        raise
     except Exception as e:
-        return {"error": f"Failed to save link: {str(e)}"}
+        return {"error": f"Failed to queue link: {str(e)}"}
 
 @app.get("/api/links/status")
 def get_links_status(user_id: int = Depends(get_current_user_id)):

@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 import pytest
 from unittest import mock
 from fastapi.testclient import TestClient
@@ -105,7 +106,7 @@ def test_tenant_data_isolation(setup_test_users):
     user_a_id = setup_test_users["user_a_id"]
     user_b_id = setup_test_users["user_b_id"]
     
-    job_b_id = "job-userb-secret-123"
+    job_b_id = f"job-userb-secret-{uuid.uuid4().hex[:6]}"
     with SessionLocal() as db:
         job = Job(id=job_b_id, user_id=user_b_id, game_name="Secret B Game", provider="Provider B", status="QUEUED")
         event = JobEvent(job_id=job_b_id, user_id=user_b_id, event_type="JOB_CREATED", stage="QUEUED", status="QUEUED")
