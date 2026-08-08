@@ -70,3 +70,54 @@ class ImageAgent:
             if path: results['transaction'] = path
             
         return results
+
+    def process_custom_image(self, file_path: str, target_width: Optional[int] = None, target_height: Optional[int] = None, quality: int = 90) -> Dict[str, Any]:
+        """
+        Processes a local uploaded image using Pillow, maintaining aspect ratio unless specified.
+        Returns width, height, file_size, and updated file_path.
+        """
+        try:
+            img = Image.open(file_path)
+            orig_w, orig_h = img.size
+
+            if target_width or target_height:
+                if target_width and not target_height:
+                    ratio = target_width / float(orig_w)
+                    new_h = int(orig_h * ratio)
+                    img = img.resize((target_width, new_h), Image.Resampling.LANCZOS)
+                elif target_height and not target_width:
+                    ratio = target_height / float(orig_h)
+                    new_w = int(orig_w * ratio)
+                    img = img.resize((new_w, target_height), Image.Resampling.LANCZOS)
+                elif target_width and target_height:
+                    img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+
+            # Convert to RGB if needed
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                bg = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'RGBA':
+                    bg.paste(img, mask=img.split()[3])
+                else:
+                    bg.paste(img)
+                img = bg
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+
+            out_w, out_h = img.size
+            img.save(file_path, 'JPEG', quality=quality)
+            file_size = os.path.getsize(file_path)
+
+            return {
+                "width": out_w,
+                "height": out_h,
+                "file_size": file_size,
+                "file_path": file_path
+            }
+        except Exception as e:
+            logger.error(f"Failed custom image processing for {file_path}: {e}")
+            return {
+                "width": 0,
+                "height": 0,
+                "file_size": os.path.getsize(file_path) if os.path.exists(file_path) else 0,
+                "file_path": file_path
+            }

@@ -9,15 +9,41 @@ from core.universal_model import ContentDocument, SeoMetadata, Section, FAQ
 logger = get_logger("content_agent")
 
 class ContentAgent:
-    def draft_article(self, candidate: Candidate, context: Dict[str, Any], verified_facts: Dict[str, Any]) -> ContentDocument:
+    def draft_article(self, candidate: Candidate, context: Dict[str, Any], verified_facts: Dict[str, Any], template: Optional[Dict[str, Any]] = None) -> ContentDocument:
         """
-        Drafts the article using context and ONLY verified facts.
-        Outputs directly to the Universal Content Model (ContentDocument).
+        Drafts the article using context, verified facts, and selected template structure.
+        Outputs directly to the Universal Content Model (ContentDocument) with stable section_ids.
         """
         logger.info(f"Drafting article for {candidate.game_name} via Groq JSON mode...")
         
         client = Groq(api_key=settings.groq_api_key)
         
+        template_instructions = ""
+        if template and template.get("sections"):
+            t_secs = template["sections"]
+            lines = []
+            for idx, ts in enumerate(t_secs, 1):
+                sec_id = ts.get("id", "")
+                name = ts.get("name", "")
+                req = "REQUIRED" if ts.get("required") else "OPTIONAL"
+                c_type = ts.get("content_type", "paragraph")
+                ai_inst = ts.get("ai_instruction", "")
+                lines.append(f"{idx}. Heading: '{name}' [section_id: '{sec_id}'] ({req}, format: {c_type}). Instruction: {ai_inst}")
+            template_instructions = "TEMPLATE SECTIONS TO GENERATE:\n" + "\n".join(lines) + "\n\n"
+        else:
+            template_instructions = (
+                "MANDATORY SECTIONS (Ensure these headings exist in the sections array):\n"
+                "1. Features (Must be at least 300 words)\n"
+                "2. Pros and Cons (use <ul> for lists in content, must be at least 200 words)\n"
+                "3. How to Get Started (Register, Login, Download) (Must be at least 250 words)\n"
+                "4. How to Deposit & Withdraw Money (Must be at least 250 words)\n"
+                "5. Games/Bet Types Available (Must be at least 250 words)\n"
+                "6. Rewards and Bonuses (Must be at least 200 words)\n"
+                "7. Personal Review (MUST begin the content with the exact phrase 'By our expert,')\n"
+                "8. Who This Game Suits (MUST use this exact heading text)\n"
+                "9. How It Compares (MUST include the word 'comparison' in the content)\n\n"
+            )
+
         system_prompt = (
             "You are an expert casino game reviewer writing for a Pakistani iGaming SEO blog. "
             "Write a highly engaging, SEO-optimized review. "
@@ -32,6 +58,7 @@ class ContentAgent:
             "7. You MUST include at least one internal link.\n"
             "8. You MUST bold important LSI keywords using HTML <strong> tags ONLY. Do NOT use **markdown**.\n"
             "9. MANDATORY LENGTH REQUIREMENT: The total word count MUST exceed 1500 words. To achieve this, EACH SECTION must contain at least 250-300 words of detailed, descriptive text. Do not summarize; write extensively.\n\n"
+            f"{template_instructions}"
             "OUTPUT FORMAT: You MUST return a valid JSON object matching the following structure exactly:\n"
             "{\n"
             '  "title": "A catchy title including the Focus Keyword, a power word, and 2026",\n'
@@ -43,11 +70,10 @@ class ContentAgent:
             '  "introduction": "2-3 long paragraphs introducing the game/platform (use <p> tags)",\n'
             '  "sections": [\n'
             '    {\n'
+            '      "section_id": "sec-xxx",\n'
             '      "heading": "Features of Game",\n'
             '      "content": "<p>Intro to features</p>",\n'
-            '      "subsections": [\n'
-            '        {"heading": "User-Friendly Interface", "content": "<p>Description...</p>", "subsections": []}\n'
-            '      ]\n'
+            '      "subsections": []\n'
             '    }\n'
             '  ],\n'
             '  "faqs": [\n'
@@ -55,16 +81,6 @@ class ContentAgent:
             '  ],\n'
             '  "conclusion": "2 long paragraphs, ending with a responsible-gaming reminder (use <p> tags)"\n'
             "}\n\n"
-            "MANDATORY SECTIONS (Ensure these headings exist in the sections array):\n"
-            "1. Features (Must be at least 300 words)\n"
-            "2. Pros and Cons (use <ul> for lists in content, must be at least 200 words)\n"
-            "3. How to Get Started (Register, Login, Download) (Must be at least 250 words)\n"
-            "4. How to Deposit & Withdraw Money (Must be at least 250 words)\n"
-            "5. Games/Bet Types Available (Must be at least 250 words)\n"
-            "6. Rewards and Bonuses (Must be at least 200 words)\n"
-            "7. Personal Review (MUST begin the content with the exact phrase 'By our expert,')\n"
-            "8. Who This Game Suits (MUST use this exact heading text)\n"
-            "9. How It Compares (MUST include the word 'comparison' in the content)\n\n"
             "Return ONLY the raw JSON object. Do not wrap it in ```json blocks."
         )
         
@@ -82,7 +98,6 @@ class ContentAgent:
                 response_format={"type": "json_object"}
             )
             raw_json = response.choices[0].message.content
-            # LLaMA sometimes still wraps in markdown despite being in JSON mode, so we strip it.
             raw_json = raw_json.strip()
             if raw_json.startswith("```json"):
                 raw_json = raw_json[7:]
@@ -93,10 +108,14 @@ class ContentAgent:
             
             clean_game_name = candidate.game_name.replace('-', ' ').title()
             
-            # Reconstruct Pydantic Model
             seo = SeoMetadata(**data.get("seo_metadata", {"focus_keyword": clean_game_name, "meta_description": ""}))
             
             sections = []
+            tmpl_secs_by_name = {}
+            if template and template.get("sections"):
+                for ts in template["sections"]:
+                    tmpl_secs_by_name[ts.get("name", "").lower().strip()] = ts.get("id", "")
+
             for sec in data.get("sections", []):
                 subsections = []
                 for sub in sec.get("subsections", []):
@@ -108,7 +127,16 @@ class ContentAgent:
                 sec_c = sec.get("content", "")
                 if isinstance(sec_c, list):
                     sec_c = "\n".join(sec_c)
-                sections.append(Section(heading=sec.get("heading", ""), content=sec_c, subsections=subsections))
+                    
+                heading_text = sec.get("heading", "")
+                sec_id = sec.get("section_id") or sec.get("id") or tmpl_secs_by_name.get(heading_text.lower().strip(), "")
+                
+                sections.append(Section(
+                    section_id=sec_id,
+                    heading=heading_text,
+                    content=sec_c,
+                    subsections=subsections
+                ))
                 
             faqs = [FAQ(**faq) for faq in data.get("faqs", [])]
             
@@ -135,7 +163,6 @@ class ContentAgent:
             
         except Exception as e:
             logger.error(f"Failed to generate structured draft with Groq: {e}")
-            # Return a fallback empty document
             return ContentDocument(
                 title=f"Fallback {candidate.game_name}",
                 seo_metadata=SeoMetadata(focus_keyword=candidate.game_name, meta_description=""),

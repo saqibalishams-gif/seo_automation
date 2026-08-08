@@ -239,6 +239,85 @@ class CostRecord(Base):
     description = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
 
+class ContentTemplate(Base):
+    __tablename__ = "content_templates"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    name = Column(String, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    mode = Column(String, default="custom", nullable=False) # "default" or "custom"
+    is_default = Column(Boolean, default=False, nullable=False)
+    version = Column(Integer, default=1, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    sections = relationship("TemplateSection", back_populates="template", cascade="all, delete-orphan", order_by="TemplateSection.order")
+
+class TemplateSection(Base):
+    __tablename__ = "template_sections"
+    
+    id = Column(String, primary_key=True, index=True) # UUID section_id
+    template_id = Column(Integer, ForeignKey("content_templates.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    order = Column(Integer, default=1, nullable=False)
+    required = Column(Boolean, default=True, nullable=False)
+    content_type = Column(String, default="paragraph", nullable=False) # paragraph, bullet_list, table, faq, how_to
+    ai_instruction = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    template = relationship("ContentTemplate", back_populates="sections")
+
+class ImageAsset(Base):
+    __tablename__ = "image_assets"
+    
+    id = Column(String, primary_key=True, index=True) # UUID image_id
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    filename = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    mime_type = Column(String, default="image/png")
+    width = Column(Integer, default=0)
+    height = Column(Integer, default=0)
+    file_size = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class ImageAssignment(Base):
+    __tablename__ = "image_assignments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    image_id = Column(String, ForeignKey("image_assets.id"), index=True, nullable=False)
+    section_id = Column(String, index=True, nullable=False) # References TemplateSection.id UUID
+    template_id = Column(Integer, ForeignKey("content_templates.id"), nullable=True)
+    job_id = Column(String, nullable=True, index=True)
+    draft_id = Column(Integer, nullable=True, index=True)
+    
+    position = Column(String, default="after_heading") # before_heading, after_heading, before_paragraph, after_paragraph, between_paragraphs, end_of_section
+    alignment = Column(String, default="center") # left, center, right, full_width
+    size = Column(String, default="large") # small, medium, large, full_width, custom
+    custom_width = Column(Integer, nullable=True)
+    custom_height = Column(Integer, nullable=True)
+    fallback_behavior = Column(String, default="do_not_publish") # do_not_publish, nearest_section, end_of_article
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class WebsiteProfile(Base):
+    __tablename__ = "website_profiles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    site_url = Column(String, nullable=False)
+    username = Column(String, nullable=False)
+    app_password = Column(String, nullable=False) # Encrypted
+    default_template_id = Column(Integer, ForeignKey("content_templates.id"), nullable=True)
+    editor_type = Column(String, default="classic")
+    seo_plugin = Column(String, default="none")
+    default_categories = Column(Text, default="[]")
+    default_tags = Column(Text, default="[]")
+    default_author = Column(String, nullable=True)
+    image_defaults_json = Column(Text, default="{}")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 # Create tables automatically
 Base.metadata.create_all(bind=engine)
 

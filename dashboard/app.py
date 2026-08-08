@@ -17,6 +17,7 @@ from dashboard.auth import hash_password, verify_password, generate_session_toke
 from utils.crypto import encrypt_credential, decrypt_credential
 from utils.queue import enqueue_job, is_redis_available
 from services.subscription_service import check_user_quota, get_user_usage_summary, get_or_create_subscription
+from core.universal_model import ContentTemplateCreate, ImageAssignmentCreate, WebsiteProfileSchema, ContentDocument
 
 # Initialize app and DB
 init_db()
@@ -681,3 +682,304 @@ def health_check():
         "active_workers": active_workers,
         "timestamp": datetime.datetime.utcnow().isoformat()
     }
+
+# --- TEMPLATES & SECTIONS APIS ---
+
+@app.get("/api/templates")
+def get_templates_endpoint(user_id: int = Depends(get_current_user_id)):
+    from services.template_service import get_user_templates
+    return get_user_templates(user_id)
+
+@app.get("/api/templates/{template_id}")
+def get_template_detail_endpoint(template_id: int, user_id: int = Depends(get_current_user_id)):
+    from services.template_service import get_template_by_id
+    tmpl = get_template_by_id(template_id, user_id)
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return tmpl
+
+@app.post("/api/templates")
+def create_template_endpoint(payload: ContentTemplateCreate, user_id: int = Depends(get_current_user_id)):
+    from services.template_service import create_custom_template
+    tmpl = create_custom_template(user_id, payload)
+    log_audit_event(user_id, "TEMPLATE_CREATED", "ContentTemplate", str(tmpl.id))
+    return {"message": "Template created successfully", "template_id": tmpl.id}
+
+@app.post("/api/templates/{template_id}/duplicate")
+def duplicate_template_endpoint(template_id: int, user_id: int = Depends(get_current_user_id)):
+    from services.template_service import duplicate_template
+    dup = duplicate_template(template_id, user_id)
+    if not dup:
+        raise HTTPException(status_code=404, detail="Template not found")
+    log_audit_event(user_id, "TEMPLATE_DUPLICATED", "ContentTemplate", str(dup.id))
+    return {"message": "Template duplicated successfully", "template_id": dup.id}
+
+@app.delete("/api/templates/{template_id}")
+def delete_template_endpoint(template_id: int, user_id: int = Depends(get_current_user_id)):
+    from services.template_service import delete_template
+    success = delete_template(template_id, user_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Cannot delete default or missing template")
+    log_audit_event(user_id, "TEMPLATE_DELETED", "ContentTemplate", str(template_id))
+    return {"message": "Template deleted"}
+
+# --- IMAGE ASSETS & ASSIGNMENTS APIS ---
+
+@app.post("/api/images/upload")
+async def upload_image_asset(
+    file: UploadFile = File(...),
+    target_width: Optional[int] = Form(None),
+    target_height: Optional[int] = Form(None),
+    user_id: int = Depends(get_current_user_id)
+):
+    try:
+        from agents.image_agent import ImageAgent
+        img_agent = ImageAgent()
+        
+        ext = os.path.splitext(file.filename)[1].lower()
+        if ext not in ['.jpg', '.jpeg', '.png', '.webp']:
+            raise HTTPException(status_code=400, detail="Unsupported image format. Allowed: JPG, PNG, WEBP.")
+            
+        image_id = f"img-{uuid.uuid4().hex[:12]}"
+        safe_filename = f"{image_id}{ext}"
+        upload_dir = os.path.join(BASE_DIR, 'data', 'images')
+        os.makedirs(upload_dir, exist_ok=True)
+        file_path = os.path.join(upload_dir, safe_filename)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Pillow processing
+        info = img_agent.process_custom_image(file_path, target_width=target_width, target_height=target_height)
+        
+        with SessionLocal() as db:
+            asset = ImageAsset(
+                id=image_id,
+                user_id=user_id,
+                filename=file.filename,
+                file_path=file_path,
+                mime_type=f"image/{ext.replace('.', '')}",
+                width=info["width"],
+                height=info["height"],
+                file_size=info["file_size"]
+            )
+            db.add(asset)
+            db.commit()
+            
+        log_audit_event(user_id, "IMAGE_UPLOADED", "ImageAsset", image_id)
+        return {
+            "message": "Image uploaded and processed via Pillow",
+            "image_id": image_id,
+            "url": f"/api/images/{image_id}/file",
+            "width": info["width"],
+            "height": info["height"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/images")
+def list_user_images(user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        assets = db.query(ImageAsset).filter(ImageAsset.user_id == user_id).order_by(ImageAsset.created_at.desc()).all()
+        return [
+            {
+                "id": a.id,
+                "filename": a.filename,
+                "url": f"/api/images/{a.id}/file",
+                "width": a.width,
+                "height": a.height,
+                "file_size": a.file_size,
+                "created_at": a.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for a in assets
+        ]
+
+@app.get("/api/images/{image_id}/file")
+def serve_image_file(image_id: str):
+    from fastapi.responses import FileResponse
+    with SessionLocal() as db:
+        asset = db.query(ImageAsset).filter(ImageAsset.id == image_id).first()
+        if not asset or not os.path.exists(asset.file_path):
+            raise HTTPException(status_code=404, detail="Image file not found")
+        return FileResponse(asset.file_path, media_type=asset.mime_type)
+
+@app.post("/api/images/assign")
+def assign_image_to_section(payload: ImageAssignmentCreate, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        asset = db.query(ImageAsset).filter(ImageAsset.id == payload.image_id, ImageAsset.user_id == user_id).first()
+        if not asset:
+            raise HTTPException(status_code=404, detail="Image asset not found")
+            
+        assignment = db.query(ImageAssignment).filter(
+            ImageAssignment.user_id == user_id,
+            ImageAssignment.image_id == payload.image_id,
+            ImageAssignment.section_id == payload.section_id
+        ).first()
+        
+        if not assignment:
+            assignment = ImageAssignment(
+                user_id=user_id,
+                image_id=payload.image_id,
+                section_id=payload.section_id,
+                template_id=payload.template_id,
+                job_id=payload.job_id,
+                draft_id=payload.draft_id,
+                position=payload.position,
+                alignment=payload.alignment,
+                size=payload.size,
+                custom_width=payload.custom_width,
+                custom_height=payload.custom_height,
+                fallback_behavior=payload.fallback_behavior
+            )
+            db.add(assignment)
+        else:
+            assignment.position = payload.position
+            assignment.alignment = payload.alignment
+            assignment.size = payload.size
+            assignment.custom_width = payload.custom_width
+            assignment.custom_height = payload.custom_height
+            assignment.fallback_behavior = payload.fallback_behavior
+            
+        db.commit()
+        log_audit_event(user_id, "IMAGE_ASSIGNED", "ImageAssignment", str(assignment.id), details={"section_id": payload.section_id})
+        return {"message": "Image assignment saved", "assignment_id": assignment.id}
+
+# --- VALIDATION & PREVIEW APIS ---
+
+class ContentPreviewRequest(BaseModel):
+    draft_id: Optional[int] = None
+    document: Optional[Dict[str, Any]] = None
+    template_id: Optional[int] = None
+
+@app.post("/api/content/validate")
+def validate_content_endpoint(req: ContentPreviewRequest, user_id: int = Depends(get_current_user_id)):
+    from core.universal_model import ContentDocument
+    from services.validation_service import validate_content_before_publish
+    
+    doc = None
+    with SessionLocal() as db:
+        if req.draft_id:
+            d = db.query(ContentDraft).filter(ContentDraft.id == req.draft_id, ContentDraft.user_id == user_id).first()
+            if d and d.document_json:
+                doc = ContentDocument(**json.loads(d.document_json))
+        elif req.document:
+            doc = ContentDocument(**req.document)
+            
+    if not doc:
+        raise HTTPException(status_code=400, detail="Invalid document payload for validation")
+        
+    res = validate_content_before_publish(doc, user_id, template_id=req.template_id)
+    return res
+
+@app.post("/api/content/preview")
+def preview_content_endpoint(req: ContentPreviewRequest, user_id: int = Depends(get_current_user_id)):
+    from core.universal_model import ContentDocument
+    from core.rendering_engine import RenderingEngine
+    
+    doc = None
+    with SessionLocal() as db:
+        if req.draft_id:
+            d = db.query(ContentDraft).filter(ContentDraft.id == req.draft_id, ContentDraft.user_id == user_id).first()
+            if d and d.document_json:
+                doc = ContentDocument(**json.loads(d.document_json))
+        elif req.document:
+            doc = ContentDocument(**req.document)
+            
+    if not doc:
+        raise HTTPException(status_code=400, detail="Invalid document payload for preview")
+
+    # Fetch image assignments for user
+    with SessionLocal() as db:
+        assignments = db.query(ImageAssignment).filter(ImageAssignment.user_id == user_id).all()
+        assign_dicts = []
+        for a in assignments:
+            asset = db.query(ImageAsset).filter(ImageAsset.id == a.image_id).first()
+            if asset:
+                assign_dicts.append({
+                    "url": f"/api/images/{asset.id}/file",
+                    "section_id": a.section_id,
+                    "position": a.position,
+                    "alignment": a.alignment,
+                    "size": a.size,
+                    "width": a.custom_width or asset.width,
+                    "height": a.custom_height or asset.height,
+                    "fallback_behavior": a.fallback_behavior
+                })
+
+    rendered_html = RenderingEngine.render_classic_html(doc, image_assignments=assign_dicts)
+    return {"title": doc.title, "html_preview": rendered_html}
+
+# --- ENHANCED HISTORY PANEL APIS ---
+
+@app.get("/api/history")
+def get_enhanced_history(
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    template_id: Optional[int] = None,
+    user_id: int = Depends(get_current_user_id)
+):
+    with SessionLocal() as db:
+        query = db.query(PublishHistory).filter(PublishHistory.user_id == user_id)
+        if q:
+            query = query.filter(PublishHistory.game_name.ilike(f"%{q}%"))
+        history = query.order_by(PublishHistory.published_at.desc()).limit(100).all()
+        
+        return [
+            {
+                "id": h.id,
+                "game_name": h.game_name,
+                "provider": h.provider,
+                "article_id": h.article_id,
+                "status": "Published" if h.article_id else "Failed",
+                "published_at": h.published_at.strftime("%Y-%m-%d %H:%M:%S") if h.published_at else None
+            }
+            for h in history
+        ]
+
+@app.delete("/api/history/{history_id}")
+def delete_single_history(history_id: int, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        h = db.query(PublishHistory).filter(PublishHistory.id == history_id, PublishHistory.user_id == user_id).first()
+        if not h:
+            raise HTTPException(status_code=404, detail="History entry not found")
+        db.delete(h)
+        db.commit()
+    log_audit_event(user_id, "HISTORY_DELETED", "PublishHistory", str(history_id))
+    return {"message": "History entry deleted"}
+
+@app.post("/api/history/bulk-delete")
+def bulk_delete_history(history_ids: Optional[List[int]] = None, delete_all: bool = False, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        if delete_all:
+            db.query(PublishHistory).filter(PublishHistory.user_id == user_id).delete()
+        elif history_ids:
+            db.query(PublishHistory).filter(PublishHistory.user_id == user_id, PublishHistory.id.in_(history_ids)).delete(synchronize_session=False)
+        db.commit()
+    log_audit_event(user_id, "HISTORY_BULK_DELETED", "PublishHistory", "bulk")
+    return {"message": "Selected history entries deleted"}
+
+@app.post("/api/history/{history_id}/retry")
+def retry_history_job(history_id: int, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        h = db.query(PublishHistory).filter(PublishHistory.id == history_id, PublishHistory.user_id == user_id).first()
+        if not h:
+            raise HTTPException(status_code=404, detail="History entry not found")
+        
+        job_id = f"job-retry-{uuid.uuid4().hex[:8]}"
+        new_job = Job(
+            id=job_id,
+            user_id=user_id,
+            game_name=h.game_name,
+            provider=h.provider,
+            status="QUEUED",
+            current_stage="QUEUED"
+        )
+        db.add(new_job)
+        db.commit()
+        
+    enqueue_job(job_id, {"job_id": job_id, "user_id": user_id, "game_name": h.game_name, "provider": h.provider, "dry_run": False})
+    log_audit_event(user_id, "HISTORY_RETRIED", "Job", job_id)
+    return {"message": "Job retry enqueued", "job_id": job_id}
+
