@@ -139,421 +139,157 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 2: CREATE ARTICLE (5-STEP WIZARD) ================= -->
+            <!-- ================= VIEW 2: AUTOMATE & PUBLISH ================= -->
             <div id="view-create" class="tab-view hidden">
-                <section id="workflow-container" class="glass-panel">
+                <section class="glass-panel" id="automation-fast-track">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="margin: 0 0 4px 0; color: var(--text-primary);">🚀 Quick Automate</h2>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Fill in the article details and start automation.</p>
+                        </div>
+                        <button id="btn-open-advanced-setup" class="btn-secondary-sm" style="padding: 8px 16px;">⚙️ Advanced Configuration</button>
+                    </div>
 
-                    <!-- Progress Stepper -->
-                    <div class="stepper-bar">
-                        <div class="step-item active" data-step="1">
-                            <div class="step-num">1</div>
-                            <div class="step-label">Content</div>
+                    <!-- 1. Execution Details -->
+                    <div class="workflow-section">
+                        <div class="workflow-section-title">
+                            <span class="section-icon">📝</span>
+                            <div>
+                                <h3>Article Details</h3>
+                                <p class="section-desc">What is this specific article about?</p>
+                            </div>
                         </div>
-                        <div class="step-connector"></div>
-                        <div class="step-item" data-step="2">
-                            <div class="step-num">2</div>
-                            <div class="step-label">Format</div>
+
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 2; min-width: 220px;">
+                                <label>Target URL <span style="font-weight: 400; color: var(--text-muted);">(the page this article covers)</span></label>
+                                <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza">
+                            </div>
+                            <div class="form-group" style="flex: 1; min-width: 160px;">
+                                <label>Game / Product Name</label>
+                                <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                            </div>
                         </div>
-                        <div class="step-connector"></div>
-                        <div class="step-item" data-step="3">
-                            <div class="step-num">3</div>
-                            <div class="step-label">Images</div>
+
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
+                            <div class="form-group" style="flex: 1; min-width: 160px;">
+                                <label>Provider / Brand</label>
+                                <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                            </div>
+                            <div class="form-group" style="flex: 1; min-width: 130px;">
+                                <label>Market / Country</label>
+                                <select id="input_market">
+                                    <option value="UK">UK (GC Compliance)</option>
+                                    <option value="PK">PK (Pakistani Market)</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="step-connector"></div>
-                        <div class="step-item" data-step="4">
-                            <div class="step-num">4</div>
-                            <div class="step-label">SEO</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step-item" data-step="5">
-                            <div class="step-num">5</div>
-                            <div class="step-label">Review</div>
+
+                        <div class="form-group" style="margin-top: 0.8rem;">
+                            <label>Additional Information <span style="font-weight: 400; color: var(--text-muted);">(optional extra context for the AI)</span></label>
+                            <textarea id="input_additional_info" placeholder="Any extra context, special notes, or requirements specific to this article..."></textarea>
                         </div>
                     </div>
 
-                    <!-- ─── STEP 1: CONTENT ─── -->
-                    <div class="workflow-step-content active" id="workflow-step-1">
-
-                        <!-- A. ARTICLE INFORMATION -->
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">📝</span>
-                                <div>
-                                    <h3>Article Information</h3>
-                                    <p class="section-desc">Tell us what this specific article is about.</p>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <div class="form-group" style="flex: 2; min-width: 220px;">
-                                    <label>Article / Game / Product Name</label>
-                                    <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
-                                </div>
-                                <div class="form-group" style="flex: 1; min-width: 160px;">
-                                    <label>Provider / Brand</label>
-                                    <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
-                                </div>
-                            </div>
-
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
-                                <div class="form-group" style="flex: 3; min-width: 260px;">
-                                    <label>Source URL <span style="font-weight: 400; color: var(--text-muted);">(the page this article covers)</span></label>
-                                    <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza">
-                                </div>
-                                <div class="form-group" style="flex: 1; min-width: 130px;">
-                                    <label>Market / Country</label>
-                                    <select id="input_market">
-                                        <option value="UK">UK (GC Compliance)</option>
-                                        <option value="PK">PK (Pakistani Market)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="margin-top: 0.8rem;">
-                                <label>Additional Information <span style="font-weight: 400; color: var(--text-muted);">(optional extra context for the AI)</span></label>
-                                <textarea id="input_additional_info" placeholder="Any extra context, special notes, or requirements specific to this article..."></textarea>
+                    <!-- 2. Images (Model B) -->
+                    <div class="workflow-section">
+                        <div class="workflow-section-title">
+                            <span class="section-icon">🖼</span>
+                            <div>
+                                <h3>Article Images</h3>
+                                <p class="section-desc">Upload images for the specific sections of your format.</p>
                             </div>
                         </div>
-
-                        <!-- Divider -->
-                        <div class="workflow-section-divider"></div>
-
-                        <!-- B. CONTENT SETUP -->
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">⚙</span>
-                                <div>
-                                    <h3>Content Setup</h3>
-                                    <p class="section-desc">These settings control how the AI writes your article.</p>
-                                </div>
-                            </div>
-
-                            <!-- Saved Setup Banner (shown when default exists) -->
-                            <div id="content-setup-saved-banner" class="content-setup-banner hidden">
-                                <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;">
-                                    <span style="font-size: 1.5rem; flex-shrink: 0;">⭐</span>
-                                    <div style="flex: 1; min-width: 180px;">
-                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Default Content Setup</div>
-                                        <div style="font-size: 0.85rem; color: #047857; font-weight: 600; margin-top: 2px;">✓ Your saved content settings are being used.</div>
-                                        <div id="saved-setup-summary" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 5px;"></div>
-                                    </div>
-                                    <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start; flex-wrap: wrap;">
-                                        <button id="btn-make-changes-setup" class="btn-secondary-sm" style="padding: 7px 14px;">Make Changes</button>
-                                        <button id="btn-change-setup" class="btn-secondary-sm" style="padding: 7px 14px; color: var(--accent-orange-strong);">Change Setup</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Content Setup Edit Form (shown when no default or editing) -->
-                            <div id="content-setup-form" class="hidden">
-                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                    <div class="form-group" style="flex: 1; min-width: 160px;">
-                                        <label>Writing Tone</label>
-                                        <select id="setup_tone">
-                                            <option value="professional">Professional</option>
-                                            <option value="engaging">Engaging &amp; Casual</option>
-                                            <option value="expert">Expert / Authoritative</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" style="flex: 1; min-width: 160px;">
-                                        <label>Content Length</label>
-                                        <select id="setup_word_count">
-                                            <option value="1500">Standard (1,500+ words)</option>
-                                            <option value="2500">In-Depth (2,500+ words)</option>
-                                            <option value="1000">Short Review (1,000+ words)</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" style="flex: 1; min-width: 160px;">
-                                        <label>Target Audience</label>
-                                        <select id="setup_target_audience">
-                                            <option value="general">General Audience</option>
-                                            <option value="beginners">Beginners</option>
-                                            <option value="experienced">Experienced Players</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
-                                    <div class="form-group" style="flex: 1; min-width: 220px;">
-                                        <label>Primary Keyword <span style="font-weight: 400; color: var(--text-muted);">(for this article)</span></label>
-                                        <input type="text" id="setup_primary_keyword" placeholder="e.g. Sweet Bonanza review">
-                                    </div>
-                                    <div class="form-group" style="flex: 1; min-width: 220px;">
-                                        <label>Secondary Keywords <span style="font-weight: 400; color: var(--text-muted);">(comma separated)</span></label>
-                                        <input type="text" id="setup_secondary_keywords" placeholder="e.g. Sweet Bonanza free play, volatility">
-                                    </div>
-                                </div>
-
-                                <div class="form-group" style="margin-top: 0.8rem;">
-                                    <label>Writing Instructions <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
-                                    <textarea id="setup_writing_instructions" placeholder="Specific instructions for how the AI should write this content..."></textarea>
-                                </div>
-
-                                <!-- Save Actions -->
-                                <div id="content-setup-save-actions" class="confirm-action-row" style="margin-top: 1.2rem;">
-                                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-                                        <button id="btn-save-content-setup" class="btn-primary" style="padding: 10px 22px;">Save Content Setup</button>
-                                        <button id="btn-cancel-content-setup" class="btn-secondary-sm" style="padding: 9px 14px;">Cancel</button>
-                                    </div>
-                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
-                                        <input type="checkbox" id="chk-save-as-default-setup" checked>
-                                        <span>Save as my default — used automatically for future articles</span>
-                                    </label>
-                                </div>
-
-                                <!-- Post-save confirmation -->
-                                <div id="content-setup-saved-confirm" class="hidden" style="margin-top: 1rem;">
-                                    <div class="success-msg" style="margin-bottom: 10px;">✓ Content Setup Saved — These settings are ready to use for this article.</div>
-                                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                        <button id="btn-make-changes-after-save" class="btn-secondary-sm">Make Changes</button>
-                                        <button id="btn-set-as-default" class="btn-secondary-sm" style="color: var(--accent-orange-strong);">⭐ Set as Default</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Navigation -->
-                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-                            <button type="button" class="btn-primary btn-next-step" data-next="2" style="padding: 10px 28px;">Continue to Format ➔</button>
+                        <div id="fast-track-images-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Loading format sections...</p>
                         </div>
                     </div>
 
-                    <!-- ─── STEP 2: ARTICLE FORMAT ─── -->
-                    <div class="workflow-step-content hidden" id="workflow-step-2">
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">🗂</span>
-                                <div>
-                                    <h3>Article Format</h3>
-                                    <p class="section-desc">Choose how your article will be structured.</p>
-                                </div>
-                            </div>
-
-                            <!-- Active Format Card -->
-                            <div id="active-format-card" style="background: rgba(255,122,61,0.07); border: 2px solid var(--accent-orange); padding: 20px; border-radius: 14px; margin-bottom: 1.2rem;">
-                                <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-orange-strong); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;">Currently Selected Format</div>
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-                                    <div style="flex: 1; min-width: 180px;">
-                                        <h4 id="active-format-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">⭐ Default SEO Format</h4>
-                                        <div id="active-format-meta" style="font-size: 0.85rem; color: var(--text-secondary);">Loading format details...</div>
-                                    </div>
-                                    <div style="display: flex; gap: 10px; flex-shrink: 0;">
-                                        <button id="btn-open-change-format" class="btn-primary" style="padding: 9px 18px;">Change Format</button>
-                                        <button id="btn-edit-format" class="btn-secondary-sm" style="padding: 9px 14px;">Edit Format</button>
-                                    </div>
-                                </div>
-                                <div id="active-format-sections-preview" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;"></div>
-                            </div>
-
-                            <!-- Article-only override notice -->
-                            <div id="format-article-override" class="hidden" style="background: rgba(255,122,61,0.05); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,122,61,0.2);">
-                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-orange-strong); margin-bottom: 6px;">📌 Format changed for this article only</div>
-                                <div id="article-override-name" style="font-weight: 600; color: var(--text-primary); font-size: 0.93rem; margin-bottom: 10px;"></div>
-                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
-                                    <input type="checkbox" id="chk-make-format-default">
-                                    <span>Also make this the default for future articles</span>
-                                </label>
+                    <!-- 3. Current Setup Summary -->
+                    <div class="workflow-section">
+                        <div class="workflow-section-title">
+                            <span class="section-icon">⚙</span>
+                            <div>
+                                <h3>Configuration Used</h3>
+                                <p class="section-desc">This article will be written using your active settings.</p>
                             </div>
                         </div>
-
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1" style="padding: 9px 18px;">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="3" style="padding: 10px 28px;">Continue to Images ➔</button>
-                        </div>
-                    </div>
-
-                    <!-- ─── STEP 3: ARTICLE IMAGES ─── -->
-                    <div class="workflow-step-content hidden" id="workflow-step-3">
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">🖼</span>
-                                <div>
-                                    <h3>Article Images</h3>
-                                    <p class="section-desc">Choose which images to use and where they should appear.</p>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                                <!-- Upload & Placement Panel -->
-                                <div style="flex: 1; min-width: 290px; background: rgba(0,0,0,0.03); padding: 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07);">
-                                    <h4 style="margin-bottom: 1rem; font-weight: 700; color: var(--text-primary);">Upload Image</h4>
-
-                                    <div class="form-group" style="margin-bottom: 1rem;">
-                                        <label>Select Image File</label>
-                                        <input type="file" id="step3_image_file" accept="image/*">
-                                    </div>
-
-                                    <div id="step3-image-preview" class="hidden" style="margin-bottom: 1rem; text-align: center;">
-                                        <img id="step3-preview-img" style="max-width: 100%; max-height: 140px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 1rem;">
-                                        <label>Where should this image appear?</label>
-                                        <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 1rem;">
-                                        <label>Image Position</label>
-                                        <select id="step3_position_select" style="padding: 8px;">
-                                            <option value="after_heading">After section heading</option>
-                                            <option value="before_heading">Before section heading</option>
-                                            <option value="after_paragraph">After section text</option>
-                                            <option value="between_paragraphs">Between paragraphs</option>
-                                            <option value="end_of_section">End of section</option>
-                                        </select>
-                                    </div>
-
-                                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                                        <div class="form-group" style="flex: 1; min-width: 110px;">
-                                            <label>Image Size</label>
-                                            <select id="step3_size_select" style="padding: 8px;">
-                                                <option value="small">Small</option>
-                                                <option value="medium" selected>Medium</option>
-                                                <option value="large">Large</option>
-                                                <option value="full_width">Full Width</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="flex: 1; min-width: 110px;">
-                                            <label>Alignment</label>
-                                            <select id="step3_align_select" style="padding: 8px;">
-                                                <option value="center">Center</option>
-                                                <option value="left">Left</option>
-                                                <option value="right">Right</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
-                                    <div id="img-save-msg" class="hidden" style="margin-top: 8px;"></div>
-                                </div>
-
-                                <!-- Structure Map -->
-                                <div style="flex: 1; min-width: 260px;">
-                                    <h4 style="margin-bottom: 0.8rem; font-weight: 700; color: var(--text-primary);">Assigned Images</h4>
-                                    <div id="assigned-images-visual-list">
-                                        <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned yet.</p>
-                                    </div>
-
-                                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 700; color: var(--text-primary);">Article Structure</h4>
-                                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">Shows where images will appear in the published article.</p>
-                                    <div id="structure-tree-diagram" class="structure-tree"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2" style="padding: 9px 18px;">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="4" style="padding: 10px 28px;">Continue to SEO ➔</button>
-                        </div>
-                    </div>
-
-                    <!-- ─── STEP 4: SEO OPTIMIZATION ─── -->
-                    <div class="workflow-step-content hidden" id="workflow-step-4">
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">🔍</span>
-                                <div>
-                                    <h3>SEO Optimization</h3>
-                                    <p class="section-desc">How should this article be optimized for search engines?</p>
-                                </div>
-                            </div>
-
-                            <!-- SEO Checklist -->
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 8px; margin-bottom: 1.5rem;">
-                                <div class="seo-check-item">✓ Search intent alignment</div>
-                                <div class="seo-check-item">✓ Keyword usage &amp; density</div>
-                                <div class="seo-check-item">✓ Heading structure (H1–H3)</div>
-                                <div class="seo-check-item">✓ Meta title generation</div>
-                                <div class="seo-check-item">✓ Meta description</div>
-                                <div class="seo-check-item">✓ Image ALT text</div>
-                                <div class="seo-check-item">✓ Readability score</div>
-                                <div class="seo-check-item">✓ Internal linking</div>
-                            </div>
-
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <div class="form-group" style="flex: 1; min-width: 220px;">
-                                    <label>Primary Keyword <span style="font-weight: 400; color: var(--text-muted);">(auto-filled from Content Setup)</span></label>
-                                    <input type="text" id="step4_focus_kw" placeholder="e.g. Sweet Bonanza review">
-                                </div>
-                                <div class="form-group" style="flex: 1; min-width: 220px;">
-                                    <label>Secondary Keywords</label>
-                                    <input type="text" id="step4_secondary_kw" placeholder="e.g. Sweet Bonanza free, volatility">
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="margin-top: 0.8rem;">
-                                <label>Meta Description <span style="font-weight: 400; color: var(--text-muted);">(optional — AI generates if left blank)</span></label>
-                                <textarea id="step4_meta_desc" placeholder="A compelling 1–2 sentence description starting with your primary keyword..."></textarea>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3" style="padding: 9px 18px;">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="5" style="padding: 10px 28px;">Continue to Review ➔</button>
-                        </div>
-                    </div>
-
-                    <!-- ─── STEP 5: REVIEW & PUBLISH ─── -->
-                    <div class="workflow-step-content hidden" id="workflow-step-5">
-                        <div class="workflow-section">
-                            <div class="workflow-section-title">
-                                <span class="section-icon">👁</span>
-                                <div>
-                                    <h3>Review &amp; Publish</h3>
-                                    <p class="section-desc">Review your article configuration before publishing to WordPress.</p>
-                                </div>
-                            </div>
-
-                            <!-- Summary Card -->
-                            <div id="review-summary-card" style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 18px; margin-bottom: 1.5rem;">
-                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 14px;">
-                                    <div>
-                                        <div class="review-label">Article</div>
-                                        <div class="review-value" id="review-article-name">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="review-label">Source URL</div>
-                                        <div class="review-value" id="review-url">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="review-label">Market</div>
-                                        <div class="review-value" id="review-market">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="review-label">Content Setup</div>
-                                        <div class="review-value" id="review-content-setup">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="review-label">Article Format</div>
-                                        <div class="review-value" id="review-format">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="review-label">Images</div>
-                                        <div class="review-value" id="review-images">—</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Validation Result -->
-                            <div id="step5-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.08);">
-                                <p style="color: var(--text-secondary);">Running pre-publish checks...</p>
-                            </div>
-
-                            <!-- Article Preview -->
-                            <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto; margin-bottom: 1rem;">
-                                <p style="color: gray;">Article preview will appear here.</p>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 10px;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4" style="padding: 9px 18px;">← Edit</button>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button type="button" id="btn-save-draft-publish" class="btn-secondary-sm" style="padding: 9px 18px;">Save Draft</button>
-                                <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation &amp; Publish</button>
+                        <div id="fast-track-setup-summary" style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 14px;">
+                                <div><div class="review-label">Writing Tone</div><div class="review-value" id="summary-tone">—</div></div>
+                                <div><div class="review-label">Word Count</div><div class="review-value" id="summary-words">—</div></div>
+                                <div><div class="review-label">Format</div><div class="review-value" id="summary-format">—</div></div>
+                                <div><div class="review-label">SEO Profile</div><div class="review-value">Auto-generated</div></div>
                             </div>
                         </div>
                     </div>
 
+                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1.5rem; gap: 10px;">
+                        <button type="button" id="btn-save-draft-publish" class="btn-secondary-sm" style="padding: 10px 18px;">Save Draft</button>
+                        <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation &amp; Publish</button>
+                    </div>
+                </section>
+
+                <!-- ================= ADVANCED SETUP WIZARD (Hidden by Default) ================= -->
+                <section class="glass-panel hidden" id="advanced-setup-wizard">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="margin: 0 0 4px 0; color: var(--text-primary);">⚙️ Advanced Configuration</h2>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Define how your articles should be structured and written.</p>
+                        </div>
+                        <button id="btn-close-advanced-setup" class="btn-secondary-sm" style="padding: 8px 16px;">Cancel</button>
+                    </div>
+
+                    <div class="workflow-section">
+                        <div class="workflow-section-title"><span class="section-icon">📝</span><div><h3>Content Strategy</h3></div></div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 1;"><label>Writing Tone</label><select id="setup_tone"><option value="professional">Professional</option><option value="engaging">Engaging &amp; Casual</option><option value="expert">Expert / Authoritative</option></select></div>
+                            <div class="form-group" style="flex: 1;"><label>Content Length</label><select id="setup_word_count"><option value="1500">Standard (1,500+ words)</option><option value="2500">In-Depth (2,500+ words)</option><option value="1000">Short Review (1,000+ words)</option></select></div>
+                            <div class="form-group" style="flex: 1;"><label>Target Audience</label><select id="setup_target_audience"><option value="general">General Audience</option><option value="beginners">Beginners</option><option value="experienced">Experienced Players</option></select></div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
+                            <div class="form-group" style="flex: 1;"><label>Primary Keyword</label><input type="text" id="setup_primary_keyword"></div>
+                            <div class="form-group" style="flex: 1;"><label>Secondary Keywords</label><input type="text" id="setup_secondary_keywords"></div>
+                        </div>
+                        <div class="form-group" style="margin-top: 0.8rem;">
+                            <label>Writing Instructions</label>
+                            <textarea id="setup_writing_instructions"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="workflow-section">
+                        <div class="workflow-section-title"><span class="section-icon">🗂</span><div><h3>Article Format</h3></div></div>
+                        <div id="active-format-card" style="background: rgba(255,122,61,0.07); border: 2px solid var(--accent-orange); padding: 20px; border-radius: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                                <div style="flex: 1;">
+                                    <h4 id="active-format-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Loading...</h4>
+                                    <div id="active-format-meta" style="font-size: 0.85rem; color: var(--text-secondary);">Loading format details...</div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button id="btn-open-change-format" class="btn-primary" style="padding: 9px 18px;">Change Format</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-section">
+                        <div class="workflow-section-title"><span class="section-icon">🔍</span><div><h3>SEO Rules</h3></div></div>
+                        <div class="form-group">
+                            <label>Meta Description Override</label>
+                            <textarea id="step4_meta_desc" placeholder="Leave blank to let AI generate based on keywords..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="confirm-action-row" style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" id="chk-save-as-default-setup" checked>
+                            <span>Save as my global default configuration</span>
+                        </label>
+                        <div>
+                            <span id="setup-save-msg" class="hidden" style="margin-right: 15px; font-size: 0.9rem; color: #10B981; font-weight: 600;">✓ Saved!</span>
+                            <button id="btn-save-content-setup" class="btn-primary" style="padding: 10px 22px;">Save Configuration</button>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -808,6 +544,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=11"></script>
+    <script src="/static/app.js?v=12"></script>
 </body>
 </html>

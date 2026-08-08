@@ -22,32 +22,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const devUuidContainer = document.getElementById("dev-uuid-lookup-container");
     const logoutBtn        = document.getElementById("logout-btn");
 
-    // Stepper
-    const workflowStepContents = document.querySelectorAll(".workflow-step-content");
-    const stepItems            = document.querySelectorAll(".step-item");
-    const btnNextSteps         = document.querySelectorAll(".btn-next-step");
-    const btnPrevSteps         = document.querySelectorAll(".btn-prev-step");
-
-    // Content Setup
-    const contentSetupSavedBanner   = document.getElementById("content-setup-saved-banner");
-    const contentSetupForm           = document.getElementById("content-setup-form");
-    const btnMakeChangesSetup        = document.getElementById("btn-make-changes-setup");
-    const btnChangeSetup             = document.getElementById("btn-change-setup");
-    const btnSaveContentSetup        = document.getElementById("btn-save-content-setup");
-    const btnCancelContentSetup      = document.getElementById("btn-cancel-content-setup");
-    const contentSetupSaveActions    = document.getElementById("content-setup-save-actions");
-    const contentSetupSavedConfirm   = document.getElementById("content-setup-saved-confirm");
-    const btnMakeChangesAfterSave    = document.getElementById("btn-make-changes-after-save");
-    const btnSetAsDefault            = document.getElementById("btn-set-as-default");
+    // Fast-Track Automator
+    const automationFastTrack        = document.getElementById("automation-fast-track");
+    const btnOpenAdvancedSetup       = document.getElementById("btn-open-advanced-setup");
+    const fastTrackImagesContainer   = document.getElementById("fast-track-images-container");
+    const fastTrackSetupSummary      = document.getElementById("fast-track-setup-summary");
+    const inputTargetUrl             = document.getElementById("input_target_url");
+    const inputGameName              = document.getElementById("input_game_name");
+    const inputProvider              = document.getElementById("input_provider");
+    const inputMarket                = document.getElementById("input_market");
+    const inputAdditionalInfo        = document.getElementById("input_additional_info");
+    const btnFinalPublish            = document.getElementById("btn-final-publish");
+    const btnSaveDraftPublish        = document.getElementById("btn-save-draft-publish");
+    
+    // Advanced Setup Wizard
+    const advancedSetupWizard        = document.getElementById("advanced-setup-wizard");
+    const btnCloseAdvancedSetup      = document.getElementById("btn-close-advanced-setup");
+    const setupTone                  = document.getElementById("setup_tone");
+    const setupWordCount             = document.getElementById("setup_word_count");
+    const setupTargetAudience        = document.getElementById("setup_target_audience");
+    const setupPrimaryKeyword        = document.getElementById("setup_primary_keyword");
+    const setupSecondaryKeywords     = document.getElementById("setup_secondary_keywords");
+    const setupWritingInstructions   = document.getElementById("setup_writing_instructions");
+    const step4MetaDesc              = document.getElementById("step4_meta_desc");
     const chkSaveAsDefaultSetup      = document.getElementById("chk-save-as-default-setup");
-    const savedSetupSummary          = document.getElementById("saved-setup-summary");
+    const setupSaveMsg               = document.getElementById("setup-save-msg");
+    const btnSaveContentSetup        = document.getElementById("btn-save-content-setup");
 
-    // Format Step
+    // Format Card in Setup
     const btnOpenChangeFormat        = document.getElementById("btn-open-change-format");
-    const btnEditFormat              = document.getElementById("btn-edit-format");
-    const formatArticleOverride      = document.getElementById("format-article-override");
-    const articleOverrideName        = document.getElementById("article-override-name");
-    const chkMakeFormatDefault       = document.getElementById("chk-make-format-default");
+    const activeFormatTitle          = document.getElementById("active-format-title");
+    const activeFormatMeta           = document.getElementById("active-format-meta");
 
     // Change Format Modal
     const changeFormatModal          = document.getElementById("change-format-modal");
@@ -56,24 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnApplyFormatModal        = document.getElementById("btn-apply-format-modal");
     const formatModalOptionsList     = document.getElementById("format-modal-options-list");
     const chkSetAsWebsiteDefault     = document.getElementById("chk-set-as-website-default");
-
-    // Step 3 Images
-    const step3ImageFile             = document.getElementById("step3_image_file");
-    const step3SectionSelect         = document.getElementById("step3_section_select");
-    const step3PositionSelect        = document.getElementById("step3_position_select");
-    const step3SizeSelect            = document.getElementById("step3_size_select");
-    const step3AlignSelect           = document.getElementById("step3_align_select");
-    const btnSaveStep3Image          = document.getElementById("btn-save-step3-image");
-    const assignedImagesVisualList   = document.getElementById("assigned-images-visual-list");
-    const structureTreeDiagram       = document.getElementById("structure-tree-diagram");
-    const imgSaveMsg                 = document.getElementById("img-save-msg");
-    const step3ImagePreview          = document.getElementById("step3-image-preview");
-    const step3PreviewImg            = document.getElementById("step3-preview-img");
-
-    // Step 5 Review
-    const step5PreviewRendered       = document.getElementById("step5-preview-rendered");
-    const step5ValidationCard        = document.getElementById("step5-validation-card");
-    const btnFinalPublish            = document.getElementById("btn-final-publish");
 
     // Section Editor Modal
     const sectionEditorModal         = document.getElementById("section-editor-modal");
@@ -224,27 +211,22 @@ document.addEventListener("DOMContentLoaded", () => {
     setupCollapsibles();
 
     // ===================================================================
-    // STEPPER
+    // CREATE VIEW NAVIGATION (Fast-Track vs Setup Wizard)
     // ===================================================================
-    function goToStep(stepNum) {
-        activeStep = parseInt(stepNum);
-        stepItems.forEach(item => {
-            const num = parseInt(item.getAttribute("data-step"));
-            item.classList.toggle("active",    num === activeStep);
-            item.classList.toggle("completed", num < activeStep);
+    
+    if (btnOpenAdvancedSetup) {
+        btnOpenAdvancedSetup.addEventListener("click", () => {
+            automationFastTrack.classList.add("hidden");
+            advancedSetupWizard.classList.remove("hidden");
         });
-        workflowStepContents.forEach(c => c.classList.add("hidden"));
-        const target = document.getElementById(`workflow-step-${activeStep}`);
-        if (target) target.classList.remove("hidden");
-
-        if      (activeStep === 3) loadStep3Data();
-        else if (activeStep === 4) prefillSeoStep();
-        else if (activeStep === 5) loadStep5Review();
     }
 
-    stepItems.forEach(item => item.addEventListener("click", () => goToStep(item.getAttribute("data-step"))));
-    btnNextSteps.forEach(btn => btn.addEventListener("click", () => goToStep(btn.getAttribute("data-next"))));
-    btnPrevSteps.forEach(btn => btn.addEventListener("click", () => goToStep(btn.getAttribute("data-prev"))));
+    if (btnCloseAdvancedSetup) {
+        btnCloseAdvancedSetup.addEventListener("click", () => {
+            advancedSetupWizard.classList.add("hidden");
+            automationFastTrack.classList.remove("hidden");
+        });
+    }
 
     // ===================================================================
     // INIT CREATE VIEW
@@ -252,8 +234,144 @@ document.addEventListener("DOMContentLoaded", () => {
     async function initCreateView() {
         if (userTemplates.length === 0) await loadTemplates();
         await loadContentSettings();
+        await loadActiveFormat();
+        
+        // Ensure we are in Fast Track mode
+        if (advancedSetupWizard) advancedSetupWizard.classList.add("hidden");
+        if (automationFastTrack) automationFastTrack.classList.remove("hidden");
+
+        // Force a UI refresh of the format card and images
         updateFormatStepDisplay();
-        goToStep(1);
+        renderFastTrackSummary();
+        renderFastTrackImageUploaders();
+    }
+
+    function renderFastTrackSummary() {
+        const toneEl = document.getElementById("summary-tone");
+        const wordEl = document.getElementById("summary-words");
+        const fmtEl  = document.getElementById("summary-format");
+
+        if (toneEl) toneEl.textContent = setupTone?.options[setupTone.selectedIndex]?.text || "Professional";
+        if (wordEl) wordEl.textContent = setupWordCount?.options[setupWordCount.selectedIndex]?.text || "Standard (1500+)";
+        if (fmtEl)  fmtEl.textContent  = persistentActiveFormat.template_name || "Default Format";
+    }
+
+    function renderFastTrackImageUploaders() {
+        if (!fastTrackImagesContainer) return;
+        if (!activeTemplate || !activeTemplate.sections || activeTemplate.sections.length === 0) {
+            fastTrackImagesContainer.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No sections found in this format.</p>`;
+            return;
+        }
+
+        fastTrackImagesContainer.innerHTML = activeTemplate.sections.map(s => `
+            <div class="glass-panel" style="padding: 14px; border: 1px solid rgba(0,0,0,0.06); background: rgba(0,0,0,0.015);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                    <strong style="color:var(--text-primary); font-size:1rem;">${s.name}</strong>
+                </div>
+                <div id="img-upload-ui-${s.id}">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 10px;">
+                        <input type="file" id="img-file-${s.id}" accept="image/*" style="font-size:0.85rem; padding: 4px;">
+                        <select id="img-pos-${s.id}" style="padding: 4px 8px; font-size:0.85rem;">
+                            <option value="after_heading">After Heading</option>
+                            <option value="before_heading">Before Heading</option>
+                            <option value="end_of_section">End of Section</option>
+                        </select>
+                        <select id="img-size-${s.id}" style="padding: 4px 8px; font-size:0.85rem;">
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                            <option value="small">Small</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn-secondary-sm btn-upload-section-img" data-sec-id="${s.id}">Upload to Section</button>
+                    <div id="img-status-${s.id}" style="font-size: 0.8rem; margin-top: 6px;" class="hidden"></div>
+                </div>
+                <div id="img-preview-${s.id}" class="hidden" style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(0,0,0,0.1);">
+                    <!-- Assigned image preview goes here -->
+                </div>
+            </div>
+        `).join("");
+
+        // Attach listeners for upload buttons
+        document.querySelectorAll(".btn-upload-section-img").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const secId = e.target.getAttribute("data-sec-id");
+                await handleSectionImageUpload(secId);
+            });
+        });
+    }
+
+    async function handleSectionImageUpload(secId) {
+        const fileInput = document.getElementById(`img-file-${secId}`);
+        const posSelect = document.getElementById(`img-pos-${secId}`);
+        const sizeSelect = document.getElementById(`img-size-${secId}`);
+        const statusEl = document.getElementById(`img-status-${secId}`);
+        
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showMsg(statusEl, "Please select an image first.", "error", 2000);
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        showMsg(statusEl, "Uploading...", "success", 0);
+
+        try {
+            const uploadRes = await fetch("/api/images/upload", { method: "POST", body: formData });
+            const uploadData = await uploadRes.json();
+            if (uploadData.error) throw new Error(uploadData.error);
+            
+            const assetId = uploadData.id;
+
+            const assignPayload = {
+                image_id: assetId,
+                section_id: secId,
+                position: posSelect.value,
+                size: sizeSelect.value,
+                alignment: "center" // default
+            };
+
+            const assignRes = await fetch("/api/images/assign", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(assignPayload)
+            });
+
+            if (!assignRes.ok) throw new Error("Failed to assign");
+
+            showMsg(statusEl, "Assigned!", "success", 2000);
+
+            // Update UI to show preview
+            const uploadUi = document.getElementById(`img-upload-ui-${secId}`);
+            const previewUi = document.getElementById(`img-preview-${secId}`);
+            
+            uploadUi.classList.add("hidden");
+            previewUi.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${uploadData.url}" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid rgba(0,0,0,0.1);">
+                    <div style="flex:1;">
+                        <strong style="font-size:0.9rem; display:block;">${file.name}</strong>
+                        <span style="font-size:0.8rem; color:var(--text-secondary);">${posSelect.options[posSelect.selectedIndex].text} • ${sizeSelect.options[sizeSelect.selectedIndex].text}</span>
+                    </div>
+                    <button class="btn-secondary-sm btn-remove-section-img" data-sec-id="${secId}" style="color:#DC2626; border-color:rgba(220,38,38,0.3);">Remove</button>
+                </div>
+            `;
+            previewUi.classList.remove("hidden");
+
+            // Attach remove listener
+            previewUi.querySelector(".btn-remove-section-img").addEventListener("click", () => {
+                // In a real app we'd call unassign API here, for now just reset UI
+                previewUi.classList.add("hidden");
+                previewUi.innerHTML = "";
+                fileInput.value = "";
+                uploadUi.classList.remove("hidden");
+            });
+
+        } catch (e) {
+            console.error("Upload error:", e);
+            showMsg(statusEl, "Upload failed: " + e.message, "error", 3000);
+        }
     }
 
     // ===================================================================
@@ -266,36 +384,11 @@ document.addEventListener("DOMContentLoaded", () => {
             savedContentSetup = data;
             const hasSaved = data && (data.default_tone || data.default_word_count);
             if (hasSaved) {
-                showContentSetupBanner(data);
-            } else {
-                showContentSetupEditForm(null);
+                populateContentSetupForm(data);
             }
         } catch (e) {
-            showContentSetupEditForm(null);
+            console.error("Failed to load content settings", e);
         }
-    }
-
-    function showContentSetupBanner(data) {
-        if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.remove("hidden");
-        if (contentSetupForm)         contentSetupForm.classList.add("hidden");
-
-        const toneMap   = { professional: "Professional", engaging: "Engaging & Casual", expert: "Expert" };
-        const lengthMap = { "1500": "Standard (1,500+ words)", "2500": "In-Depth (2,500+ words)", "1000": "Short (1,000+ words)" };
-        if (savedSetupSummary && data) {
-            const parts = [];
-            if (data.default_tone)       parts.push(toneMap[data.default_tone] || data.default_tone);
-            if (data.default_word_count) parts.push(lengthMap[data.default_word_count] || data.default_word_count);
-            savedSetupSummary.textContent = parts.join(" • ");
-        }
-        if (data) populateContentSetupForm(data);
-    }
-
-    function showContentSetupEditForm(data) {
-        if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
-        if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
-        if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
-        if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
-        if (data) populateContentSetupForm(data);
     }
 
     function populateContentSetupForm(data) {
@@ -303,37 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const length = document.getElementById("setup_word_count");
         if (tone   && data.default_tone)       tone.value   = data.default_tone;
         if (length && data.default_word_count) length.value = data.default_word_count;
-    }
-
-    if (btnMakeChangesSetup) {
-        btnMakeChangesSetup.addEventListener("click", () => {
-            if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
-            if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
-            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
-            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
-            // Article-only by default when "Make Changes" is clicked
-            if (chkSaveAsDefaultSetup) chkSaveAsDefaultSetup.checked = false;
-        });
-    }
-
-    if (btnChangeSetup) {
-        btnChangeSetup.addEventListener("click", () => {
-            if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
-            if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
-            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
-            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
-            // Change entire default
-            if (chkSaveAsDefaultSetup) chkSaveAsDefaultSetup.checked = true;
-        });
-    }
-
-    if (btnCancelContentSetup) {
-        btnCancelContentSetup.addEventListener("click", () => {
-            if (savedContentSetup) showContentSetupBanner(savedContentSetup);
-            else {
-                if (contentSetupForm)  contentSetupForm.classList.add("hidden");
-            }
-        });
     }
 
     if (btnSaveContentSetup) {
@@ -347,48 +409,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 save_as_default:          saveAsDefault
             };
             try {
-                const res = await fetch("/api/user/content-settings", {
-                    method:  "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body:    JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    savedContentSetup = payload;
-                    if (contentSetupSaveActions)  contentSetupSaveActions.classList.add("hidden");
-                    if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.remove("hidden");
+                if (saveAsDefault) {
+                    const res = await fetch("/api/user/content-settings", {
+                        method:  "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body:    JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        savedContentSetup = payload;
+                        if (setupSaveMsg) {
+                            showMsg(setupSaveMsg, "✓ Saved as default", "success", 2000);
+                        }
+                    }
+                } else {
+                    savedContentSetup = payload; // just save for this session
+                    if (setupSaveMsg) {
+                        showMsg(setupSaveMsg, "✓ Setup updated for this article", "success", 2000);
+                    }
                 }
-            } catch (e) { console.error("Failed to save content setup", e); }
-        });
-    }
+                
+                // Refresh fast-track view
+                renderFastTrackSummary();
 
-    if (btnMakeChangesAfterSave) {
-        btnMakeChangesAfterSave.addEventListener("click", () => {
-            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
-            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
-        });
-    }
-
-    if (btnSetAsDefault) {
-        btnSetAsDefault.addEventListener("click", async () => {
-            const payload = {
-                default_tone:            document.getElementById("setup_tone")?.value || "professional",
-                default_word_count:      document.getElementById("setup_word_count")?.value || "1500",
-                default_market:          document.getElementById("input_market")?.value || "UK",
-                default_keyword_density: "1.2",
-                save_as_default:         true
-            };
-            try {
-                const res = await fetch("/api/user/content-settings", {
-                    method:  "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body:    JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    savedContentSetup = payload;
-                    btnSetAsDefault.textContent = "⭐ Saved as Default ✓";
-                    btnSetAsDefault.disabled    = true;
-                }
-            } catch (e) {}
+                // Close the wizard after short delay
+                setTimeout(() => {
+                    if (advancedSetupWizard) advancedSetupWizard.classList.add("hidden");
+                    if (automationFastTrack) automationFastTrack.classList.remove("hidden");
+                }, 1000);
+            } catch (e) { 
+                console.error("Failed to save content setup", e); 
+                if (setupSaveMsg) showMsg(setupSaveMsg, "Failed to save", "error", 2000);
+            }
         });
     }
 
@@ -538,15 +589,6 @@ document.addEventListener("DOMContentLoaded", () => {
             persistentActiveFormat = { mode: "custom", template_id: selected.id, template_name: selected.name };
             updateFormatStepDisplay();
 
-            // Show override notice if different from website default
-            const def = userTemplates.find(t => t.is_default);
-            if (!def || selected.id !== def.id) {
-                if (formatArticleOverride) formatArticleOverride.classList.remove("hidden");
-                if (articleOverrideName)   articleOverrideName.textContent = `Using: ${selected.name} (${selected.sections.length} sections)`;
-            } else {
-                if (formatArticleOverride) formatArticleOverride.classList.add("hidden");
-            }
-
             // Persist as website default only if checkbox is ticked
             if (chkSetAsWebsiteDefault && chkSetAsWebsiteDefault.checked) {
                 try {
@@ -557,6 +599,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 } catch (e) { console.error("Failed to save format as default", e); }
             }
+
+            // Update fast track UI
+            renderFastTrackSummary();
+            renderFastTrackImageUploaders();
 
             if (chkSetAsWebsiteDefault) chkSetAsWebsiteDefault.checked = false;
             changeFormatModal.classList.add("hidden");
@@ -861,207 +907,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===================================================================
-    // STEP 3 — IMAGES
-    // ===================================================================
-    if (step3ImageFile) {
-        step3ImageFile.addEventListener("change", () => {
-            if (step3ImageFile.files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    if (step3PreviewImg)  step3PreviewImg.src = e.target.result;
-                    if (step3ImagePreview) step3ImagePreview.classList.remove("hidden");
-                };
-                reader.readAsDataURL(step3ImageFile.files[0]);
-            }
-        });
-    }
-
-    async function loadStep3Data() {
-        if (!activeTemplate) await loadTemplates();
-        if (!activeTemplate?.sections) return;
-
-        if (step3SectionSelect) {
-            step3SectionSelect.innerHTML = `<option value="">Select Section...</option>` +
-                activeTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
-        }
-        loadVisualImageAssignments();
-    }
-
-    async function loadVisualImageAssignments() {
-        try {
-            const res  = await fetch("/api/images/assignments");
-            const data = await res.json();
-            if (!Array.isArray(data)) return;
-            imageAssignments = data;
-
-            if (assignedImagesVisualList) {
-                if (data.length === 0) {
-                    assignedImagesVisualList.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No images assigned yet.</p>`;
-                } else {
-                    assignedImagesVisualList.innerHTML = data.map(a => `
-                        <div class="assigned-img-card">
-                            <img src="${a.url}" style="width:45px;height:45px;object-fit:cover;border-radius:6px;">
-                            <div style="flex:1;min-width:0;">
-                                <strong style="font-size:0.9rem;color:var(--text-primary);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.filename}</strong>
-                                <div style="font-size:0.8rem;color:var(--text-secondary);">${a.section_name} • ${a.position.replace(/_/g," ")}</div>
-                                <div style="font-size:0.75rem;color:var(--text-muted);">${a.size} • ${a.alignment}</div>
-                            </div>
-                        </div>`).join("");
-                }
-            }
-            renderStructureTree();
-        } catch (e) { console.error("Failed to load image assignments", e); }
-    }
-
-    function renderStructureTree() {
-        if (!activeTemplate?.sections || !structureTreeDiagram) return;
-        structureTreeDiagram.innerHTML = activeTemplate.sections.map(s => {
-            const imgs = imageAssignments.filter(a => a.section_id === s.id);
-            return `
-                <div class="tree-node">
-                    <strong style="color:var(--text-primary);">${s.name}</strong>
-                    ${imgs.map(a => `
-                        <div style="font-size:0.8rem;color:#2563EB;margin-left:14px;margin-top:3px;">
-                            🖼 ${a.filename} — ${a.position.replace(/_/g," ")} • ${a.size} • ${a.alignment}
-                        </div>`).join("")}
-                </div>`;
-        }).join("");
-    }
-
-    if (btnSaveStep3Image) {
-        btnSaveStep3Image.addEventListener("click", async () => {
-            if (!step3ImageFile?.files?.length) {
-                showMsg(imgSaveMsg, "Please select an image file.", "error"); return;
-            }
-            const sectionId = step3SectionSelect?.value;
-            if (!sectionId) {
-                showMsg(imgSaveMsg, "Please select a section.", "error"); return;
-            }
-
-            const fd = new FormData();
-            fd.append("file", step3ImageFile.files[0]);
-
-            try {
-                const upRes  = await fetch("/api/images/upload", { method: "POST", body: fd });
-                const upData = await upRes.json();
-                if (!upData.image_id) { showMsg(imgSaveMsg, "Upload failed.", "error"); return; }
-
-                const aRes = await fetch("/api/images/assign", {
-                    method:  "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body:    JSON.stringify({
-                        image_id:         upData.image_id,
-                        section_id:       sectionId,
-                        position:         step3PositionSelect?.value || "after_heading",
-                        size:             step3SizeSelect?.value    || "medium",
-                        alignment:        step3AlignSelect?.value   || "center",
-                        fallback_behavior: "do_not_publish"
-                    })
-                });
-                if (aRes.ok) {
-                    showMsg(imgSaveMsg, "✓ Image saved and assigned!", "success");
-                    if (step3ImageFile)    step3ImageFile.value = "";
-                    if (step3ImagePreview) step3ImagePreview.classList.add("hidden");
-                    loadVisualImageAssignments();
-                }
-            } catch (e) { showMsg(imgSaveMsg, "Error: " + e.message, "error"); }
-        });
-    }
-
-    // ===================================================================
     // STEP 4 — SEO PREFILL
     // ===================================================================
-    function prefillSeoStep() {
-        const pk  = document.getElementById("setup_primary_keyword")?.value   || "";
-        const sk  = document.getElementById("setup_secondary_keywords")?.value || "";
-        const kw  = document.getElementById("step4_focus_kw");
-        const sk2 = document.getElementById("step4_secondary_kw");
-        if (kw  && !kw.value  && pk) kw.value  = pk;
-        if (sk2 && !sk2.value && sk) sk2.value = sk;
-    }
 
     // ===================================================================
-    // STEP 5 — REVIEW & PUBLISH
+    // PUBLISH LOGIC
     // ===================================================================
-    async function loadStep5Review() {
-        const gameName = document.getElementById("input_game_name")?.value   || "";
-        const url      = document.getElementById("input_target_url")?.value  || "";
-        const market   = document.getElementById("input_market")?.value      || "UK";
-        const tone     = document.getElementById("setup_tone")?.value        || "professional";
-        const length   = document.getElementById("setup_word_count")?.value  || "1500";
-
-        // Fill summary
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-
-        setVal("review-article-name",  gameName || "Not set");
-        setHtml("review-url",          url ? `<a href="${url}" target="_blank" style="color:var(--accent-orange-strong);word-break:break-all;font-size:0.85rem;">${url}</a>` : "Not set");
-        setVal("review-market",        market);
-        setVal("review-content-setup", `${tone.charAt(0).toUpperCase()+tone.slice(1)} • ${length}+ words`);
-        setVal("review-format",        activeTemplate ? `${activeTemplate.name} (${activeTemplate.sections.length} sections)` : "Default");
-        setVal("review-images",        imageAssignments.length > 0 ? `${imageAssignments.length} image(s) assigned` : "No images");
-
-        await renderStep5Validation();
-        await renderStep5Preview();
-    }
-
-    async function renderStep5Validation() {
-        if (!step5ValidationCard) return;
-        step5ValidationCard.innerHTML = `<p style="color:var(--text-secondary);">Running pre-publish checks...</p>`;
-        try {
-            const res  = await fetch("/api/content/validate", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ document: buildPreviewDoc(), template_id: activeTemplate?.id || null })
-            });
-            const data = await res.json();
-            const ok   = data.is_valid;
-            step5ValidationCard.style.cssText = `background:${ok?"rgba(16,185,129,0.1)":"rgba(245,158,11,0.1)"};border:1px solid ${ok?"#10B981":"#F59E0B"};padding:16px;border-radius:12px;`;
-            step5ValidationCard.innerHTML = `
-                <h4 style="margin:0 0 6px 0;color:${ok?"#047857":"#B45309"};">${ok?"✅ Pre-publish checks passed":"⚠️ Pre-publish warnings"}</h4>
-                <div style="font-size:0.9rem;color:${ok?"#047857":"#B45309"};"><strong>${data.checks_passed} / ${data.total_checks} checks passed</strong></div>
-                ${data.errors?.length ? `<ul style="margin-top:8px;padding-left:20px;font-size:0.85rem;color:#B45309;">${data.errors.map(e=>`<li>${e}</li>`).join("")}</ul>` : ""}`;
-        } catch (e) {
-            step5ValidationCard.innerHTML = `<p style="color:var(--text-secondary);">Validation unavailable in preview mode.</p>`;
-        }
-    }
-
-    async function renderStep5Preview() {
-        if (!step5PreviewRendered) return;
-        step5PreviewRendered.innerHTML = `<p style="color:gray;">Generating preview...</p>`;
-        try {
-            const res  = await fetch("/api/content/preview", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ document: buildPreviewDoc() })
-            });
-            const data = await res.json();
-            step5PreviewRendered.innerHTML = `<h1 style="font-size:1.4rem;font-weight:700;margin-bottom:12px;">${data.title}</h1>` + data.html_preview;
-        } catch (e) {
-            step5PreviewRendered.innerHTML = `<p style="color:gray;">Preview unavailable. Article will be generated on publish.</p>`;
-        }
-    }
-
-    function buildPreviewDoc() {
-        const game = document.getElementById("input_game_name")?.value  || "Article";
-        const kw   = document.getElementById("step4_focus_kw")?.value   || game;
-        const desc = document.getElementById("step4_meta_desc")?.value  || `Comprehensive review of ${game}.`;
-        return {
-            title:        `${game} Review`,
-            slug:         game.toLowerCase().replace(/\s+/g, "-"),
-            seo_metadata: { focus_keyword: kw, meta_description: desc },
-            introduction: `Welcome to this review of ${game}.`,
-            sections:     activeTemplate ? activeTemplate.sections.map(s => ({
-                section_id: s.id, heading: s.name, content: `This section covers ${s.name.toLowerCase()}.`
-            })) : [],
-            conclusion: `In conclusion, ${game} is worth exploring.`
-        };
-    }
-
+    
     if (btnFinalPublish) {
         btnFinalPublish.addEventListener("click", async () => {
             const url = document.getElementById("input_target_url")?.value;
-            if (!url) { alert("Please enter a Source URL in Step 1."); goToStep(1); return; }
+            if (!url) { alert("Please enter a Target URL."); return; }
 
             btnFinalPublish.disabled    = true;
             btnFinalPublish.textContent = "🚀 Submitting...";
