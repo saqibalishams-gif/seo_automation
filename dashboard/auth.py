@@ -9,12 +9,28 @@ from utils.db import get_db_connection
 cookie_scheme = APIKeyCookie(name="session_token", auto_error=False)
 
 def hash_password(password: str) -> str:
-    # A simple SHA-256 hash (in a real production app, use bcrypt or PBKDF2)
-    # Since we are avoiding third-party C-extensions, we use hashlib.
-    return hashlib.sha256(password.encode()).hexdigest()
+    salt = secrets.token_bytes(16)
+    salt_hex = salt.hex()
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    return f"pbkdf2:sha256:100000${salt_hex}${dk.hex()}"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hash_password(plain_password) == hashed_password
+    if not hashed_password:
+        return False
+    if hashed_password.startswith("pbkdf2:sha256:"):
+        try:
+            parts = hashed_password.split("$")
+            if len(parts) != 3:
+                return False
+            salt = bytes.fromhex(parts[1])
+            expected_dk_hex = parts[2]
+            dk = hashlib.pbkdf2_hmac('sha256', plain_password.encode('utf-8'), salt, 100000)
+            return secrets.compare_digest(dk.hex(), expected_dk_hex)
+        except Exception:
+            return False
+    # Fallback for legacy unsalted SHA-256 hashes
+    legacy_hash = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+    return secrets.compare_digest(legacy_hash, hashed_password)
 
 def generate_session_token() -> str:
     return secrets.token_urlsafe(32)
@@ -39,11 +55,49 @@ def get_current_user_id(session_token: str = Depends(cookie_scheme)) -> int:
             
         return row['user_id']
 
+def get_current_user(user_id: int = Depends(get_current_user_id)):
+    from utils.db_models import SessionLocal, User
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User account not found")
+        return user
+
+def require_admin(user = Depends(get_current_user)):
+    if user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    return user
+
+def log_audit_event(user_id: Optional[int], action: str, resource_type: str = None, resource_id: str = None, ip_address: str = None, details: dict = None):
+    try:
+        from utils.db_models import SessionLocal, AuditLog
+        import json
+        with SessionLocal() as db:
+            audit = AuditLog(
+                user_id=user_id,
+                action=action,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                ip_address=ip_address,
+                details_json=json.dumps(details or {})
+            )
+            db.add(audit)
+            db.commit()
+    except Exception as e:
+        pass
+
 def get_user_settings(user_id: int) -> dict:
+    from utils.crypto import decrypt_credential
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM user_settings WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
         if not row:
             return {}
-        return dict(row)
+        data = dict(row)
+        if data.get('wp_app_password'):
+            data['wp_app_password'] = decrypt_credential(data['wp_app_password'])
+        return data

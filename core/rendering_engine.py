@@ -24,7 +24,8 @@ class RenderingEngine:
                 # Basic wrapping if content isn't already wrapped (simple safeguard)
                 content = section.content.strip()
                 if not content.startswith('<p>') and not content.startswith('<ul>') and not content.startswith('<ol>'):
-                    content = f"<p>{content.replace('\n\n', '</p><p>')}</p>"
+                    p_break = '</p><p>'
+                    content = f"<p>{content.replace(chr(10) + chr(10), p_break)}</p>"
                 sec_html.append(content)
                 
             for sub in section.subsections:
@@ -44,7 +45,8 @@ class RenderingEngine:
             html.append("<h2>Conclusion</h2>")
             content = doc.conclusion.strip()
             if not content.startswith('<p>'):
-                content = f"<p>{content.replace('\n\n', '</p><p>')}</p>"
+                p_break = '</p><p>'
+                content = f"<p>{content.replace(chr(10) + chr(10), p_break)}</p>"
             html.append(content)
             
         # Responsible Gambling Notice

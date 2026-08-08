@@ -3,74 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Automation Dashboard</title>
+    <title>SEO SaaS Automation — User Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=2">
+    <link rel="stylesheet" href="/static/styles.css?v=3">
 </head>
 <body>
-    <!-- Background Blobs -->
     <div class="bg-blobs">
         <div class="blob blob-orange"></div>
         <div class="blob blob-blue"></div>
-        <div class="blob blob-orange-lt"></div>
     </div>
 
     <div class="app-container">
-        
         <!-- Header Bar -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
                 <div class="status-dot-container"><div class="status-dot"></div></div>
-                <h1>SEO Auto</h1>
+                <h1>SEO Automation SaaS</h1>
             </div>
             <div class="status-pills">
-                <div class="status-pill" id="header-wp-status">Checking WordPress...</div>
-                <div class="status-pill" id="header-theme-status">Theme: --</div>
-                <div class="status-pill" id="header-seo-status">SEO: --</div>
-                <button id="nav-setup" style="background: none; border: none; cursor: pointer; color: var(--accent-orange); font-weight: bold; margin-left: 10px;">⚙ Setup</button>
-                <button id="nav-overview" style="background: none; border: none; cursor: pointer; color: var(--accent-blue-text); font-weight: bold; margin-left: 10px;">Overview</button>
-                <button id="nav-drafts" style="background: none; border: none; cursor: pointer; color: #10B981; font-weight: bold; margin-left: 10px;">Review Drafts</button>
-                <button id="logout-btn" style="background: none; border: none; cursor: pointer; color: #A03B24; font-weight: bold; margin-left: 10px;">Log Out</button>
+                <div class="status-pill" id="user-plan-pill">Plan: FREE</div>
+                <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
+                <button id="nav-overview" class="nav-btn">Overview</button>
+                <button id="nav-jobs" class="nav-btn">Jobs & Timeline</button>
+                <button id="nav-drafts" class="nav-btn">Review Drafts</button>
+                <button id="nav-setup" class="nav-btn">⚙ Sites & Settings</button>
+                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin</button>
+                <button id="logout-btn" class="nav-btn btn-logout">Log Out</button>
             </div>
         </header>
 
-        <!-- Main Column -->
         <main class="main-column">
-            
-            <!-- Setup Wizard (Hidden by default) -->
-            <section id="setup" class="glass-panel hidden">
-                <h3 class="panel-header">System Configuration</h3>
+            <!-- Stats Row -->
+            <section class="stats-row">
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="stat-published">0</div>
+                    <div class="stat-label">Published Articles</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="stat-drafts">0</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="stat-quota-used">0%</div>
+                    <div class="stat-label">Monthly Quota Used</div>
+                </div>
+            </section>
+
+            <!-- Trigger New Run Panel -->
+            <section class="glass-panel">
+                <h3 class="panel-header">🚀 Start Autonomous Content Pipeline</h3>
+                <form id="run-form" class="run-form">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Target Game Name</label>
+                            <input type="text" id="run_game_name" placeholder="e.g. Sweet Bonanza" required>
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>Provider</label>
+                            <input type="text" id="run_provider" placeholder="e.g. Pragmatic Play" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Market</label>
+                            <select id="run_market">
+                                <option value="UK">UK (GC Compliance)</option>
+                                <option value="PK">PK (Pakistani Market)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="run-btn">
+                        <span class="btn-text">Enqueue Automation Job</span>
+                    </button>
+                    <div id="run-status" class="status-msg hidden"></div>
+                </form>
+            </section>
+
+            <!-- Jobs & Timeline View -->
+            <section id="jobs-section" class="glass-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="panel-header" style="margin: 0;">Jobs & Stage Progression</h3>
+                    <select id="job-status-filter" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white;">
+                        <option value="ALL">All Statuses</option>
+                        <option value="QUEUED">Queued</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="PENDING_REVIEW">Pending Review</option>
+                        <option value="PUBLISHED">Published</option>
+                        <option value="FAILED">Failed</option>
+                    </select>
+                </div>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Game / Provider</th>
+                            <th>Status</th>
+                            <th>Current Stage</th>
+                            <th>Duration</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobs-tbody">
+                        <tr><td colspan="6" style="text-align: center;">Loading jobs...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Drafts Review Section -->
+            <section id="drafts-section" class="glass-panel">
+                <h3 class="panel-header">📄 Drafts Pending Review</h3>
+                <div id="drafts-container">
+                    <p style="color: rgba(255,255,255,0.6);">Loading drafts...</p>
+                </div>
+            </section>
+
+            <!-- Sites & Settings Section -->
+            <section id="setup-section" class="glass-panel hidden">
+                <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
                 <form id="setup-form" class="run-form">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 2;">
-                            <label>WordPress URL</label>
+                            <label>WordPress Site URL</label>
                             <input type="url" id="set_wp_url" placeholder="https://example.com" required>
                         </div>
-                    </div>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <div class="form-group">
-                            <label>WordPress Username</label>
+                            <label>Username</label>
                             <input type="text" id="set_wp_username" required>
                         </div>
                         <div class="form-group">
-                            <label>WordPress App Password</label>
-                            <input type="password" id="set_wp_password" required>
+                            <label>App Password (Encrypted at Rest)</label>
+                            <input type="password" id="set_wp_password" placeholder="••••••••••••" required>
                         </div>
                     </div>
-                    
-                    <h3 class="panel-header" style="margin-top: 1rem;">Theme & Plugins</h3>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <div class="form-group">
-                            <label>Active Theme</label>
+                            <label>Editor Adapter</label>
                             <select id="set_theme_type">
-                                <option value="standard">Standard (GeneratePress, Astra, etc)</option>
-                                <option value="appyn">Appyn (APK Theme)</option>
+                                <option value="classic">Classic Editor</option>
+                                <option value="gutenberg">Gutenberg Editor</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>SEO Plugin</label>
+                            <label>SEO Plugin Adapter</label>
                             <select id="set_seo_plugin">
                                 <option value="none">None</option>
                                 <option value="rankmath">RankMath</option>
@@ -78,225 +152,26 @@
                             </select>
                         </div>
                     </div>
-
-                    <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 0;">
-                        <span class="btn-text">Save Configuration</span>
-                    </button>
+                    <button type="submit" class="btn-primary">Save Settings</button>
                     <div id="setup-status" class="status-msg hidden"></div>
                 </form>
             </section>
-
-            <!-- Overview View -->
-            <div id="overview-view" style="display: contents;">
-                
-                <!-- Stats Row -->
-                <section class="stats-row">
-                    <div class="glass-panel stat-tile">
-                        <div class="stat-value" id="stat-published">0</div>
-                        <div class="stat-label">Published</div>
-                    </div>
-                    <div class="glass-panel stat-tile">
-                        <div class="stat-value" id="stat-queue">0</div>
-                        <div class="stat-label">In Queue</div>
-                    </div>
-                    <div class="glass-panel stat-tile">
-                        <div class="stat-value" id="stat-facts">0</div>
-                        <div class="stat-label">Facts Verified</div>
-                    </div>
-                    <div class="glass-panel stat-tile">
-                        <div class="stat-value" id="stat-errors">0</div>
-                        <div class="stat-label">Error Rate</div>
-                    </div>
-                </section>
-
-                <!-- Automation Runner Panel -->
-                <section class="glass-panel">
-                    <h3 class="panel-header">Automation Runner</h3>
-                    <form id="run-form" class="inline-form">
-                        <div class="form-group">
-                            <label for="market">Market</label>
-                            <select id="market" name="market">
-                                <option value="UK">UK (United Kingdom)</option>
-                                <option value="SE">SE (Sweden)</option>
-                                <option value="ON">ON (Ontario)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="volume">Volume</label>
-                            <input type="number" id="volume" name="volume" value="2" min="1" max="100">
-                        </div>
-
-                        <div class="form-group checkbox-group">
-                            <input type="checkbox" id="dry_run" name="dry_run" checked>
-                            <label for="dry_run">Dry Run</label>
-                        </div>
-
-                        <button type="submit" class="btn-primary" id="run-btn">
-                            <span class="btn-text">Run Batch</span>
-                        </button>
-                    </form>
-                    <div id="run-status" class="status-msg hidden"></div>
-                </section>
-
-                <section class="glass-panel">
-                    <h3 class="panel-header">Manual Queue Entry</h3>
-                    <form id="link-form" style="display: flex; flex-direction: column; gap: 16px;">
-                        <div class="inline-form">
-                            <div class="form-group" style="flex: 2;">
-                                <label for="url">Game URL (Required)</label>
-                                <input type="url" id="url" name="url" placeholder="https://example.com/slot..." required>
-                            </div>
-                        </div>
-                        <div class="inline-form">
-                            <div class="form-group">
-                                <label for="game_name">Game Name (Optional)</label>
-                                <input type="text" id="game_name" name="game_name" placeholder="Leave blank for AI extraction">
-                            </div>
-                            <div class="form-group">
-                                <label for="provider">Provider (Optional)</label>
-                                <input type="text" id="provider" name="provider" placeholder="Leave blank for AI extraction">
-                            </div>
-                        </div>
-                        
-                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">Article Images</h4>
-                        <div class="inline-form">
-                            <div class="form-group">
-                                <label for="featured_image">Featured Image</label>
-                                <input type="file" id="featured_image" name="featured_image" accept="image/jpeg, image/png, image/webp">
-                            </div>
-                            <div class="form-group">
-                                <label for="description_image">Description Image</label>
-                                <input type="file" id="description_image" name="description_image" accept="image/jpeg, image/png, image/webp">
-                            </div>
-                        </div>
-                        <div class="inline-form">
-                            <div class="form-group">
-                                <label for="login_image">Login Image</label>
-                                <input type="file" id="login_image" name="login_image" accept="image/jpeg, image/png, image/webp">
-                            </div>
-                            <div class="form-group">
-                                <label for="transaction_image">Transaction Image</label>
-                                <input type="file" id="transaction_image" name="transaction_image" accept="image/jpeg, image/png, image/webp">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-primary" id="link-btn" style="align-self: flex-start;">
-                            <span class="btn-text">Add to Queue</span>
-                        </button>
-                    </form>
-                    <div id="link-status" class="status-msg hidden"></div>
-                </section>
-
-                <!-- Unified Link Queue / History Panel -->
-                <section class="glass-panel">
-                    <h3 class="panel-header">Activity & Queue History</h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Game / URL</th>
-                                    <th>Status</th>
-                                    <th>Reason / Details</th>
-                                    <th>Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="unified-tbody">
-                                <tr><td colspan="4" style="text-align:center">Loading data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Live Flow Monitor -->
-                <section class="glass-panel">
-                    <h3 class="panel-header">Live Flow Monitor</h3>
-                    <div class="terminal-window" id="terminal-content">
-                        Waiting for logs...
-                    </div>
-                </section>
-
-            </div> <!-- End Overview View -->
-
-            <!-- Drafts View (Hidden by default) -->
-            <div id="drafts-view" style="display: none;">
-                <section class="glass-panel">
-                    <h3 class="panel-header">Ready for Review</h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Game / Title</th>
-                                    <th>Status</th>
-                                    <th>Time</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="drafts-tbody">
-                                <tr><td colspan="4" style="text-align:center">Loading drafts...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-                
-                <section id="draft-preview-panel" class="glass-panel hidden" style="margin-top: 20px;">
-                    <h3 class="panel-header">Draft Preview</h3>
-                    <div id="draft-preview-content" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; font-size: 0.9rem; max-height: 400px; overflow-y: auto;">
-                    </div>
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <button id="btn-publish-draft" class="btn-primary" style="background: #10B981;">Publish to WordPress</button>
-                        <button id="btn-close-preview" class="btn-primary" style="background: #6B7280;">Close</button>
-                        <span id="publish-status" class="status-msg hidden" style="margin-left: auto;"></span>
-                    </div>
-                </section>
-            </div> <!-- End Drafts View -->
-
         </main>
-
-        <!-- Sidebar Column -->
-        <aside class="sidebar-column">
-            <div class="glass-panel agent-card">
-                
-                <div class="agent-avatar">
-                    <!-- Simple vector avatar -->
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="8" r="4" fill="currentColor"/>
-                        <path d="M6 21V19C6 16.7909 7.79086 15 10 15H14C16.2091 15 18 16.7909 18 19V21" fill="currentColor"/>
-                        <path d="M4 11V14C4 15.1046 4.89543 16 6 16H6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M20 11V14C20 15.1046 19.1046 16 18 16H17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="6" cy="11" r="2" fill="currentColor"/>
-                        <circle cx="18" cy="11" r="2" fill="currentColor"/>
-                    </svg>
-                </div>
-
-                <div class="agent-name">System Agent</div>
-                <div class="agent-role">Orchestrator</div>
-
-                <div class="agent-status">
-                    <div class="status-dot-blue"></div>
-                    <span id="agent-status-text">Online, standing by</span>
-                </div>
-
-                <div class="speech-bubble" id="agent-speech">
-                    Hello! I'm monitoring the queue. Add a URL or run a batch to get started.
-                </div>
-
-                <div class="mini-stats">
-                    <div class="mini-stat-tile">
-                        <div class="mini-stat-val" id="mini-stat-items">0</div>
-                        <div class="mini-stat-lbl">Items this run</div>
-                    </div>
-                    <div class="mini-stat-tile">
-                        <div class="mini-stat-val" id="mini-stat-errors">0</div>
-                        <div class="mini-stat-lbl">Errors</div>
-                    </div>
-                </div>
-
-            </div>
-        </aside>
-
     </div>
-    
-    <script src="/static/app.js?v=2"></script>
+
+    <!-- Timeline Modal -->
+    <div id="timeline-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="modal-job-title" style="margin: 0;">Job Event Timeline</h3>
+                <button id="close-modal-btn" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="timeline-events-container" class="timeline-container">
+                <!-- Timeline items rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=3"></script>
 </body>
 </html>

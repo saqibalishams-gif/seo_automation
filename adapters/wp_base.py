@@ -28,8 +28,17 @@ class BaseWordPressAdapter:
                 files = {'file': (filename, f, 'image/jpeg')}
                 response = request_with_retry('POST', url, files=files, headers=self.headers, auth=self.auth, timeout=30)
                 
+            if response.status_code not in (200, 201):
+                logger.error(f"Media upload returned non-2xx status: {response.status_code} - {response.text[:200]}")
+                return None
+            
+            content_type = response.headers.get('content-type', '')
+            if 'application/json' not in content_type.lower():
+                logger.error(f"Media upload returned non-JSON content-type: {content_type}")
+                return None
+                
             result = response.json()
-            if result.get('id') and result.get('source_url'):
+            if isinstance(result, dict) and result.get('id') and result.get('source_url'):
                 return {"id": result['id'], "url": result['source_url']}
         except Exception as e:
             logger.error(f"Media upload failed: {e}")
@@ -40,8 +49,19 @@ class BaseWordPressAdapter:
         url = f"{self.site_url}/wp-json/wp/v2/posts"
         try:
             response = request_with_retry('POST', url, json=payload, headers=self.headers, auth=self.auth, timeout=15)
+            if response.status_code not in (200, 201):
+                logger.error(f"Post creation returned non-2xx status: {response.status_code} - {response.text[:200]}")
+                return None
+                
+            content_type = response.headers.get('content-type', '')
+            if 'application/json' not in content_type.lower():
+                logger.error(f"Post creation returned non-JSON content-type: {content_type}")
+                return None
+                
             data = response.json()
-            return str(data.get('id', ''))
+            if isinstance(data, dict):
+                return str(data.get('id', ''))
+            return None
         except Exception as e:
             logger.error(f"Failed to push post: {e}")
             return None

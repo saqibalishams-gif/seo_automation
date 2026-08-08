@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Automation SaaS — System Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css?v=3">
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-orange"></div>
+        <div class="blob blob-blue"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 1400px;">
+        <!-- Admin Header Bar -->
+        <header class="glass-panel header-bar">
+            <div class="brand-section">
+                <div class="status-dot-container"><div class="status-dot" style="background: #F59E0B;"></div></div>
+                <h1>⚡ Admin Operations Console</h1>
+            </div>
+            <div class="status-pills">
+                <div class="status-pill" id="admin-health-pill">System Health: --</div>
+                <div class="status-pill" id="admin-redis-pill">Redis Queue: --</div>
+                <button id="admin-nav-overview" class="nav-btn">Overview</button>
+                <button id="admin-nav-workers" class="nav-btn">Workers</button>
+                <button id="admin-nav-jobs" class="nav-btn">System Jobs</button>
+                <button id="admin-nav-pipeline" class="nav-btn">Workflow Pipeline</button>
+                <button id="admin-nav-errors" class="nav-btn">Error Center</button>
+                <button id="admin-nav-audit" class="nav-btn">Audit Logs</button>
+                <a href="/dashboard" class="nav-btn" style="color: #60A5FA; text-decoration: none;">👤 User View</a>
+                <button id="admin-logout-btn" class="nav-btn btn-logout">Logout</button>
+            </div>
+        </header>
+
+        <main class="main-column">
+            <!-- System Stats Row -->
+            <section class="stats-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="admin-stat-users">0</div>
+                    <div class="stat-label">Registered Users</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="admin-stat-jobs">0</div>
+                    <div class="stat-label">Total Jobs</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="admin-stat-processing" style="color: #60A5FA;">0</div>
+                    <div class="stat-label">Processing</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="admin-stat-failed" style="color: #EF4444;">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="glass-panel stat-tile">
+                    <div class="stat-value" id="admin-stat-rate" style="color: #10B981;">100%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </section>
+
+            <!-- Workflow Pipeline Section -->
+            <section id="pipeline-section" class="glass-panel">
+                <h3 class="panel-header">🔄 Live Workflow Pipeline (Including Fake-Fact Maker)</h3>
+                <div id="pipeline-diagram" class="pipeline-diagram-container">
+                    <!-- Workflow diagram rendered dynamically -->
+                </div>
+            </section>
+
+            <!-- Worker Monitoring Section -->
+            <section id="workers-section" class="glass-panel">
+                <h3 class="panel-header">🖥 Background Worker Monitoring & Heartbeats</h3>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>Worker ID</th>
+                            <th>Hostname / PID</th>
+                            <th>Status</th>
+                            <th>Health</th>
+                            <th>Current Job</th>
+                            <th>Current Stage</th>
+                            <th>Completed / Failed</th>
+                            <th>Last Heartbeat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workers-tbody">
+                        <tr><td colspan="8" style="text-align: center;">Loading worker heartbeats...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- System Jobs Section -->
+            <section id="system-jobs-section" class="glass-panel">
+                <h3 class="panel-header">📋 System-Wide Job Monitor</h3>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>User ID</th>
+                            <th>Game / Provider</th>
+                            <th>Status</th>
+                            <th>Current Stage</th>
+                            <th>Worker</th>
+                            <th>Duration</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="system-jobs-tbody">
+                        <tr><td colspan="8" style="text-align: center;">Loading jobs...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Error Center Section -->
+            <section id="errors-section" class="glass-panel">
+                <h3 class="panel-header">🚨 System Error Center</h3>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Job ID</th>
+                            <th>Category</th>
+                            <th>Error Code</th>
+                            <th>Message</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="errors-tbody">
+                        <tr><td colspan="7" style="text-align: center;">No errors reported.</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Cost & Analytics Section -->
+            <section id="analytics-section" class="glass-panel">
+                <h3 class="panel-header">💰 Cost & Usage Analytics</h3>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div class="stat-tile" style="flex: 1;">
+                        <div class="stat-value" id="cost-ai-requests">0</div>
+                        <div class="stat-label">Total AI Requests</div>
+                    </div>
+                    <div class="stat-tile" style="flex: 1;">
+                        <div class="stat-value" id="cost-estimated">$0.00</div>
+                        <div class="stat-label">Est. Operational Cost</div>
+                    </div>
+                    <div class="stat-tile" style="flex: 1;">
+                        <div class="stat-value" id="cost-margin" style="color: #10B981;">84.5%</div>
+                        <div class="stat-label">Gross Margin</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Audit Logs Section -->
+            <section id="audit-section" class="glass-panel">
+                <h3 class="panel-header">📜 Security Audit Log Trail</h3>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Action</th>
+                            <th>Resource Type</th>
+                            <th>Resource ID</th>
+                            <th>IP Address</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-tbody">
+                        <tr><td colspan="7" style="text-align: center;">Loading audit log trail...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- Timeline Modal -->
+    <div id="admin-timeline-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="admin-modal-job-title" style="margin: 0;">Job Event Timeline</h3>
+                <button id="admin-close-modal-btn" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="admin-timeline-events-container" class="timeline-container"></div>
+        </div>
+    </div>
+
+    <script src="/static/admin.js?v=3"></script>
+</body>
+</html>

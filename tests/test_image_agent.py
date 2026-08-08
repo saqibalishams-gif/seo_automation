@@ -11,9 +11,9 @@ def temp_db():
     
     with get_db_connection(path) as conn:
         conn.execute(
-            '''INSERT INTO image_licenses (game_name, provider, file_path, license_type, license_notes) 
-               VALUES (?, ?, ?, ?, ?)''',
-            ("Licensed Game", "ProviderA", "data/images/licensed_game.jpg", "screenshot_with_permission", "Permission granted via email")
+            '''INSERT INTO image_licenses (user_id, game_name, provider, file_path, license_type, license_notes) 
+               VALUES (?, ?, ?, ?, ?, ?)''',
+            (1, "Licensed Game", "ProviderA", "data/images/licensed_game.jpg", "screenshot_with_permission", "Permission granted via email")
         )
         conn.commit()
         
@@ -23,7 +23,7 @@ def temp_db():
 
 def test_image_happy_path(temp_db):
     agent = ImageAgent()
-    image = agent.get_licensed_image("Licensed Game", "ProviderA", db_path=temp_db)
+    image = agent.get_licensed_image("Licensed Game", "ProviderA", user_id=1, db_path=temp_db)
     
     assert image is not None
     assert image["file_path"] == "data/images/licensed_game.jpg"
@@ -31,6 +31,6 @@ def test_image_happy_path(temp_db):
 
 def test_image_skip_path(temp_db):
     agent = ImageAgent()
-    image = agent.get_licensed_image("Unlicensed Game", "ProviderA", db_path=temp_db)
+    image = agent.get_licensed_image("Unlicensed Game", "ProviderA", user_id=1, db_path=temp_db)
     
     assert image is None
