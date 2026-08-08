@@ -47,6 +47,14 @@ def init_db(db_path=DB_PATH, schema_path=SCHEMA_PATH):
             conn.execute("ALTER TABLE user_settings ADD COLUMN active_format_mode TEXT DEFAULT 'default'")
         if 'active_template_id' not in us_cols:
             conn.execute("ALTER TABLE user_settings ADD COLUMN active_template_id INTEGER DEFAULT NULL")
+        if 'default_market' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN default_market TEXT DEFAULT 'UK'")
+        if 'default_word_count' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN default_word_count TEXT DEFAULT '1500'")
+        if 'default_tone' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN default_tone TEXT DEFAULT 'professional'")
+        if 'default_keyword_density' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN default_keyword_density TEXT DEFAULT '1.2'")
             
         conn.commit()
     logger.info("Database initialized with column migrations.")

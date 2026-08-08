@@ -76,6 +76,11 @@ class UserSettings(Base):
     active_format_mode = Column(String, default="default") # "default" or "custom"
     active_template_id = Column(Integer, nullable=True)
     
+    default_market = Column(String, default="UK")
+    default_word_count = Column(String, default="1500")
+    default_tone = Column(String, default="professional")
+    default_keyword_density = Column(String, default="1.2")
+    
     user = relationship("User", back_populates="settings")
 
 class ContentDraft(Base):

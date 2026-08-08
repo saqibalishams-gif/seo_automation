@@ -855,3 +855,243 @@ select:focus, input:focus {
     z-index: 1000;
     min-width: 170px;
 }
+
+/* ============================================================
+   v11 — UX REDESIGN ADDITIONS
+   ============================================================ */
+
+/* Textarea inherits input styling */
+textarea {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+    resize: vertical;
+    width: 100%;
+    height: 72px;
+}
+
+textarea:focus {
+    border-color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* Workflow section headers */
+.workflow-section {
+    margin-bottom: 0.5rem;
+}
+
+.workflow-section-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 1.2rem;
+}
+
+.workflow-section-title .section-icon {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+
+.workflow-section-title h3 {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.section-desc {
+    font-size: 0.87rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Visual divider between Article Info and Content Setup */
+.workflow-section-divider {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 1.6rem 0;
+}
+
+/* Content Setup saved banner */
+.content-setup-banner {
+    background: rgba(16, 185, 129, 0.07);
+    border: 1.5px solid rgba(16, 185, 129, 0.28);
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+
+/* Inline success and error messages */
+.success-msg {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.error-msg {
+    background: rgba(239, 68, 68, 0.1);
+    color: #B91C1C;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+/* Confirm / Save action row */
+.confirm-action-row {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+/* SEO checklist items */
+.seo-check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #047857;
+}
+
+/* Review step labels */
+.review-label {
+    font-size: 0.71rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+}
+
+.review-value {
+    font-size: 0.91rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Format option cards in Change Format modal */
+.format-option-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.format-option-card:hover {
+    border-color: var(--accent-orange);
+    background: rgba(255, 122, 61, 0.03);
+}
+
+.format-option-card.selected {
+    border-color: var(--accent-orange);
+    background: rgba(255, 122, 61, 0.07);
+    box-shadow: 0 2px 8px rgba(255, 122, 61, 0.15);
+}
+
+/* Format list items on Content Formats page */
+.format-list-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    gap: 12px;
+    transition: all 0.18s ease;
+}
+
+.format-list-item:hover {
+    border-color: rgba(255, 122, 61, 0.3);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Builder section rows */
+.builder-section-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 11px 15px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    gap: 12px;
+    transition: border-color 0.18s ease;
+}
+
+.builder-section-row:hover {
+    border-color: rgba(255, 122, 61, 0.22);
+}
+
+/* Collapsible header */
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Step completed state */
+.step-item.completed .step-num {
+    background: #10B981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+}
+
+.step-item.completed {
+    opacity: 0.85;
+}
+
+/* Run form layout helper */
+.run-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* Input file element */
+input[type="file"] {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--glass-border);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+.tab-view:not(.hidden) {
+    animation: fadeIn 0.22s ease-in-out;
+}

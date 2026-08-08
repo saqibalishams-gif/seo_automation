@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Automation Platform — Clean SaaS Dashboard</title>
+    <title>SEO Automation Platform — Guided Article Workflow</title>
+    <meta name="description" content="AI-powered SEO automation platform. Create, optimize, and publish articles to WordPress automatically.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=7">
+    <link rel="stylesheet" href="/static/styles.css?v=11">
 </head>
 <body>
     <div class="bg-blobs">
@@ -16,21 +17,19 @@
     </div>
 
     <div class="app-container">
-        <!-- Top Navigation Header Bar -->
+        <!-- ===== TOP NAVIGATION (unchanged) ===== -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
                 <div class="status-dot-container"><div class="status-dot"></div></div>
                 <h1 style="font-size: 1.15rem;">SEO AUTO</h1>
             </div>
             <div class="status-pills" style="align-items: center;">
-                <!-- Primary Top Nav Items -->
                 <button id="nav-home" class="nav-btn active">🏠 Dashboard</button>
                 <button id="nav-create" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">✍ Create Article</button>
-                <button id="nav-templates" class="nav-btn">🎨 Formats</button>
+                <button id="nav-templates" class="nav-btn">🎨 Content Formats</button>
                 <button id="nav-history" class="nav-btn">📜 History</button>
                 <button id="nav-websites" class="nav-btn">🌐 Websites</button>
 
-                <!-- Responsive / Minimizable "More ⋯" Dropdown -->
                 <div class="nav-dropdown-container">
                     <button id="nav-more-btn" class="nav-btn">More ⋯</button>
                     <div id="nav-more-menu" class="nav-dropdown-menu hidden">
@@ -51,9 +50,11 @@
         </header>
 
         <main class="main-column">
-            <!-- ================= VIEW 1: HOME DASHBOARD (ACTIVE BY DEFAULT) ================= -->
+
+            <!-- ================= VIEW 1: HOME DASHBOARD ================= -->
             <div id="view-home" class="tab-view active">
-                <!-- Summary Stats Row -->
+
+                <!-- Stats Row -->
                 <section class="stats-row" style="margin-bottom: 1.5rem;">
                     <div class="glass-panel stat-tile">
                         <div class="stat-value" id="stat-published">0</div>
@@ -65,7 +66,7 @@
                     </div>
                     <div class="glass-panel stat-tile">
                         <div class="stat-value" id="stat-templates">1</div>
-                        <div class="stat-label">Saved Templates</div>
+                        <div class="stat-label">Saved Formats</div>
                     </div>
                     <div class="glass-panel stat-tile">
                         <div class="stat-value" id="stat-quota-used">0%</div>
@@ -73,63 +74,76 @@
                     </div>
                 </section>
 
-                <!-- Quick Queue Automation Form -->
-                <section class="glass-panel" style="margin-bottom: 1.5rem;">
-                    <h3 class="panel-header">🚀 Quick Automation Execution</h3>
-                    <form id="url-queue-form-home" class="run-form">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <div class="form-group" style="flex: 3; min-width: 280px;">
-                                <label>Target Page / Game URL</label>
-                                <input type="url" id="home_input_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
-                            </div>
-                            <div class="form-group" style="flex: 1; min-width: 130px;">
-                                <label>Market</label>
-                                <select id="home_input_market" style="padding: 10px;">
-                                    <option value="UK">UK (GC Compliance)</option>
-                                    <option value="PK">PK (Pakistani Market)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                            <div class="form-group" style="flex: 1;">
-                                <label>Game Name (Optional)</label>
-                                <input type="text" id="home_input_game" placeholder="e.g. Sweet Bonanza">
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Provider (Optional)</label>
-                                <input type="text" id="home_input_provider" placeholder="e.g. Pragmatic Play">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-primary" style="margin-top: 1rem; padding: 12px 24px; font-size: 1rem;">
-                            🚀 Add to Queue & Start Automation
-                        </button>
-                    </form>
+                <!-- Primary CTA -->
+                <section class="glass-panel" style="margin-bottom: 1.5rem; text-align: center; padding: 32px 24px;">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">✍</div>
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Ready to create a new article?</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.93rem; margin-bottom: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">The guided workflow takes you through article info, content setup, format, images, SEO, and publishing — step by step.</p>
+                    <button id="btn-home-create-article" class="btn-primary" style="padding: 14px 40px; font-size: 1.05rem;">+ Create Article</button>
                 </section>
 
-                <!-- Active Jobs Grid -->
-                <section class="glass-panel">
-                    <h3 class="panel-header">⚡ Active Automation Jobs <span class="badge badge-warning" id="badge-jobs-running">0 Running</span></h3>
-                    <table class="table-styled">
-                        <thead>
-                            <tr>
-                                <th>Job ID</th>
-                                <th>Game / Provider</th>
-                                <th>Status</th>
-                                <th>Current Stage</th>
-                                <th>Duration</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="jobs-tbody-home">
-                            <tr><td colspan="6" style="text-align: center;">Loading active jobs...</td></tr>
-                        </tbody>
-                    </table>
+                <!-- Collapse controls -->
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 0.5rem;">
+                    <button id="btn-expand-all" class="btn-secondary-sm">Expand All</button>
+                    <button id="btn-collapse-all" class="btn-secondary-sm">Collapse All</button>
+                </div>
+
+                <!-- Active Automation Jobs (collapsible, open by default) -->
+                <section class="glass-panel collapsible-section" style="margin-bottom: 1rem;">
+                    <div class="collapsible-header" data-target="home-jobs-body">
+                        <h3 class="panel-header" style="margin: 0;">⚡ Active Automation Jobs <span class="badge badge-warning" id="badge-jobs-running">0 Running</span></h3>
+                        <button class="btn-toggle-panel" data-target="home-jobs-body">−</button>
+                    </div>
+                    <div class="collapsible-body" id="home-jobs-body">
+                        <table class="table-styled" style="margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Article / Job</th>
+                                    <th>Status</th>
+                                    <th>Stage</th>
+                                    <th>Duration</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobs-tbody-home">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No active jobs found.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Recent Drafts (collapsible, collapsed by default) -->
+                <section class="glass-panel collapsible-section" style="margin-bottom: 1rem;">
+                    <div class="collapsible-header" data-target="home-drafts-body">
+                        <h3 class="panel-header" style="margin: 0;">📄 Recent Drafts</h3>
+                        <button class="btn-toggle-panel" data-target="home-drafts-body">+</button>
+                    </div>
+                    <div class="collapsible-body hidden" id="home-drafts-body">
+                        <div id="home-drafts-list" style="margin-top: 0.8rem;">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Loading drafts...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Articles (collapsible, collapsed by default) -->
+                <section class="glass-panel collapsible-section" style="margin-bottom: 1rem;">
+                    <div class="collapsible-header" data-target="home-history-body">
+                        <h3 class="panel-header" style="margin: 0;">📜 Recent Articles</h3>
+                        <button class="btn-toggle-panel" data-target="home-history-body">+</button>
+                    </div>
+                    <div class="collapsible-body hidden" id="home-history-body">
+                        <div id="home-history-list" style="margin-top: 0.8rem;">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Loading history...</p>
+                        </div>
+                    </div>
                 </section>
             </div>
 
-            <!-- ================= VIEW 2: CREATE ARTICLE GUIDED WIZARD ================= -->
+            <!-- ================= VIEW 2: CREATE ARTICLE (5-STEP WIZARD) ================= -->
             <div id="view-create" class="tab-view hidden">
                 <section id="workflow-container" class="glass-panel">
+
+                    <!-- Progress Stepper -->
                     <div class="stepper-bar">
                         <div class="step-item active" data-step="1">
                             <div class="step-num">1</div>
@@ -138,7 +152,7 @@
                         <div class="step-connector"></div>
                         <div class="step-item" data-step="2">
                             <div class="step-num">2</div>
-                            <div class="step-label">Structure</div>
+                            <div class="step-label">Format</div>
                         </div>
                         <div class="step-connector"></div>
                         <div class="step-item" data-step="3">
@@ -153,247 +167,463 @@
                         <div class="step-connector"></div>
                         <div class="step-item" data-step="5">
                             <div class="step-num">5</div>
-                            <div class="step-label">Preview</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step-item" data-step="6">
-                            <div class="step-num">6</div>
-                            <div class="step-label">Publish</div>
+                            <div class="step-label">Review</div>
                         </div>
                     </div>
 
-                    <!-- STEP 1: CONTENT -->
+                    <!-- ─── STEP 1: CONTENT ─── -->
                     <div class="workflow-step-content active" id="workflow-step-1">
-                        <h3 class="panel-header">Step 1: Target Page & Article Information</h3>
-                        <form id="url-queue-form-step1" class="run-form">
+
+                        <!-- A. ARTICLE INFORMATION -->
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">📝</span>
+                                <div>
+                                    <h3>Article Information</h3>
+                                    <p class="section-desc">Tell us what this specific article is about.</p>
+                                </div>
+                            </div>
+
                             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <div class="form-group" style="flex: 3; min-width: 280px;">
-                                    <label>Target Page / Game URL</label>
-                                    <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
+                                <div class="form-group" style="flex: 2; min-width: 220px;">
+                                    <label>Article / Game / Product Name</label>
+                                    <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                                </div>
+                                <div class="form-group" style="flex: 1; min-width: 160px;">
+                                    <label>Provider / Brand</label>
+                                    <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
+                                <div class="form-group" style="flex: 3; min-width: 260px;">
+                                    <label>Source URL <span style="font-weight: 400; color: var(--text-muted);">(the page this article covers)</span></label>
+                                    <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza">
                                 </div>
                                 <div class="form-group" style="flex: 1; min-width: 130px;">
-                                    <label>Market</label>
-                                    <select id="input_market" style="padding: 10px;">
+                                    <label>Market / Country</label>
+                                    <select id="input_market">
                                         <option value="UK">UK (GC Compliance)</option>
                                         <option value="PK">PK (Pakistani Market)</option>
                                     </select>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                                <div class="form-group" style="flex: 1;">
-                                    <label>Game Name (Optional)</label>
-                                    <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
-                                </div>
-                                <div class="form-group" style="flex: 1;">
-                                    <label>Provider (Optional)</label>
-                                    <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+
+                            <div class="form-group" style="margin-top: 0.8rem;">
+                                <label>Additional Information <span style="font-weight: 400; color: var(--text-muted);">(optional extra context for the AI)</span></label>
+                                <textarea id="input_additional_info" placeholder="Any extra context, special notes, or requirements specific to this article..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="workflow-section-divider"></div>
+
+                        <!-- B. CONTENT SETUP -->
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">⚙</span>
+                                <div>
+                                    <h3>Content Setup</h3>
+                                    <p class="section-desc">These settings control how the AI writes your article.</p>
                                 </div>
                             </div>
-                            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-                                <button type="button" class="btn-primary btn-next-step" data-next="2">Continue to Structure ➔</button>
+
+                            <!-- Saved Setup Banner (shown when default exists) -->
+                            <div id="content-setup-saved-banner" class="content-setup-banner hidden">
+                                <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;">
+                                    <span style="font-size: 1.5rem; flex-shrink: 0;">⭐</span>
+                                    <div style="flex: 1; min-width: 180px;">
+                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Default Content Setup</div>
+                                        <div style="font-size: 0.85rem; color: #047857; font-weight: 600; margin-top: 2px;">✓ Your saved content settings are being used.</div>
+                                        <div id="saved-setup-summary" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 5px;"></div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start; flex-wrap: wrap;">
+                                        <button id="btn-make-changes-setup" class="btn-secondary-sm" style="padding: 7px 14px;">Make Changes</button>
+                                        <button id="btn-change-setup" class="btn-secondary-sm" style="padding: 7px 14px; color: var(--accent-orange-strong);">Change Setup</button>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
+
+                            <!-- Content Setup Edit Form (shown when no default or editing) -->
+                            <div id="content-setup-form" class="hidden">
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1; min-width: 160px;">
+                                        <label>Writing Tone</label>
+                                        <select id="setup_tone">
+                                            <option value="professional">Professional</option>
+                                            <option value="engaging">Engaging &amp; Casual</option>
+                                            <option value="expert">Expert / Authoritative</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 160px;">
+                                        <label>Content Length</label>
+                                        <select id="setup_word_count">
+                                            <option value="1500">Standard (1,500+ words)</option>
+                                            <option value="2500">In-Depth (2,500+ words)</option>
+                                            <option value="1000">Short Review (1,000+ words)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 160px;">
+                                        <label>Target Audience</label>
+                                        <select id="setup_target_audience">
+                                            <option value="general">General Audience</option>
+                                            <option value="beginners">Beginners</option>
+                                            <option value="experienced">Experienced Players</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.8rem;">
+                                    <div class="form-group" style="flex: 1; min-width: 220px;">
+                                        <label>Primary Keyword <span style="font-weight: 400; color: var(--text-muted);">(for this article)</span></label>
+                                        <input type="text" id="setup_primary_keyword" placeholder="e.g. Sweet Bonanza review">
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 220px;">
+                                        <label>Secondary Keywords <span style="font-weight: 400; color: var(--text-muted);">(comma separated)</span></label>
+                                        <input type="text" id="setup_secondary_keywords" placeholder="e.g. Sweet Bonanza free play, volatility">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-top: 0.8rem;">
+                                    <label>Writing Instructions <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+                                    <textarea id="setup_writing_instructions" placeholder="Specific instructions for how the AI should write this content..."></textarea>
+                                </div>
+
+                                <!-- Save Actions -->
+                                <div id="content-setup-save-actions" class="confirm-action-row" style="margin-top: 1.2rem;">
+                                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                                        <button id="btn-save-content-setup" class="btn-primary" style="padding: 10px 22px;">Save Content Setup</button>
+                                        <button id="btn-cancel-content-setup" class="btn-secondary-sm" style="padding: 9px 14px;">Cancel</button>
+                                    </div>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
+                                        <input type="checkbox" id="chk-save-as-default-setup" checked>
+                                        <span>Save as my default — used automatically for future articles</span>
+                                    </label>
+                                </div>
+
+                                <!-- Post-save confirmation -->
+                                <div id="content-setup-saved-confirm" class="hidden" style="margin-top: 1rem;">
+                                    <div class="success-msg" style="margin-bottom: 10px;">✓ Content Setup Saved — These settings are ready to use for this article.</div>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <button id="btn-make-changes-after-save" class="btn-secondary-sm">Make Changes</button>
+                                        <button id="btn-set-as-default" class="btn-secondary-sm" style="color: var(--accent-orange-strong);">⭐ Set as Default</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                            <button type="button" class="btn-primary btn-next-step" data-next="2" style="padding: 10px 28px;">Continue to Format ➔</button>
+                        </div>
                     </div>
 
-                    <!-- STEP 2: STRUCTURE -->
+                    <!-- ─── STEP 2: ARTICLE FORMAT ─── -->
                     <div class="workflow-step-content hidden" id="workflow-step-2">
-                        <h3 class="panel-header">Step 2: Article Format & Structure Selection</h3>
-                        
-                        <!-- Active Format Summary Card -->
-                        <div id="active-format-summary-card" style="background: rgba(255,122,61,0.08); border: 2px solid var(--accent-orange); padding: 18px; border-radius: 12px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-orange-strong); text-transform: uppercase; letter-spacing: 0.5px;">Current Active Content Format</div>
-                                <h4 id="active-format-title" style="margin: 4px 0; font-size: 1.2rem; color: var(--text-primary);">⚡ Default SEO Format</h4>
-                                <div style="font-size: 0.85rem; color: #047857; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                                    <span>✓ Active format</span> • <span>Used automatically for new articles</span>
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">🗂</span>
+                                <div>
+                                    <h3>Article Format</h3>
+                                    <p class="section-desc">Choose how your article will be structured.</p>
                                 </div>
                             </div>
-                            <button type="button" id="btn-open-change-format" class="btn-primary" style="padding: 10px 18px;">[ Change Format ]</button>
-                        </div>
 
-                        <!-- Optional Format Options Grid (Hidden when active format is clear) -->
-                        <div class="format-options-grid hidden" id="format-selection-grid" style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div class="format-card selected" id="card-format-default">
-                                <h4>⚡ Default SEO Format</h4>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
-                                    Predefined optimized article structure designed for high SEO rankings.
-                                </p>
-                                <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
-                                    <li>✓ Introduction & Overview</li>
-                                    <li>✓ Features & Mechanics</li>
-                                    <li>✓ Pros & Cons Breakdown</li>
-                                    <li>✓ FAQ & Conclusion</li>
-                                </ul>
+                            <!-- Active Format Card -->
+                            <div id="active-format-card" style="background: rgba(255,122,61,0.07); border: 2px solid var(--accent-orange); padding: 20px; border-radius: 14px; margin-bottom: 1.2rem;">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-orange-strong); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;">Currently Selected Format</div>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                                    <div style="flex: 1; min-width: 180px;">
+                                        <h4 id="active-format-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">⭐ Default SEO Format</h4>
+                                        <div id="active-format-meta" style="font-size: 0.85rem; color: var(--text-secondary);">Loading format details...</div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                                        <button id="btn-open-change-format" class="btn-primary" style="padding: 9px 18px;">Change Format</button>
+                                        <button id="btn-edit-format" class="btn-secondary-sm" style="padding: 9px 14px;">Edit Format</button>
+                                    </div>
+                                </div>
+                                <div id="active-format-sections-preview" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;"></div>
                             </div>
-                            <div class="format-card" id="card-format-custom">
-                                <h4>🛠 Custom Format Builder</h4>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
-                                    Construct custom sections, reorder topics, and set AI writing rules.
-                                </p>
-                                <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
-                                    <li>+ Create Custom Sections</li>
-                                    <li>+ Reorder Topics</li>
-                                    <li>+ Custom AI Instructions</li>
-                                </ul>
-                            </div>
-                        </div>
 
-                        <!-- Custom Builder Container -->
-                        <div id="custom-builder-view" class="hidden" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <h4 style="margin: 0;">Build Your Article Structure</h4>
-                                <button id="btn-add-section-ui" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Section</button>
+                            <!-- Article-only override notice -->
+                            <div id="format-article-override" class="hidden" style="background: rgba(255,122,61,0.05); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,122,61,0.2);">
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-orange-strong); margin-bottom: 6px;">📌 Format changed for this article only</div>
+                                <div id="article-override-name" style="font-weight: 600; color: var(--text-primary); font-size: 0.93rem; margin-bottom: 10px;"></div>
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
+                                    <input type="checkbox" id="chk-make-format-default">
+                                    <span>Also make this the default for future articles</span>
+                                </label>
                             </div>
-                            <div id="custom-sections-list"></div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="3">Continue to Images ➔</button>
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1" style="padding: 9px 18px;">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="3" style="padding: 10px 28px;">Continue to Images ➔</button>
                         </div>
                     </div>
 
-                    <!-- STEP 3: IMAGES -->
+                    <!-- ─── STEP 3: ARTICLE IMAGES ─── -->
                     <div class="workflow-step-content hidden" id="workflow-step-3">
-                        <h3 class="panel-header">Step 3: Article Image Placement & Sizes</h3>
-                        
-                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                            <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
-                                <h4 style="margin-bottom: 1rem;">🖼 Add Article Image</h4>
-                                <div class="form-group" style="margin-bottom: 1rem;">
-                                    <label>Upload Image File</label>
-                                    <input type="file" id="step3_image_file" accept="image/*">
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">🖼</span>
+                                <div>
+                                    <h3>Article Images</h3>
+                                    <p class="section-desc">Choose which images to use and where they should appear.</p>
                                 </div>
-                                <div class="form-group" style="margin-bottom: 1rem;">
-                                    <label>Where should this image appear?</label>
-                                    <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
-                                </div>
-                                <div class="form-group" style="margin-bottom: 1rem;">
-                                    <label>Position</label>
-                                    <select id="step3_position_select" style="padding: 8px;">
-                                        <option value="after_heading">After section heading</option>
-                                        <option value="before_heading">Before section heading</option>
-                                        <option value="after_paragraph">After section text</option>
-                                        <option value="end_of_section">End of section</option>
-                                    </select>
-                                </div>
-                                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                    <div class="form-group" style="flex: 1;">
-                                        <label>Size</label>
-                                        <select id="step3_size_select" style="padding: 8px;">
-                                            <option value="large">Large (800px)</option>
-                                            <option value="medium">Medium (600px)</option>
-                                            <option value="small">Small (400px)</option>
-                                            <option value="full_width">Full Width</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" style="flex: 1;">
-                                        <label>Alignment</label>
-                                        <select id="step3_align_select" style="padding: 8px;">
-                                            <option value="center">Center</option>
-                                            <option value="left">Left</option>
-                                            <option value="right">Right</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
                             </div>
 
-                            <div style="flex: 1; min-width: 320px;">
-                                <h4 style="margin-bottom: 0.8rem;">Article Images & Placement Map</h4>
-                                <div id="assigned-images-visual-list">
-                                    <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>
+                            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                                <!-- Upload & Placement Panel -->
+                                <div style="flex: 1; min-width: 290px; background: rgba(0,0,0,0.03); padding: 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07);">
+                                    <h4 style="margin-bottom: 1rem; font-weight: 700; color: var(--text-primary);">Upload Image</h4>
+
+                                    <div class="form-group" style="margin-bottom: 1rem;">
+                                        <label>Select Image File</label>
+                                        <input type="file" id="step3_image_file" accept="image/*">
+                                    </div>
+
+                                    <div id="step3-image-preview" class="hidden" style="margin-bottom: 1rem; text-align: center;">
+                                        <img id="step3-preview-img" style="max-width: 100%; max-height: 140px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 1rem;">
+                                        <label>Where should this image appear?</label>
+                                        <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 1rem;">
+                                        <label>Image Position</label>
+                                        <select id="step3_position_select" style="padding: 8px;">
+                                            <option value="after_heading">After section heading</option>
+                                            <option value="before_heading">Before section heading</option>
+                                            <option value="after_paragraph">After section text</option>
+                                            <option value="between_paragraphs">Between paragraphs</option>
+                                            <option value="end_of_section">End of section</option>
+                                        </select>
+                                    </div>
+
+                                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                                        <div class="form-group" style="flex: 1; min-width: 110px;">
+                                            <label>Image Size</label>
+                                            <select id="step3_size_select" style="padding: 8px;">
+                                                <option value="small">Small</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="large">Large</option>
+                                                <option value="full_width">Full Width</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="flex: 1; min-width: 110px;">
+                                            <label>Alignment</label>
+                                            <select id="step3_align_select" style="padding: 8px;">
+                                                <option value="center">Center</option>
+                                                <option value="left">Left</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
+                                    <div id="img-save-msg" class="hidden" style="margin-top: 8px;"></div>
                                 </div>
 
-                                <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem;">Article Structure Visualization</h4>
-                                <div id="structure-tree-diagram" class="structure-tree"></div>
+                                <!-- Structure Map -->
+                                <div style="flex: 1; min-width: 260px;">
+                                    <h4 style="margin-bottom: 0.8rem; font-weight: 700; color: var(--text-primary);">Assigned Images</h4>
+                                    <div id="assigned-images-visual-list">
+                                        <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned yet.</p>
+                                    </div>
+
+                                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 700; color: var(--text-primary);">Article Structure</h4>
+                                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">Shows where images will appear in the published article.</p>
+                                    <div id="structure-tree-diagram" class="structure-tree"></div>
+                                </div>
                             </div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="4">Continue to SEO ➔</button>
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2" style="padding: 9px 18px;">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="4" style="padding: 10px 28px;">Continue to SEO ➔</button>
                         </div>
                     </div>
 
-                    <!-- STEP 4: SEO -->
+                    <!-- ─── STEP 4: SEO OPTIMIZATION ─── -->
                     <div class="workflow-step-content hidden" id="workflow-step-4">
-                        <h3 class="panel-header">Step 4: SEO Metadata & Keywords Inspector</h3>
-                        <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label>Focus Keyword</label>
-                                <input type="text" id="step4_focus_kw" placeholder="Automatically extracted from Game Name..." style="padding: 10px; font-weight: 600;">
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">🔍</span>
+                                <div>
+                                    <h3>SEO Optimization</h3>
+                                    <p class="section-desc">How should this article be optimized for search engines?</p>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>SEO Meta Description</label>
-                                <textarea id="step4_meta_desc" placeholder="1-2 sentence catchy SEO meta description starting with focus keyword..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
+
+                            <!-- SEO Checklist -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 8px; margin-bottom: 1.5rem;">
+                                <div class="seo-check-item">✓ Search intent alignment</div>
+                                <div class="seo-check-item">✓ Keyword usage &amp; density</div>
+                                <div class="seo-check-item">✓ Heading structure (H1–H3)</div>
+                                <div class="seo-check-item">✓ Meta title generation</div>
+                                <div class="seo-check-item">✓ Meta description</div>
+                                <div class="seo-check-item">✓ Image ALT text</div>
+                                <div class="seo-check-item">✓ Readability score</div>
+                                <div class="seo-check-item">✓ Internal linking</div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="form-group" style="flex: 1; min-width: 220px;">
+                                    <label>Primary Keyword <span style="font-weight: 400; color: var(--text-muted);">(auto-filled from Content Setup)</span></label>
+                                    <input type="text" id="step4_focus_kw" placeholder="e.g. Sweet Bonanza review">
+                                </div>
+                                <div class="form-group" style="flex: 1; min-width: 220px;">
+                                    <label>Secondary Keywords</label>
+                                    <input type="text" id="step4_secondary_kw" placeholder="e.g. Sweet Bonanza free, volatility">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 0.8rem;">
+                                <label>Meta Description <span style="font-weight: 400; color: var(--text-muted);">(optional — AI generates if left blank)</span></label>
+                                <textarea id="step4_meta_desc" placeholder="A compelling 1–2 sentence description starting with your primary keyword..."></textarea>
                             </div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="5">Continue to Preview ➔</button>
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3" style="padding: 9px 18px;">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="5" style="padding: 10px 28px;">Continue to Review ➔</button>
                         </div>
                     </div>
 
-                    <!-- STEP 5: PREVIEW -->
+                    <!-- ─── STEP 5: REVIEW & PUBLISH ─── -->
                     <div class="workflow-step-content hidden" id="workflow-step-5">
-                        <h3 class="panel-header">Step 5: Article Live Preview</h3>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Review generated article layout and image placements prior to publishing.</p>
-                        
-                        <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto;">
-                            <p style="color: gray;">Rendering article preview...</p>
+                        <div class="workflow-section">
+                            <div class="workflow-section-title">
+                                <span class="section-icon">👁</span>
+                                <div>
+                                    <h3>Review &amp; Publish</h3>
+                                    <p class="section-desc">Review your article configuration before publishing to WordPress.</p>
+                                </div>
+                            </div>
+
+                            <!-- Summary Card -->
+                            <div id="review-summary-card" style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 18px; margin-bottom: 1.5rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 14px;">
+                                    <div>
+                                        <div class="review-label">Article</div>
+                                        <div class="review-value" id="review-article-name">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="review-label">Source URL</div>
+                                        <div class="review-value" id="review-url">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="review-label">Market</div>
+                                        <div class="review-value" id="review-market">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="review-label">Content Setup</div>
+                                        <div class="review-value" id="review-content-setup">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="review-label">Article Format</div>
+                                        <div class="review-value" id="review-format">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="review-label">Images</div>
+                                        <div class="review-value" id="review-images">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Validation Result -->
+                            <div id="step5-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.08);">
+                                <p style="color: var(--text-secondary);">Running pre-publish checks...</p>
+                            </div>
+
+                            <!-- Article Preview -->
+                            <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto; margin-bottom: 1rem;">
+                                <p style="color: gray;">Article preview will appear here.</p>
+                            </div>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4">← Back</button>
-                            <button type="button" class="btn-primary btn-next-step" data-next="6">Proceed to Validation & Publish ➔</button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 10px;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4" style="padding: 9px 18px;">← Edit</button>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="btn-save-draft-publish" class="btn-secondary-sm" style="padding: 9px 18px;">Save Draft</button>
+                                <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation &amp; Publish</button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- STEP 6: PUBLISH -->
-                    <div class="workflow-step-content hidden" id="workflow-step-6">
-                        <h3 class="panel-header">Step 6: 12-Check Validation & WordPress Publishing</h3>
-                        <div id="step6-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem;"></div>
-
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="5">← Back to Preview</button>
-                            <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation & Publish to WordPress</button>
-                        </div>
-                    </div>
                 </section>
             </div>
 
-            <!-- ================= VIEW 3: TEMPLATES VIEW ================= -->
+            <!-- ================= VIEW 3: CONTENT FORMATS ================= -->
             <div id="view-templates" class="tab-view hidden">
-                <section class="glass-panel">
-                    <h3 class="panel-header">🎨 Custom Content Templates Builder</h3>
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <input type="text" id="builder_template_name" placeholder="Template Name" style="font-weight: bold; flex: 2; padding: 10px;">
-                        <input type="text" id="builder_template_desc" placeholder="Template Description" style="flex: 3; padding: 10px;">
+
+                <!-- Formats List -->
+                <section class="glass-panel" id="formats-list-view">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 class="panel-header" style="margin: 0;">🎨 Content Formats</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">Saved article structures. Select a default or choose one per article.</p>
+                        </div>
+                        <button id="btn-create-new-format" class="btn-primary" style="padding: 9px 20px; flex-shrink: 0;">+ Create New Format</button>
                     </div>
+                    <div id="formats-list-container">
+                        <p style="color: var(--text-secondary);">Loading saved formats...</p>
+                    </div>
+                </section>
+
+                <!-- Format Builder (hidden by default) -->
+                <section class="glass-panel hidden" id="format-builder-view">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 class="panel-header" style="margin: 0;" id="builder-view-title">📐 Create Article Format</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">Define the sections, order, and AI writing instructions.</p>
+                        </div>
+                        <button id="btn-back-to-formats-list" class="btn-secondary-sm" style="padding: 8px 14px;">← Back to Formats</button>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 2; min-width: 200px;">
+                            <label>Format Name</label>
+                            <input type="text" id="builder_template_name" placeholder="e.g. Gaming Review" style="font-weight: 700; padding: 10px;">
+                        </div>
+                        <div class="form-group" style="flex: 3; min-width: 240px;">
+                            <label>Description</label>
+                            <input type="text" id="builder_template_desc" placeholder="e.g. Standard structure for gaming reviews" style="padding: 10px;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                        <h4 style="font-weight: 700; color: var(--text-primary);">Article Sections</h4>
+                        <button id="btn-add-builder-section" class="btn-secondary-sm" style="color: var(--accent-orange-strong); font-weight: 700;">+ Add Section</button>
+                    </div>
+
                     <div id="builder-sections-container"></div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
-                        <button id="btn-add-builder-section" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Custom Section</button>
-                        <button id="btn-save-template" class="btn-primary">💾 Save Template</button>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.2rem; align-items: center;">
+                        <div id="builder-save-msg" class="hidden" style="flex: 1;"></div>
+                        <button id="btn-cancel-builder" class="btn-secondary-sm" style="padding: 9px 16px;">Cancel</button>
+                        <button id="btn-save-template" class="btn-primary" style="padding: 10px 24px;">💾 Save Format</button>
                     </div>
                 </section>
             </div>
 
-            <!-- ================= VIEW 4: MEDIA LIBRARY VIEW ================= -->
+            <!-- ================= VIEW 4: MEDIA LIBRARY ================= -->
             <div id="view-media" class="tab-view hidden">
                 <section class="glass-panel">
-                    <h3 class="panel-header">🖼 Image Library & Section Assignments</h3>
+                    <h3 class="panel-header">🖼 Image Library &amp; Section Assignments</h3>
                     <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                        <form id="media-upload-form" class="run-form" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
+                        <form id="media-upload-form" class="run-form" style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
                             <h4 style="margin-bottom: 0.5rem;">Upload Image Asset</h4>
                             <div class="form-group">
                                 <label>Image File (JPG, PNG, WEBP)</label>
                                 <input type="file" id="media_upload_file" accept="image/*" required>
                             </div>
-                            <button type="submit" class="btn-primary" style="padding: 8px;">Upload Image Asset</button>
+                            <button type="submit" class="btn-primary" style="padding: 8px; margin-top: 0.5rem;">Upload Image Asset</button>
                         </form>
-                        <div style="flex: 2; min-width: 320px;">
+                        <div style="flex: 2; min-width: 300px;">
                             <h4 style="margin-bottom: 0.8rem;">Uploaded Image Assets:</h4>
                             <div id="media-gallery-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                                 <p style="color: var(--text-secondary);">No images uploaded yet.</p>
@@ -403,21 +633,25 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 5: HISTORY VIEW ================= -->
+            <!-- ================= VIEW 5: HISTORY ================= -->
             <div id="view-history" class="tab-view hidden">
                 <section class="glass-panel">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 class="panel-header" style="margin: 0;">📜 Article Publishing History</h3>
-                        <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h3 class="panel-header" style="margin: 0;">📜 Article Publishing History</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">⚠ Deleting history does NOT delete the WordPress article.</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                             <input type="text" id="history_search_input" placeholder="Search by title..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
-                            <button id="btn-delete-all-history" class="nav-btn" style="color: #EF4444;">🗑 Delete All History</button>
+                            <button id="btn-delete-selected-history" class="btn-secondary-sm" style="color: #EF4444;" disabled>🗑 Delete Selected</button>
+                            <button id="btn-delete-all-history" class="btn-secondary-sm" style="color: #EF4444;">Delete All History</button>
                         </div>
                     </div>
                     <table class="table-styled">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Game / Provider</th>
+                                <th style="width: 36px;"><input type="checkbox" id="history-select-all" title="Select all"></th>
+                                <th>Article</th>
                                 <th>Status</th>
                                 <th>WordPress Post ID</th>
                                 <th>Published Date</th>
@@ -431,7 +665,7 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 6: WEBSITES VIEW ================= -->
+            <!-- ================= VIEW 6: WEBSITES ================= -->
             <div id="view-websites" class="tab-view hidden">
                 <section class="glass-panel">
                     <h3 class="panel-header">🌐 Connected WordPress Websites</h3>
@@ -447,65 +681,86 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 7: DRAFTS VIEW ================= -->
+            <!-- ================= VIEW 7: DRAFTS ================= -->
             <div id="view-drafts" class="tab-view hidden">
                 <section class="glass-panel">
-                    <h3 class="panel-header">📄 Generated Article Drafts Pending Review</h3>
+                    <h3 class="panel-header">📄 Article Drafts</h3>
                     <div id="drafts-container-page"><p style="color: var(--text-secondary);">Loading drafts...</p></div>
                 </section>
             </div>
 
-            <!-- ================= VIEW 8: SETTINGS VIEW ================= -->
+            <!-- ================= VIEW 8: SETTINGS ================= -->
             <div id="view-settings" class="tab-view hidden">
                 <section class="glass-panel">
                     <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
                     <form id="setup-form" class="run-form">
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <div class="form-group" style="flex: 2;">
+                            <div class="form-group" style="flex: 2; min-width: 200px;">
                                 <label>WordPress Site URL</label>
                                 <input type="url" id="set_wp_url" placeholder="https://example.com" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="min-width: 150px;">
                                 <label>Username</label>
                                 <input type="text" id="set_wp_username" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="min-width: 180px;">
                                 <label>App Password (Encrypted)</label>
                                 <input type="password" id="set_wp_password" placeholder="••••••••••••" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary">Save Settings</button>
-                        <div id="setup-status" class="status-msg hidden"></div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <div class="form-group" style="flex: 1; min-width: 150px;">
+                                <label>Theme Type</label>
+                                <select id="set_theme_type">
+                                    <option value="standard">Standard</option>
+                                    <option value="classic">Classic</option>
+                                    <option value="block">Block (Gutenberg)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1; min-width: 150px;">
+                                <label>SEO Plugin</label>
+                                <select id="set_seo_plugin">
+                                    <option value="none">None</option>
+                                    <option value="yoast">Yoast SEO</option>
+                                    <option value="rankmath">RankMath</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 0.5rem;">Save Settings</button>
+                        <div id="setup-status" class="hidden" style="margin-top: 8px;"></div>
                     </form>
                 </section>
             </div>
 
-            <!-- DEV MODE DIAGNOSTICS DRAWER -->
+            <!-- DEV MODE DRAWER -->
             <section class="glass-panel hidden" id="dev-mode-drawer" style="border: 2px dashed #F59E0B; background: rgba(245,158,11,0.05); margin-top: 1rem;">
-                <h4 style="color: #B45309; margin-bottom: 0.5rem;">⚙ Advanced Developer Diagnostics & Internal UUIDs</h4>
+                <h4 style="color: #B45309; margin-bottom: 0.5rem;">⚙ Developer Diagnostics &amp; Internal UUIDs</h4>
                 <div id="dev-uuid-lookup-container" style="font-family: monospace; font-size: 0.85rem;"></div>
             </section>
+
         </main>
     </div>
+
+    <!-- ===== MODALS (at root level — NOT nested) ===== -->
 
     <!-- Section Editor Modal -->
     <div id="section-editor-modal" class="modal-overlay hidden">
         <div class="modal-content glass-panel" style="max-width: 500px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 style="margin: 0;">Edit Article Section</h3>
-                <button id="close-sec-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <button id="close-sec-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label>Section Name</label>
-                <input type="text" id="edit_sec_name" placeholder="e.g. Key Features" style="padding: 10px; font-weight: bold;">
+                <input type="text" id="edit_sec_name" placeholder="e.g. Key Features" style="font-weight: bold;">
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
-                <label>What should AI write?</label>
-                <textarea id="edit_sec_instruction" placeholder="Instructions for AI..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
+                <label>What should AI write here?</label>
+                <textarea id="edit_sec_instruction" placeholder="Instructions for the AI writer — what to cover and how..." style="height: 80px;"></textarea>
             </div>
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Content Format</label>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 140px;">
+                    <label>Content Type</label>
                     <select id="edit_sec_type" style="padding: 8px;">
                         <option value="paragraph">Paragraph</option>
                         <option value="bullet_list">Bullet List</option>
@@ -513,60 +768,46 @@
                         <option value="faq">FAQ</option>
                     </select>
                 </div>
-                <div class="form-group" style="flex: 1; justify-content: center;">
-                    <label><input type="checkbox" id="edit_sec_req" checked> Required Section</label>
+                <div class="form-group" style="flex: 1; min-width: 140px; justify-content: flex-end;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="edit_sec_req" checked>
+                        Required Section
+                    </label>
                 </div>
             </div>
             <button id="btn-save-section-modal" class="btn-primary" style="width: 100%;">Save Section</button>
         </div>
-    <!-- Change Format Modal -->
+    </div>
+
+    <!-- Change Format Modal (FIXED: properly at root level, not nested) -->
     <div id="change-format-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel" style="max-width: 550px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
-                <h3 style="margin: 0;">Choose Content Format</h3>
-                <button id="close-format-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-                <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="modal_format_mode" value="default" id="modal_mode_default" checked style="margin-top: 4px;">
-                    <div>
-                        <strong>⚡ Default SEO Format</strong>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Predefined optimized structure for high SEO rankings.</div>
-                    </div>
-                </label>
-
-                <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="modal_format_mode" value="custom" id="modal_mode_custom" style="margin-top: 4px;">
-                    <div style="flex: 1;">
-                        <strong>🛠 Saved Custom Format</strong>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">Select one of your previously saved custom templates:</div>
-                        <select id="modal_saved_template_select" style="width: 100%; padding: 8px;"><option value="">Loading templates...</option></select>
-                    </div>
-                </label>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.03); padding: 14px; border-radius: 8px; margin-bottom: 1.5rem;">
-                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 8px;">Format Usage Preference</label>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="radio" name="modal_usage_pref" value="active" checked>
-                        <span><strong>Save as my active format</strong> (Used automatically for future articles)</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="radio" name="modal_usage_pref" value="article_only">
-                        <span><strong>Use for this article only</strong> (Does not change my active format)</span>
-                    </label>
+        <div class="modal-content glass-panel" style="max-width: 560px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px;">
+                <div>
+                    <h3 style="margin: 0;">Change Article Format</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Select a format for this article.</p>
                 </div>
+                <button id="close-format-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
             </div>
 
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button type="button" id="btn-reset-format-default" class="btn-secondary-sm" style="color: #DC2626;">Reset to Default</button>
-                <button type="button" id="btn-apply-format-modal" class="btn-primary" style="padding: 10px 20px;">Apply Selected Format</button>
+            <div id="format-modal-options-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; max-height: 360px; overflow-y: auto;">
+                <p style="color: var(--text-secondary);">Loading formats...</p>
+            </div>
+
+            <div style="background: rgba(255,122,61,0.05); border: 1px solid rgba(255,122,61,0.18); padding: 12px 14px; border-radius: 8px; margin-bottom: 1.2rem;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.87rem; color: var(--text-secondary); cursor: pointer;">
+                    <input type="checkbox" id="chk-set-as-website-default">
+                    <span>Also make this the default for future articles on this website</span>
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" id="btn-cancel-format-modal" class="btn-secondary-sm" style="padding: 9px 18px;">Cancel</button>
+                <button type="button" id="btn-apply-format-modal" class="btn-primary" style="padding: 10px 22px;">Apply Format</button>
             </div>
         </div>
     </div>
 
-    <script src="/static/app.js?v=7"></script>
+    <script src="/static/app.js?v=11"></script>
 </body>
 </html>

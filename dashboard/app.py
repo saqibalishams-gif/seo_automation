@@ -317,6 +317,42 @@ def set_user_active_format(req: ActiveFormatRequest, user_id: int = Depends(get_
             "saved_permanently": req.save_as_active
         }
 
+class ContentSettingsRequest(BaseModel):
+    default_market: Optional[str] = "UK"
+    default_word_count: Optional[str] = "1500"
+    default_tone: Optional[str] = "professional"
+    default_keyword_density: Optional[str] = "1.2"
+    save_as_default: bool = True
+
+@app.get("/api/user/content-settings")
+def get_user_content_settings(user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+        return {
+            "default_market": settings.default_market if settings and settings.default_market else "UK",
+            "default_word_count": settings.default_word_count if settings and settings.default_word_count else "1500",
+            "default_tone": settings.default_tone if settings and settings.default_tone else "professional",
+            "default_keyword_density": settings.default_keyword_density if settings and settings.default_keyword_density else "1.2"
+        }
+
+@app.post("/api/user/content-settings")
+def set_user_content_settings(req: ContentSettingsRequest, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+        if not settings:
+            settings = UserSettings(user_id=user_id)
+            db.add(settings)
+            
+        if req.save_as_default:
+            if req.default_market: settings.default_market = req.default_market
+            if req.default_word_count: settings.default_word_count = req.default_word_count
+            if req.default_tone: settings.default_tone = req.default_tone
+            if req.default_keyword_density: settings.default_keyword_density = req.default_keyword_density
+            db.commit()
+            log_audit_event(user_id, "CONTENT_SETTINGS_SAVED", "UserSettings", str(settings.id), details=req.dict())
+            
+        return {"message": "Content setup settings saved to database successfully"}
+
 # --- TENANT-ISOLATED USER DASHBOARD APIS ---
 
 @app.get("/api/user/jobs")

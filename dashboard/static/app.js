@@ -1,824 +1,1443 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // DOM Elements — Navigation Views
-    const tabViews = document.querySelectorAll(".tab-view");
-    const navHome = document.getElementById("nav-home");
-    const navCreate = document.getElementById("nav-create");
-    const navTemplates = document.getElementById("nav-templates");
-    const navMedia = document.getElementById("nav-media");
-    const navHistory = document.getElementById("nav-history");
-    const navSettings = document.getElementById("nav-settings");
-    const navAdmin = document.getElementById("nav-admin");
-    const devModeCheckbox = document.getElementById("dev-mode-checkbox");
-    const devModeDrawer = document.getElementById("dev-mode-drawer");
-    const devUuidLookupContainer = document.getElementById("dev-uuid-lookup-container");
-    const logoutBtn = document.getElementById("logout-btn");
 
-    // Stepper Elements
+    // ===================================================================
+    // DOM REFERENCES
+    // ===================================================================
+
+    // Navigation
+    const tabViews         = document.querySelectorAll(".tab-view");
+    const navHome          = document.getElementById("nav-home");
+    const navCreate        = document.getElementById("nav-create");
+    const navTemplates     = document.getElementById("nav-templates");
+    const navMedia         = document.getElementById("nav-media");
+    const navHistory       = document.getElementById("nav-history");
+    const navSettings      = document.getElementById("nav-settings");
+    const navAdmin         = document.getElementById("nav-admin");
+    const navWebsites      = document.getElementById("nav-websites");
+    const navDrafts        = document.getElementById("nav-drafts");
+    const navMoreBtn       = document.getElementById("nav-more-btn");
+    const navMoreMenu      = document.getElementById("nav-more-menu");
+    const devModeCheckbox  = document.getElementById("dev-mode-checkbox");
+    const devModeDrawer    = document.getElementById("dev-mode-drawer");
+    const devUuidContainer = document.getElementById("dev-uuid-lookup-container");
+    const logoutBtn        = document.getElementById("logout-btn");
+
+    // Stepper
     const workflowStepContents = document.querySelectorAll(".workflow-step-content");
-    const stepItems = document.querySelectorAll(".step-item");
-    const btnNextSteps = document.querySelectorAll(".btn-next-step");
-    const btnPrevSteps = document.querySelectorAll(".btn-prev-step");
+    const stepItems            = document.querySelectorAll(".step-item");
+    const btnNextSteps         = document.querySelectorAll(".btn-next-step");
+    const btnPrevSteps         = document.querySelectorAll(".btn-prev-step");
 
-    // Format Cards Elements
-    const cardFormatDefault = document.getElementById("card-format-default");
-    const cardFormatCustom = document.getElementById("card-format-custom");
-    const customBuilderView = document.getElementById("custom-builder-view");
-    const customSectionsList = document.getElementById("custom-sections-list");
-    const btnAddSectionUi = document.getElementById("btn-add-section-ui");
+    // Content Setup
+    const contentSetupSavedBanner   = document.getElementById("content-setup-saved-banner");
+    const contentSetupForm           = document.getElementById("content-setup-form");
+    const btnMakeChangesSetup        = document.getElementById("btn-make-changes-setup");
+    const btnChangeSetup             = document.getElementById("btn-change-setup");
+    const btnSaveContentSetup        = document.getElementById("btn-save-content-setup");
+    const btnCancelContentSetup      = document.getElementById("btn-cancel-content-setup");
+    const contentSetupSaveActions    = document.getElementById("content-setup-save-actions");
+    const contentSetupSavedConfirm   = document.getElementById("content-setup-saved-confirm");
+    const btnMakeChangesAfterSave    = document.getElementById("btn-make-changes-after-save");
+    const btnSetAsDefault            = document.getElementById("btn-set-as-default");
+    const chkSaveAsDefaultSetup      = document.getElementById("chk-save-as-default-setup");
+    const savedSetupSummary          = document.getElementById("saved-setup-summary");
 
-    // Step 3 Image Manager Elements
-    const step3ImageFile = document.getElementById("step3_image_file");
-    const step3SectionSelect = document.getElementById("step3_section_select");
-    const step3PositionSelect = document.getElementById("step3_position_select");
-    const step3SizeSelect = document.getElementById("step3_size_select");
-    const step3AlignSelect = document.getElementById("step3_align_select");
-    const btnSaveStep3Image = document.getElementById("btn-save-step3-image");
-    const assignedImagesVisualList = document.getElementById("assigned-images-visual-list");
-    const structureTreeDiagram = document.getElementById("structure-tree-diagram");
+    // Format Step
+    const btnOpenChangeFormat        = document.getElementById("btn-open-change-format");
+    const btnEditFormat              = document.getElementById("btn-edit-format");
+    const formatArticleOverride      = document.getElementById("format-article-override");
+    const articleOverrideName        = document.getElementById("article-override-name");
+    const chkMakeFormatDefault       = document.getElementById("chk-make-format-default");
 
-    // Step 5 & 6 Preview & Publish
-    const step5PreviewRendered = document.getElementById("step5-preview-rendered");
-    const step6ValidationCard = document.getElementById("step6-validation-card");
-    const btnFinalPublish = document.getElementById("btn-final-publish");
+    // Change Format Modal
+    const changeFormatModal          = document.getElementById("change-format-modal");
+    const closeFormatModalBtn        = document.getElementById("close-format-modal-btn");
+    const btnCancelFormatModal       = document.getElementById("btn-cancel-format-modal");
+    const btnApplyFormatModal        = document.getElementById("btn-apply-format-modal");
+    const formatModalOptionsList     = document.getElementById("format-modal-options-list");
+    const chkSetAsWebsiteDefault     = document.getElementById("chk-set-as-website-default");
 
-    // Section Editor Modal Elements
-    const sectionEditorModal = document.getElementById("section-editor-modal");
-    const closeSecModalBtn = document.getElementById("close-sec-modal-btn");
-    const editSecName = document.getElementById("edit_sec_name");
-    const editSecInstruction = document.getElementById("edit_sec_instruction");
-    const editSecType = document.getElementById("edit_sec_type");
-    const editSecReq = document.getElementById("edit_sec_req");
-    const btnSaveSectionModal = document.getElementById("btn-save-section-modal");
+    // Step 3 Images
+    const step3ImageFile             = document.getElementById("step3_image_file");
+    const step3SectionSelect         = document.getElementById("step3_section_select");
+    const step3PositionSelect        = document.getElementById("step3_position_select");
+    const step3SizeSelect            = document.getElementById("step3_size_select");
+    const step3AlignSelect           = document.getElementById("step3_align_select");
+    const btnSaveStep3Image          = document.getElementById("btn-save-step3-image");
+    const assignedImagesVisualList   = document.getElementById("assigned-images-visual-list");
+    const structureTreeDiagram       = document.getElementById("structure-tree-diagram");
+    const imgSaveMsg                 = document.getElementById("img-save-msg");
+    const step3ImagePreview          = document.getElementById("step3-image-preview");
+    const step3PreviewImg            = document.getElementById("step3-preview-img");
 
-    // Global State
-    let activeStep = 1;
-    let selectedFormatMode = "default";
-    let userTemplates = [];
-    let activeTemplate = null;
+    // Step 5 Review
+    const step5PreviewRendered       = document.getElementById("step5-preview-rendered");
+    const step5ValidationCard        = document.getElementById("step5-validation-card");
+    const btnFinalPublish            = document.getElementById("btn-final-publish");
+
+    // Section Editor Modal
+    const sectionEditorModal         = document.getElementById("section-editor-modal");
+    const closeSecModalBtn           = document.getElementById("close-sec-modal-btn");
+    const editSecName                = document.getElementById("edit_sec_name");
+    const editSecInstruction         = document.getElementById("edit_sec_instruction");
+    const editSecType                = document.getElementById("edit_sec_type");
+    const editSecReq                 = document.getElementById("edit_sec_req");
+    const btnSaveSectionModal        = document.getElementById("btn-save-section-modal");
+
+    // Content Formats Page
+    const formatsListView            = document.getElementById("formats-list-view");
+    const formatBuilderView          = document.getElementById("format-builder-view");
+    const formatsListContainer       = document.getElementById("formats-list-container");
+    const btnCreateNewFormat         = document.getElementById("btn-create-new-format");
+    const btnBackToFormatsList       = document.getElementById("btn-back-to-formats-list");
+    const btnAddBuilderSection       = document.getElementById("btn-add-builder-section");
+    const btnSaveTemplate            = document.getElementById("btn-save-template");
+    const btnCancelBuilder           = document.getElementById("btn-cancel-builder");
+    const builderSectionsContainer   = document.getElementById("builder-sections-container");
+    const builderViewTitle           = document.getElementById("builder-view-title");
+    const builderTemplateNameEl      = document.getElementById("builder_template_name");
+    const builderTemplateDescEl      = document.getElementById("builder_template_desc");
+    const builderSaveMsg             = document.getElementById("builder-save-msg");
+
+    // ===================================================================
+    // GLOBAL STATE
+    // ===================================================================
+    let activeStep             = 1;
+    let userTemplates          = [];
+    let activeTemplate         = null;   // Format in use for images/preview
+    let articleFormat          = null;   // Article-specific format override
     let persistentActiveFormat = { mode: "default", template_id: null, template_name: "Default SEO Format" };
-    let currentEditingSecCard = null;
-    let imageAssignments = [];
+    let currentEditingSecCard  = null;
+    let imageAssignments       = [];
+    let savedContentSetup      = null;   // Loaded default content settings
+    let currentEditingTemplateId = null; // For format builder
+    let selectedFormatIdInModal  = null; // Tracked selection in change-format modal
 
-    // --- Active Format & Database Memory Loader ---
-    async function loadActiveFormat() {
-        try {
-            const res = await fetch("/api/user/active-format");
-            const data = await res.json();
-            if (data.mode) {
-                persistentActiveFormat = data;
-                selectedFormatMode = data.mode;
-                
-                const activeTitle = document.getElementById("active-format-title");
-                if (activeTitle) {
-                    if (data.mode === "custom" && data.template_name) {
-                        activeTitle.textContent = `🛠 Custom Format: ${data.template_name}`;
-                    } else {
-                        activeTitle.textContent = `⚡ Default SEO Format`;
-                    }
-                }
-            }
-        } catch (e) {
-            console.error("Failed to load active format", e);
-        }
+    // ===================================================================
+    // UTILITIES
+    // ===================================================================
+    function showMsg(el, text, type = "success", duration = 3500) {
+        if (!el) return;
+        el.className = type === "success" ? "success-msg" : "error-msg";
+        el.textContent = text;
+        el.classList.remove("hidden");
+        if (duration > 0) setTimeout(() => el.classList.add("hidden"), duration);
     }
 
-    // Change Format Modal Handlers
-    const btnOpenChangeFormat = document.getElementById("btn-open-change-format");
-    const changeFormatModal = document.getElementById("change-format-modal");
-    const closeFormatModalBtn = document.getElementById("close-format-modal-btn");
-    const modalSavedTemplateSelect = document.getElementById("modal_saved_template_select");
-    const btnApplyFormatModal = document.getElementById("btn-apply-format-modal");
-    const btnResetFormatDefault = document.getElementById("btn-reset-format-default");
-
-    if (btnOpenChangeFormat) {
-        btnOpenChangeFormat.addEventListener("click", async () => {
-            if (userTemplates.length === 0) await loadTemplates();
-            
-            if (modalSavedTemplateSelect) {
-                modalSavedTemplateSelect.innerHTML = userTemplates.map(t => `
-                    <option value="${t.id}">${t.name} ${t.is_default ? '(Default)' : ''}</option>
-                `).join("");
-            }
-            changeFormatModal.classList.remove("hidden");
-        });
-    }
-
-    if (closeFormatModalBtn) {
-        closeFormatModalBtn.addEventListener("click", () => changeFormatModal.classList.add("hidden"));
-    }
-
-    if (btnApplyFormatModal) {
-        btnApplyFormatModal.addEventListener("click", async () => {
-            const modeRadios = document.getElementsByName("modal_format_mode");
-            let chosenMode = "default";
-            for (const r of modeRadios) {
-                if (r.checked) chosenMode = r.value;
-            }
-
-            const tmplId = chosenMode === "custom" ? parseInt(modalSavedTemplateSelect.value) : null;
-            const prefRadios = document.getElementsByName("modal_usage_pref");
-            let saveAsActive = true;
-            for (const r of prefRadios) {
-                if (r.checked) saveAsActive = (r.value === "active");
-            }
-
-            if (saveAsActive) {
-                try {
-                    await fetch("/api/user/active-format", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ mode: chosenMode, template_id: tmplId, save_as_active: true })
-                    });
-                    alert("Active format saved permanently to database!");
-                } catch (e) {
-                    alert("Failed to save format preference: " + e);
-                }
-            } else {
-                alert("Format applied for current article only.");
-            }
-
-            selectedFormatMode = chosenMode;
-            if (chosenMode === "custom" && tmplId) {
-                activeTemplate = userTemplates.find(t => t.id === tmplId) || activeTemplate;
-            }
-            changeFormatModal.classList.add("hidden");
-            loadActiveFormat();
-        });
-    }
-
-    if (btnResetFormatDefault) {
-        btnResetFormatDefault.addEventListener("click", async () => {
-            if (confirm("Reset active format to Default SEO Format? This will be used automatically for all future articles.")) {
-                try {
-                    await fetch("/api/user/active-format", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ mode: "default", template_id: null, save_as_active: true })
-                    });
-                    alert("Reset to Default SEO Format.");
-                    selectedFormatMode = "default";
-                    changeFormatModal.classList.add("hidden");
-                    loadActiveFormat();
-                } catch (e) {
-                    alert("Reset failed: " + e);
-                }
-            }
-        });
-    }
-
-    const navWebsites = document.getElementById("nav-websites");
-    const navDrafts = document.getElementById("nav-drafts");
-    const navMoreBtn = document.getElementById("nav-more-btn");
-    const navMoreMenu = document.getElementById("nav-more-menu");
-
+    // ===================================================================
+    // NAV DROPDOWN
+    // ===================================================================
     if (navMoreBtn && navMoreMenu) {
-        navMoreBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            navMoreMenu.classList.toggle("hidden");
-        });
-        document.addEventListener("click", () => {
-            navMoreMenu.classList.add("hidden");
-        });
+        navMoreBtn.addEventListener("click", (e) => { e.stopPropagation(); navMoreMenu.classList.toggle("hidden"); });
+        document.addEventListener("click", () => navMoreMenu.classList.add("hidden"));
     }
 
-    // --- 1. CLEAN TABBED VIEW SWITCHER ---
-
+    // ===================================================================
+    // TAB SWITCHER
+    // ===================================================================
     function switchTab(viewName, navBtn) {
         tabViews.forEach(v => v.classList.add("hidden"));
-        const targetView = document.getElementById(`view-${viewName}`);
-        if (targetView) targetView.classList.remove("hidden");
+        const target = document.getElementById(`view-${viewName}`);
+        if (target) target.classList.remove("hidden");
 
-        [navHome, navCreate, navTemplates, navHistory, navWebsites, navMedia, navDrafts, navSettings, navAdmin].forEach(b => {
-            if (b) b.classList.remove("active");
-        });
+        [navHome, navCreate, navTemplates, navHistory, navWebsites, navMedia, navDrafts, navSettings, navAdmin]
+            .forEach(b => { if (b) b.classList.remove("active"); });
         if (navBtn) navBtn.classList.add("active");
-
         if (navMoreMenu) navMoreMenu.classList.add("hidden");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
-        // Trigger specific view loaders
-        if (viewName === "home") {
-            loadUsage();
-            loadJobsHome();
-        } else if (viewName === "create") {
-            goToStep(1);
-        } else if (viewName === "templates") {
-            loadTemplates();
-        } else if (viewName === "websites") {
-            loadWebsitesView();
-        } else if (viewName === "media") {
-            loadMediaGallery();
-        } else if (viewName === "drafts") {
-            loadDraftsPage();
-        } else if (viewName === "history") {
-            loadHistory();
-        } else if (viewName === "settings") {
-            loadSettings();
+        if      (viewName === "home")      { loadUsage(); loadJobsHome(); }
+        else if (viewName === "create")    { initCreateView(); }
+        else if (viewName === "templates") { loadFormatsListView(); }
+        else if (viewName === "websites")  { loadWebsitesView(); }
+        else if (viewName === "media")     { loadMediaGallery(); }
+        else if (viewName === "drafts")    { loadDraftsPage(); }
+        else if (viewName === "history")   { loadHistory(); }
+        else if (viewName === "settings")  { loadSettings(); }
+    }
+
+    if (navHome)      navHome.addEventListener("click",      () => switchTab("home",      navHome));
+    if (navCreate)    navCreate.addEventListener("click",    () => switchTab("create",    navCreate));
+    if (navTemplates) navTemplates.addEventListener("click", () => switchTab("templates", navTemplates));
+    if (navHistory)   navHistory.addEventListener("click",   () => switchTab("history",   navHistory));
+    if (navWebsites)  navWebsites.addEventListener("click",  () => switchTab("websites",  navWebsites));
+    if (navMedia)     navMedia.addEventListener("click",     () => switchTab("media",     navMedia));
+    if (navDrafts)    navDrafts.addEventListener("click",    () => switchTab("drafts",    navDrafts));
+    if (navSettings)  navSettings.addEventListener("click",  () => switchTab("settings",  navSettings));
+
+    const btnHomeCreate = document.getElementById("btn-home-create-article");
+    if (btnHomeCreate) btnHomeCreate.addEventListener("click", () => switchTab("create", navCreate));
+
+    // ===================================================================
+    // COLLAPSIBLE SECTIONS (Home Dashboard)
+    // ===================================================================
+    function setupCollapsibles() {
+        document.querySelectorAll(".btn-toggle-panel").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const targetId = btn.getAttribute("data-target");
+                const body = document.getElementById(targetId);
+                if (!body) return;
+                const isCollapsed = body.classList.contains("hidden");
+                body.classList.toggle("hidden");
+                btn.textContent = isCollapsed ? "−" : "+";
+                if (isCollapsed) {
+                    if (targetId === "home-drafts-body")  loadHomeDrafts();
+                    if (targetId === "home-history-body") loadHomeHistory();
+                }
+            });
+        });
+
+        document.querySelectorAll(".collapsible-header").forEach(header => {
+            header.addEventListener("click", (e) => {
+                if (e.target.classList.contains("btn-toggle-panel")) return;
+                const btn = header.querySelector(".btn-toggle-panel");
+                if (btn) btn.click();
+            });
+        });
+
+        const btnExpandAll  = document.getElementById("btn-expand-all");
+        const btnCollapseAll = document.getElementById("btn-collapse-all");
+
+        if (btnExpandAll) {
+            btnExpandAll.addEventListener("click", () => {
+                document.querySelectorAll(".collapsible-body").forEach(b => b.classList.remove("hidden"));
+                document.querySelectorAll(".btn-toggle-panel").forEach(b => b.textContent = "−");
+                loadHomeDrafts();
+                loadHomeHistory();
+            });
+        }
+        if (btnCollapseAll) {
+            btnCollapseAll.addEventListener("click", () => {
+                document.querySelectorAll(".collapsible-body").forEach(b => b.classList.add("hidden"));
+                document.querySelectorAll(".btn-toggle-panel").forEach(b => b.textContent = "+");
+                // Keep jobs open by default
+                const jobsBody = document.getElementById("home-jobs-body");
+                if (jobsBody) {
+                    jobsBody.classList.remove("hidden");
+                    const jobsBtn = document.querySelector('[data-target="home-jobs-body"]');
+                    if (jobsBtn) jobsBtn.textContent = "−";
+                }
+            });
         }
     }
+    setupCollapsibles();
 
-    if (navHome) navHome.addEventListener("click", () => switchTab("home", navHome));
-    if (navCreate) navCreate.addEventListener("click", () => switchTab("create", navCreate));
-    if (navTemplates) navTemplates.addEventListener("click", () => switchTab("templates", navTemplates));
-    if (navHistory) navHistory.addEventListener("click", () => switchTab("history", navHistory));
-    if (navWebsites) navWebsites.addEventListener("click", () => switchTab("websites", navWebsites));
-    if (navMedia) navMedia.addEventListener("click", () => switchTab("media", navMedia));
-    if (navDrafts) navDrafts.addEventListener("click", () => switchTab("drafts", navDrafts));
-    if (navSettings) navSettings.addEventListener("click", () => switchTab("settings", navSettings));
-
-    async function loadWebsitesView() {
-        try {
-            const res = await fetch("/api/user/settings");
-            const data = await res.json();
-            const urlEl = document.getElementById("site_display_url");
-            const userEl = document.getElementById("site_display_user");
-            if (urlEl && data.wp_url) urlEl.textContent = data.wp_url;
-            if (userEl && data.wp_username) userEl.textContent = `Username: ${data.wp_username}`;
-        } catch (e) {}
-    }
-
-    async function loadDraftsPage() {
-        try {
-            const res = await fetch("/api/drafts");
-            const drafts = await res.json();
-            const container = document.getElementById("drafts-container-page");
-            if (!container || !Array.isArray(drafts)) return;
-            if (drafts.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary);">No drafts pending review.</p>`;
-                return;
-            }
-            container.innerHTML = drafts.map(d => `
-                <div style="background: white; border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">${d.game_name} (${d.provider})</strong>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${d.created_at}</div>
-                    </div>
-                    <button class="btn-primary publish-draft-btn" data-id="${d.id}" style="padding: 8px 16px; font-size: 0.9rem;">🚀 Publish to WP</button>
-                </div>
-            `).join("");
-        } catch (e) {}
-    }
-
-    // --- 2. GUIDED WORKFLOW STEPPER MANAGER ---
-
+    // ===================================================================
+    // STEPPER
+    // ===================================================================
     function goToStep(stepNum) {
         activeStep = parseInt(stepNum);
         stepItems.forEach(item => {
             const num = parseInt(item.getAttribute("data-step"));
-            item.classList.toggle("active", num === activeStep);
+            item.classList.toggle("active",    num === activeStep);
+            item.classList.toggle("completed", num < activeStep);
         });
+        workflowStepContents.forEach(c => c.classList.add("hidden"));
+        const target = document.getElementById(`workflow-step-${activeStep}`);
+        if (target) target.classList.remove("hidden");
 
-        workflowStepContents.forEach(content => {
-            content.classList.add("hidden");
-        });
+        if      (activeStep === 3) loadStep3Data();
+        else if (activeStep === 4) prefillSeoStep();
+        else if (activeStep === 5) loadStep5Review();
+    }
 
-        const targetContent = document.getElementById(`workflow-step-${activeStep}`);
-        if (targetContent) targetContent.classList.remove("hidden");
+    stepItems.forEach(item => item.addEventListener("click", () => goToStep(item.getAttribute("data-step"))));
+    btnNextSteps.forEach(btn => btn.addEventListener("click", () => goToStep(btn.getAttribute("data-next"))));
+    btnPrevSteps.forEach(btn => btn.addEventListener("click", () => goToStep(btn.getAttribute("data-prev"))));
 
-        if (activeStep === 3) {
-            loadStep3Data();
-        } else if (activeStep === 5) {
-            renderStep5Preview();
-        } else if (activeStep === 6) {
-            renderStep6Validation();
+    // ===================================================================
+    // INIT CREATE VIEW
+    // ===================================================================
+    async function initCreateView() {
+        if (userTemplates.length === 0) await loadTemplates();
+        await loadContentSettings();
+        updateFormatStepDisplay();
+        goToStep(1);
+    }
+
+    // ===================================================================
+    // CONTENT SETUP STATE MACHINE
+    // ===================================================================
+    async function loadContentSettings() {
+        try {
+            const res  = await fetch("/api/user/content-settings");
+            const data = await res.json();
+            savedContentSetup = data;
+            const hasSaved = data && (data.default_tone || data.default_word_count);
+            if (hasSaved) {
+                showContentSetupBanner(data);
+            } else {
+                showContentSetupEditForm(null);
+            }
+        } catch (e) {
+            showContentSetupEditForm(null);
         }
     }
 
-    stepItems.forEach(item => {
-        item.addEventListener("click", () => {
-            const stepNum = item.getAttribute("data-step");
-            goToStep(stepNum);
+    function showContentSetupBanner(data) {
+        if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.remove("hidden");
+        if (contentSetupForm)         contentSetupForm.classList.add("hidden");
+
+        const toneMap   = { professional: "Professional", engaging: "Engaging & Casual", expert: "Expert" };
+        const lengthMap = { "1500": "Standard (1,500+ words)", "2500": "In-Depth (2,500+ words)", "1000": "Short (1,000+ words)" };
+        if (savedSetupSummary && data) {
+            const parts = [];
+            if (data.default_tone)       parts.push(toneMap[data.default_tone] || data.default_tone);
+            if (data.default_word_count) parts.push(lengthMap[data.default_word_count] || data.default_word_count);
+            savedSetupSummary.textContent = parts.join(" • ");
+        }
+        if (data) populateContentSetupForm(data);
+    }
+
+    function showContentSetupEditForm(data) {
+        if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
+        if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
+        if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
+        if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
+        if (data) populateContentSetupForm(data);
+    }
+
+    function populateContentSetupForm(data) {
+        const tone   = document.getElementById("setup_tone");
+        const length = document.getElementById("setup_word_count");
+        if (tone   && data.default_tone)       tone.value   = data.default_tone;
+        if (length && data.default_word_count) length.value = data.default_word_count;
+    }
+
+    if (btnMakeChangesSetup) {
+        btnMakeChangesSetup.addEventListener("click", () => {
+            if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
+            if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
+            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
+            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
+            // Article-only by default when "Make Changes" is clicked
+            if (chkSaveAsDefaultSetup) chkSaveAsDefaultSetup.checked = false;
         });
-    });
+    }
 
-    btnNextSteps.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const next = btn.getAttribute("data-next");
-            goToStep(next);
+    if (btnChangeSetup) {
+        btnChangeSetup.addEventListener("click", () => {
+            if (contentSetupSavedBanner)  contentSetupSavedBanner.classList.add("hidden");
+            if (contentSetupForm)         contentSetupForm.classList.remove("hidden");
+            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
+            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
+            // Change entire default
+            if (chkSaveAsDefaultSetup) chkSaveAsDefaultSetup.checked = true;
         });
-    });
+    }
 
-    btnPrevSteps.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const prev = btn.getAttribute("data-prev");
-            goToStep(prev);
-        });
-    });
-
-    // Quick Form on Home View
-    const urlQueueFormHome = document.getElementById("url-queue-form-home");
-    if (urlQueueFormHome) {
-        urlQueueFormHome.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append("url", document.getElementById("home_input_url").value);
-            formData.append("game_name", document.getElementById("home_input_game").value);
-            formData.append("provider", document.getElementById("home_input_provider").value);
-            formData.append("market", document.getElementById("home_input_market").value);
-
-            try {
-                const res = await fetch("/api/links", { method: "POST", body: formData });
-                const data = await res.json();
-                alert(data.message || "Job queued successfully!");
-                document.getElementById("home_input_url").value = "";
-                loadJobsHome();
-            } catch (err) {
-                alert("Queueing failed: " + err);
+    if (btnCancelContentSetup) {
+        btnCancelContentSetup.addEventListener("click", () => {
+            if (savedContentSetup) showContentSetupBanner(savedContentSetup);
+            else {
+                if (contentSetupForm)  contentSetupForm.classList.add("hidden");
             }
         });
     }
 
-    // --- 3. FORMAT MODE & TEMPLATES ---
-
-    if (cardFormatDefault) {
-        cardFormatDefault.addEventListener("click", () => {
-            selectedFormatMode = "default";
-            cardFormatDefault.classList.add("selected");
-            cardFormatCustom.classList.remove("selected");
-            customBuilderView.classList.add("hidden");
+    if (btnSaveContentSetup) {
+        btnSaveContentSetup.addEventListener("click", async () => {
+            const saveAsDefault = chkSaveAsDefaultSetup && chkSaveAsDefaultSetup.checked;
+            const payload = {
+                default_tone:             document.getElementById("setup_tone")?.value || "professional",
+                default_word_count:       document.getElementById("setup_word_count")?.value || "1500",
+                default_market:           document.getElementById("input_market")?.value || "UK",
+                default_keyword_density:  "1.2",
+                save_as_default:          saveAsDefault
+            };
+            try {
+                const res = await fetch("/api/user/content-settings", {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    savedContentSetup = payload;
+                    if (contentSetupSaveActions)  contentSetupSaveActions.classList.add("hidden");
+                    if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.remove("hidden");
+                }
+            } catch (e) { console.error("Failed to save content setup", e); }
         });
     }
 
-    if (cardFormatCustom) {
-        cardFormatCustom.addEventListener("click", () => {
-            selectedFormatMode = "custom";
-            cardFormatCustom.classList.add("selected");
-            cardFormatDefault.classList.remove("selected");
-            customBuilderView.classList.remove("hidden");
+    if (btnMakeChangesAfterSave) {
+        btnMakeChangesAfterSave.addEventListener("click", () => {
+            if (contentSetupSavedConfirm) contentSetupSavedConfirm.classList.add("hidden");
+            if (contentSetupSaveActions)  contentSetupSaveActions.classList.remove("hidden");
         });
     }
 
+    if (btnSetAsDefault) {
+        btnSetAsDefault.addEventListener("click", async () => {
+            const payload = {
+                default_tone:            document.getElementById("setup_tone")?.value || "professional",
+                default_word_count:      document.getElementById("setup_word_count")?.value || "1500",
+                default_market:          document.getElementById("input_market")?.value || "UK",
+                default_keyword_density: "1.2",
+                save_as_default:         true
+            };
+            try {
+                const res = await fetch("/api/user/content-settings", {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    savedContentSetup = payload;
+                    btnSetAsDefault.textContent = "⭐ Saved as Default ✓";
+                    btnSetAsDefault.disabled    = true;
+                }
+            } catch (e) {}
+        });
+    }
+
+    // ===================================================================
+    // ACTIVE FORMAT — LOAD & DISPLAY
+    // ===================================================================
+    async function loadActiveFormat() {
+        try {
+            const res  = await fetch("/api/user/active-format");
+            const data = await res.json();
+            if (data.mode) {
+                persistentActiveFormat = { ...data };
+            }
+        } catch (e) { console.error("Failed to load active format", e); }
+    }
+
+    function updateFormatStepDisplay() {
+        const titleEl    = document.getElementById("active-format-title");
+        const metaEl     = document.getElementById("active-format-meta");
+        const previewEl  = document.getElementById("active-format-sections-preview");
+
+        // Resolve template object
+        let tmpl = null;
+        if (persistentActiveFormat.mode === "custom" && persistentActiveFormat.template_id) {
+            tmpl = userTemplates.find(t => t.id === persistentActiveFormat.template_id) || null;
+        }
+        if (!tmpl) tmpl = userTemplates.find(t => t.is_default) || userTemplates[0] || null;
+
+        if (titleEl) {
+            if (tmpl) {
+                titleEl.textContent = `${tmpl.is_default ? "⭐ " : "🎨 "}${tmpl.name}`;
+            } else {
+                titleEl.textContent = "⭐ Default SEO Format";
+            }
+        }
+
+        const count = tmpl ? tmpl.sections.length : 0;
+        if (metaEl) {
+            metaEl.innerHTML = count > 0
+                ? `<span style="color:#047857;font-weight:600;">✓ ${count} sections</span>${tmpl?.is_default ? ' &nbsp;•&nbsp; <span class="badge badge-info">Default</span>' : ''}`
+                : `<span style="color:var(--text-muted);">Loading...</span>`;
+        }
+
+        if (previewEl && tmpl) {
+            const shown = tmpl.sections.slice(0, 6);
+            previewEl.innerHTML = shown.map(s =>
+                `<span style="background:rgba(0,0,0,0.06);padding:3px 9px;border-radius:6px;font-size:0.77rem;color:var(--text-secondary);">${s.name}</span>`
+            ).join("") + (tmpl.sections.length > 6 ? `<span style="font-size:0.77rem;color:var(--text-muted);padding:3px 4px;">+${tmpl.sections.length - 6} more</span>` : "");
+        } else if (previewEl) {
+            previewEl.innerHTML = "";
+        }
+
+        if (tmpl) activeTemplate = tmpl;
+    }
+
+    // ===================================================================
+    // CHANGE FORMAT MODAL — FULLY FIXED
+    // ===================================================================
+    if (btnOpenChangeFormat) {
+        btnOpenChangeFormat.addEventListener("click", async () => {
+            if (userTemplates.length === 0) await loadTemplates();
+            renderFormatModalOptions();
+            changeFormatModal.classList.remove("hidden"); // ← The key fix: modal is now at root level
+        });
+    }
+
+    function renderFormatModalOptions() {
+        if (!formatModalOptionsList) return;
+
+        // Determine which format is currently selected for this article
+        const currentId = articleFormat ? articleFormat.id :
+            (persistentActiveFormat.mode === "custom" ? persistentActiveFormat.template_id : null);
+
+        if (userTemplates.length === 0) {
+            formatModalOptionsList.innerHTML = `
+                <p style="color:var(--text-secondary);text-align:center;padding:20px;">
+                    No saved formats found.
+                    <a href="#" id="modal-create-link" style="color:var(--accent-orange-strong);">Create one first</a>
+                </p>`;
+            document.getElementById("modal-create-link")?.addEventListener("click", e => {
+                e.preventDefault();
+                changeFormatModal.classList.add("hidden");
+                switchTab("templates", navTemplates);
+            });
+            return;
+        }
+
+        formatModalOptionsList.innerHTML = userTemplates.map(t => {
+            // Select default template when no explicit selection
+            const isSelected = currentId ? (t.id === currentId) : t.is_default;
+            return `
+                <label class="format-option-card ${isSelected ? "selected" : ""}" data-tmpl-id="${t.id}">
+                    <input type="radio" name="modal_format_radio" value="${t.id}" ${isSelected ? "checked" : ""} style="flex-shrink:0;margin-top:2px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <strong style="font-size:0.95rem;">${t.is_default ? "⭐ " : ""}${t.name}</strong>
+                            ${t.is_default ? '<span class="badge badge-info">Default</span>' : ""}
+                        </div>
+                        ${t.description ? `<div style="font-size:0.82rem;color:var(--text-secondary);margin-top:2px;">${t.description}</div>` : ""}
+                        <div style="font-size:0.79rem;color:var(--text-muted);margin-top:3px;">${t.sections.length} sections: ${t.sections.slice(0,4).map(s=>s.name).join(", ")}${t.sections.length>4?"...":""}</div>
+                    </div>
+                </label>`;
+        }).join("");
+
+        // Track initial selection
+        const initialChecked = formatModalOptionsList.querySelector("input[type=radio]:checked");
+        if (initialChecked) selectedFormatIdInModal = parseInt(initialChecked.value);
+
+        // Wire radio change
+        formatModalOptionsList.querySelectorAll("input[type=radio]").forEach(radio => {
+            radio.addEventListener("change", () => {
+                selectedFormatIdInModal = parseInt(radio.value);
+                formatModalOptionsList.querySelectorAll(".format-option-card").forEach(c => c.classList.remove("selected"));
+                radio.closest(".format-option-card")?.classList.add("selected");
+            });
+        });
+
+        // Click on label = select radio
+        formatModalOptionsList.querySelectorAll(".format-option-card").forEach(card => {
+            card.addEventListener("click", e => {
+                if (e.target.type === "radio") return;
+                const radio = card.querySelector("input[type=radio]");
+                if (radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event("change")); }
+            });
+        });
+    }
+
+    if (closeFormatModalBtn) closeFormatModalBtn.addEventListener("click", () => changeFormatModal.classList.add("hidden"));
+    if (btnCancelFormatModal)  btnCancelFormatModal.addEventListener("click", () => changeFormatModal.classList.add("hidden"));
+
+    if (btnApplyFormatModal) {
+        btnApplyFormatModal.addEventListener("click", async () => {
+            // Fallback to default if nothing selected
+            if (!selectedFormatIdInModal) {
+                const def = userTemplates.find(t => t.is_default);
+                if (def) selectedFormatIdInModal = def.id;
+            }
+
+            const selected = userTemplates.find(t => t.id === selectedFormatIdInModal);
+            if (!selected) { changeFormatModal.classList.add("hidden"); return; }
+
+            // Apply to this article (in memory)
+            articleFormat  = selected;
+            activeTemplate = selected;
+
+            // Update the displayed format in Step 2
+            persistentActiveFormat = { mode: "custom", template_id: selected.id, template_name: selected.name };
+            updateFormatStepDisplay();
+
+            // Show override notice if different from website default
+            const def = userTemplates.find(t => t.is_default);
+            if (!def || selected.id !== def.id) {
+                if (formatArticleOverride) formatArticleOverride.classList.remove("hidden");
+                if (articleOverrideName)   articleOverrideName.textContent = `Using: ${selected.name} (${selected.sections.length} sections)`;
+            } else {
+                if (formatArticleOverride) formatArticleOverride.classList.add("hidden");
+            }
+
+            // Persist as website default only if checkbox is ticked
+            if (chkSetAsWebsiteDefault && chkSetAsWebsiteDefault.checked) {
+                try {
+                    await fetch("/api/user/active-format", {
+                        method:  "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body:    JSON.stringify({ mode: "custom", template_id: selected.id, save_as_active: true })
+                    });
+                } catch (e) { console.error("Failed to save format as default", e); }
+            }
+
+            if (chkSetAsWebsiteDefault) chkSetAsWebsiteDefault.checked = false;
+            changeFormatModal.classList.add("hidden");
+        });
+    }
+
+    // Handle "Also make default" checkbox from Step 2 override notice
+    if (chkMakeFormatDefault) {
+        chkMakeFormatDefault.addEventListener("change", async () => {
+            if (chkMakeFormatDefault.checked && articleFormat) {
+                try {
+                    await fetch("/api/user/active-format", {
+                        method:  "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body:    JSON.stringify({ mode: "custom", template_id: articleFormat.id, save_as_active: true })
+                    });
+                } catch (e) {}
+            }
+        });
+    }
+
+    // ===================================================================
+    // EDIT FORMAT (navigate to builder)
+    // ===================================================================
+    if (btnEditFormat) {
+        btnEditFormat.addEventListener("click", () => {
+            if (activeTemplate && activeTemplate.id) {
+                currentEditingTemplateId = activeTemplate.id;
+                openFormatBuilder(activeTemplate);
+                switchTab("templates", navTemplates);
+            } else {
+                switchTab("templates", navTemplates);
+            }
+        });
+    }
+
+    // ===================================================================
+    // LOAD TEMPLATES
+    // ===================================================================
     async function loadTemplates() {
         try {
-            const res = await fetch("/api/templates");
+            const res  = await fetch("/api/templates");
             const data = await res.json();
             if (!Array.isArray(data)) return;
-            userTemplates = data;
-            activeTemplate = data.find(t => t.is_default) || data[0];
-            renderCustomSectionsList(activeTemplate);
+            userTemplates  = data;
+            activeTemplate = data.find(t => t.is_default) || data[0] || null;
             updateDevDiagnostics();
-        } catch (e) {
-            console.error("Failed to load templates", e);
-        }
+        } catch (e) { console.error("Failed to load templates", e); }
     }
 
-    function renderCustomSectionsList(tmpl) {
-        if (!tmpl || !customSectionsList) return;
-        customSectionsList.innerHTML = tmpl.sections.map((s, idx) => `
-            <div class="custom-sec-row" data-sec-id="${s.id}" data-name="${s.name}" data-type="${s.content_type || 'paragraph'}" data-instruction="${s.ai_instruction || ''}" data-req="${s.required ? 'true' : 'false'}" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.08);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <strong style="color: var(--text-muted);">${idx + 1}.</strong>
-                    <span style="font-weight: 700; color: var(--text-primary);">${s.name}</span>
-                    <span class="badge badge-info" style="text-transform: capitalize;">${s.content_type || 'paragraph'}</span>
-                    ${s.required ? '<span class="badge badge-success">Required</span>' : ''}
+    // ===================================================================
+    // CONTENT FORMATS PAGE
+    // ===================================================================
+    async function loadFormatsListView() {
+        if (userTemplates.length === 0) await loadTemplates();
+        if (formatsListView)   formatsListView.classList.remove("hidden");
+        if (formatBuilderView) formatBuilderView.classList.add("hidden");
+        renderFormatsList();
+    }
+
+    function renderFormatsList() {
+        if (!formatsListContainer) return;
+        if (userTemplates.length === 0) {
+            formatsListContainer.innerHTML = `<p style="color:var(--text-secondary);">No saved formats yet. Create your first format.</p>`;
+            return;
+        }
+        formatsListContainer.innerHTML = userTemplates.map(t => `
+            <div class="format-list-item">
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                        <strong style="font-size:1rem;color:var(--text-primary);">${t.is_default ? "⭐ " : ""}${t.name}</strong>
+                        ${t.is_default ? '<span class="badge badge-info">Default</span>' : ""}
+                    </div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary);">${t.description || "No description"}</div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${t.sections.length} sections: ${t.sections.slice(0,5).map(s=>s.name).join(", ")}${t.sections.length>5?"...":""}</div>
                 </div>
-                <div style="display: flex; gap: 6px;">
-                    <button class="btn-secondary-sm edit-sec-btn">Edit</button>
-                    <button class="btn-secondary-sm del-sec-btn" style="color: #EF4444;">Delete</button>
+                <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;">
+                    <button class="btn-secondary-sm format-use-btn" data-id="${t.id}" style="color:var(--accent-orange-strong);">Use</button>
+                    <button class="btn-secondary-sm format-edit-btn" data-id="${t.id}">Edit</button>
+                    <button class="btn-secondary-sm format-dup-btn"  data-id="${t.id}">Duplicate</button>
+                    ${!t.is_default ? `<button class="btn-secondary-sm format-del-btn" data-id="${t.id}" style="color:#EF4444;">Delete</button>` : ""}
                 </div>
             </div>
         `).join("");
 
-        document.querySelectorAll(".edit-sec-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                const row = e.target.closest(".custom-sec-row");
-                openSectionModal(row);
+        formatsListContainer.querySelectorAll(".format-use-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const id   = parseInt(btn.getAttribute("data-id"));
+                const tmpl = userTemplates.find(t => t.id === id);
+                if (!tmpl) return;
+                try {
+                    await fetch("/api/user/active-format", {
+                        method:  "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body:    JSON.stringify({ mode: "custom", template_id: id, save_as_active: true })
+                    });
+                    persistentActiveFormat = { mode: "custom", template_id: id, template_name: tmpl.name };
+                    activeTemplate         = tmpl;
+                    btn.textContent = "✓ Using"; btn.disabled = true;
+                    setTimeout(() => { btn.textContent = "Use"; btn.disabled = false; }, 2000);
+                } catch (e) {}
             });
         });
 
-        document.querySelectorAll(".del-sec-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                e.target.closest(".custom-sec-row").remove();
+        formatsListContainer.querySelectorAll(".format-edit-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id   = parseInt(btn.getAttribute("data-id"));
+                const tmpl = userTemplates.find(t => t.id === id);
+                if (tmpl) { currentEditingTemplateId = id; openFormatBuilder(tmpl); }
+            });
+        });
+
+        formatsListContainer.querySelectorAll(".format-dup-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const id = parseInt(btn.getAttribute("data-id"));
+                try {
+                    const res = await fetch(`/api/templates/${id}/duplicate`, { method: "POST" });
+                    if (res.ok) { await loadTemplates(); renderFormatsList(); }
+                } catch (e) {}
+            });
+        });
+
+        formatsListContainer.querySelectorAll(".format-del-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const id = parseInt(btn.getAttribute("data-id"));
+                if (!confirm("Delete this format? This cannot be undone.")) return;
+                try {
+                    const res = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+                    if (res.ok) { await loadTemplates(); renderFormatsList(); }
+                } catch (e) {}
             });
         });
     }
 
+    if (btnCreateNewFormat) {
+        btnCreateNewFormat.addEventListener("click", () => {
+            currentEditingTemplateId = null;
+            openFormatBuilder(null);
+        });
+    }
+
+    if (btnBackToFormatsList || btnCancelBuilder) {
+        [btnBackToFormatsList, btnCancelBuilder].forEach(btn => {
+            if (btn) btn.addEventListener("click", () => {
+                if (formatsListView)   formatsListView.classList.remove("hidden");
+                if (formatBuilderView) formatBuilderView.classList.add("hidden");
+                renderFormatsList();
+            });
+        });
+    }
+
+    function openFormatBuilder(tmpl) {
+        if (builderViewTitle)       builderViewTitle.textContent   = tmpl ? "📐 Edit Article Format" : "📐 Create Article Format";
+        if (builderTemplateNameEl)  builderTemplateNameEl.value    = tmpl ? tmpl.name : "";
+        if (builderTemplateDescEl)  builderTemplateDescEl.value    = tmpl ? (tmpl.description || "") : "";
+        if (builderSectionsContainer) builderSectionsContainer.innerHTML = "";
+        if (builderSaveMsg) { builderSaveMsg.textContent = ""; builderSaveMsg.classList.add("hidden"); }
+
+        if (tmpl && tmpl.sections) {
+            tmpl.sections.forEach((s, i) => appendBuilderSection(s, i + 1));
+        }
+        if (formatsListView)   formatsListView.classList.add("hidden");
+        if (formatBuilderView) formatBuilderView.classList.remove("hidden");
+    }
+
+    function appendBuilderSection(s, idx) {
+        if (!builderSectionsContainer) return;
+        const div = document.createElement("div");
+        div.className = "builder-section-row";
+        div.setAttribute("data-sec-id",     s.id || "");
+        div.setAttribute("data-name",       s.name || "");
+        div.setAttribute("data-instruction",s.ai_instruction || "");
+        div.setAttribute("data-type",       s.content_type || "paragraph");
+        div.setAttribute("data-req",        s.required ? "true" : "false");
+        div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                <span style="font-weight:700;color:var(--text-muted);font-size:0.85rem;min-width:22px;">${idx}.</span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;color:var(--text-primary);">${s.name}</div>
+                    <div style="font-size:0.79rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:350px;">${s.ai_instruction ? s.ai_instruction.slice(0,90) + (s.ai_instruction.length > 90 ? "..." : "") : "No instructions set"}</div>
+                </div>
+                <span class="badge badge-info" style="text-transform:capitalize;flex-shrink:0;">${s.content_type || "paragraph"}</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn-secondary-sm bld-edit-btn">Edit</button>
+                <button class="btn-secondary-sm bld-del-btn" style="color:#EF4444;">Remove</button>
+            </div>`;
+        div.querySelector(".bld-edit-btn").addEventListener("click", () => openSectionModal(div));
+        div.querySelector(".bld-del-btn").addEventListener("click", () => {
+            div.remove();
+            renumberBuilderSections();
+        });
+        builderSectionsContainer.appendChild(div);
+    }
+
+    function renumberBuilderSections() {
+        if (!builderSectionsContainer) return;
+        builderSectionsContainer.querySelectorAll(".builder-section-row").forEach((row, i) => {
+            const numEl = row.querySelector("span[style*='min-width:22px']");
+            if (numEl) numEl.textContent = `${i + 1}.`;
+        });
+    }
+
+    if (btnAddBuilderSection) btnAddBuilderSection.addEventListener("click", () => openSectionModal(null));
+
+    if (btnSaveTemplate) {
+        btnSaveTemplate.addEventListener("click", async () => {
+            const name = builderTemplateNameEl?.value?.trim();
+            if (!name) { showMsg(builderSaveMsg, "Please enter a format name.", "error"); return; }
+
+            const sections = [];
+            builderSectionsContainer?.querySelectorAll(".builder-section-row").forEach((row, i) => {
+                sections.push({
+                    id:            row.getAttribute("data-sec-id") || null,
+                    name:          row.getAttribute("data-name"),
+                    order:         i + 1,
+                    content_type:  row.getAttribute("data-type") || "paragraph",
+                    ai_instruction:row.getAttribute("data-instruction") || "",
+                    required:      row.getAttribute("data-req") === "true"
+                });
+            });
+
+            const payload = {
+                name,
+                description: builderTemplateDescEl?.value?.trim() || "",
+                mode: "custom",
+                is_default: false,
+                sections
+            };
+
+            try {
+                const res = await fetch("/api/templates", {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showMsg(builderSaveMsg, "✓ Format saved!", "success", 2000);
+                    await loadTemplates();
+                    setTimeout(() => {
+                        if (formatsListView)   formatsListView.classList.remove("hidden");
+                        if (formatBuilderView) formatBuilderView.classList.add("hidden");
+                        renderFormatsList();
+                    }, 1600);
+                } else {
+                    showMsg(builderSaveMsg, "Failed to save format.", "error");
+                }
+            } catch (e) { showMsg(builderSaveMsg, "Error: " + e.message, "error"); }
+        });
+    }
+
+    // ===================================================================
+    // SECTION EDITOR MODAL
+    // ===================================================================
     function openSectionModal(rowCard) {
         currentEditingSecCard = rowCard;
         if (rowCard) {
-            editSecName.value = rowCard.getAttribute("data-name") || "";
-            editSecInstruction.value = rowCard.getAttribute("data-instruction") || "";
-            editSecType.value = rowCard.getAttribute("data-type") || "paragraph";
-            editSecReq.checked = rowCard.getAttribute("data-req") === "true";
+            if (editSecName)        editSecName.value        = rowCard.getAttribute("data-name") || "";
+            if (editSecInstruction) editSecInstruction.value = rowCard.getAttribute("data-instruction") || "";
+            if (editSecType)        editSecType.value        = rowCard.getAttribute("data-type") || "paragraph";
+            if (editSecReq)         editSecReq.checked       = rowCard.getAttribute("data-req") === "true";
         } else {
-            editSecName.value = "";
-            editSecInstruction.value = "";
-            editSecType.value = "paragraph";
-            editSecReq.checked = true;
+            if (editSecName)        editSecName.value        = "";
+            if (editSecInstruction) editSecInstruction.value = "";
+            if (editSecType)        editSecType.value        = "paragraph";
+            if (editSecReq)         editSecReq.checked       = true;
         }
-        sectionEditorModal.classList.remove("hidden");
+        if (sectionEditorModal) sectionEditorModal.classList.remove("hidden");
     }
 
-    if (btnAddSectionUi) {
-        btnAddSectionUi.addEventListener("click", () => openSectionModal(null));
-    }
-
-    if (closeSecModalBtn) {
-        closeSecModalBtn.addEventListener("click", () => sectionEditorModal.classList.add("hidden"));
-    }
+    if (closeSecModalBtn) closeSecModalBtn.addEventListener("click", () => sectionEditorModal?.classList.add("hidden"));
 
     if (btnSaveSectionModal) {
         btnSaveSectionModal.addEventListener("click", () => {
-            const name = editSecName.value.trim();
-            if (!name) {
-                alert("Please enter a section name");
-                return;
-            }
+            const name = editSecName?.value?.trim();
+            if (!name) { alert("Please enter a section name."); return; }
+
             if (currentEditingSecCard) {
-                currentEditingSecCard.setAttribute("data-name", name);
-                currentEditingSecCard.setAttribute("data-instruction", editSecInstruction.value);
-                currentEditingSecCard.setAttribute("data-type", editSecType.value);
-                currentEditingSecCard.setAttribute("data-req", editSecReq.checked ? "true" : "false");
-                currentEditingSecCard.querySelector("span:nth-child(2)").textContent = name;
+                // Update existing row
+                currentEditingSecCard.setAttribute("data-name",        name);
+                currentEditingSecCard.setAttribute("data-instruction",  editSecInstruction?.value || "");
+                currentEditingSecCard.setAttribute("data-type",         editSecType?.value || "paragraph");
+                currentEditingSecCard.setAttribute("data-req",          editSecReq?.checked ? "true" : "false");
+                // Refresh display text
+                const nameEl  = currentEditingSecCard.querySelector("[style*='font-weight:700;color:var(--text-primary)']");
+                const instrEl = currentEditingSecCard.querySelector("[style*='font-size:0.79rem']");
+                if (nameEl)  nameEl.textContent  = name;
+                if (instrEl) instrEl.textContent = editSecInstruction?.value ? editSecInstruction.value.slice(0,90) + (editSecInstruction.value.length>90?"...":"") : "No instructions set";
             } else {
-                const secId = `sec-${Math.random().toString(36).substr(2, 9)}`;
-                const count = customSectionsList.children.length + 1;
-                const newRow = document.createElement("div");
-                newRow.className = "custom-sec-row";
-                newRow.setAttribute("data-sec-id", secId);
-                newRow.setAttribute("data-name", name);
-                newRow.setAttribute("data-type", editSecType.value);
-                newRow.setAttribute("data-instruction", editSecInstruction.value);
-                newRow.setAttribute("data-req", editSecReq.checked ? "true" : "false");
-                newRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.08);";
-                newRow.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <strong style="color: var(--text-muted);">${count}.</strong>
-                        <span style="font-weight: 700; color: var(--text-primary);">${name}</span>
-                        <span class="badge badge-info" style="text-transform: capitalize;">${editSecType.value}</span>
-                        ${editSecReq.checked ? '<span class="badge badge-success">Required</span>' : ''}
-                    </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn-secondary-sm edit-sec-btn">Edit</button>
-                        <button class="btn-secondary-sm del-sec-btn" style="color: #EF4444;">Delete</button>
-                    </div>
-                `;
-                customSectionsList.appendChild(newRow);
-                newRow.querySelector(".edit-sec-btn").addEventListener("click", () => openSectionModal(newRow));
-                newRow.querySelector(".del-sec-btn").addEventListener("click", () => newRow.remove());
+                // Add new section
+                const count = builderSectionsContainer ? builderSectionsContainer.children.length + 1 : 1;
+                appendBuilderSection({
+                    id:            `sec-${Math.random().toString(36).substr(2, 9)}`,
+                    name,
+                    ai_instruction: editSecInstruction?.value || "",
+                    content_type:   editSecType?.value || "paragraph",
+                    required:       editSecReq?.checked !== false
+                }, count);
             }
-            sectionEditorModal.classList.add("hidden");
+            if (sectionEditorModal) sectionEditorModal.classList.add("hidden");
         });
     }
 
-    // --- 4. STEP 3 IMAGE MANAGER & MEDIA LIBRARY ---
+    // ===================================================================
+    // STEP 3 — IMAGES
+    // ===================================================================
+    if (step3ImageFile) {
+        step3ImageFile.addEventListener("change", () => {
+            if (step3ImageFile.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    if (step3PreviewImg)  step3PreviewImg.src = e.target.result;
+                    if (step3ImagePreview) step3ImagePreview.classList.remove("hidden");
+                };
+                reader.readAsDataURL(step3ImageFile.files[0]);
+            }
+        });
+    }
 
     async function loadStep3Data() {
         if (!activeTemplate) await loadTemplates();
-        if (!activeTemplate || !activeTemplate.sections) return;
+        if (!activeTemplate?.sections) return;
 
-        step3SectionSelect.innerHTML = activeTemplate.sections.map(s => `
-            <option value="${s.id}">${s.name}</option>
-        `).join("");
-
+        if (step3SectionSelect) {
+            step3SectionSelect.innerHTML = `<option value="">Select Section...</option>` +
+                activeTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+        }
         loadVisualImageAssignments();
     }
 
     async function loadVisualImageAssignments() {
         try {
-            const res = await fetch("/api/images/assignments");
+            const res  = await fetch("/api/images/assignments");
             const data = await res.json();
             if (!Array.isArray(data)) return;
             imageAssignments = data;
 
-            if (data.length === 0) {
-                assignedImagesVisualList.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>`;
-            } else {
-                assignedImagesVisualList.innerHTML = data.map(a => `
-                    <div class="assigned-img-card">
-                        <img src="${a.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
-                        <div style="flex: 1;">
-                            <strong style="font-size: 0.9rem; color: var(--text-primary);">${a.filename}</strong>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                                Assigned to <strong>${a.section_name}</strong> • ${a.position.replace('_', ' ')}
+            if (assignedImagesVisualList) {
+                if (data.length === 0) {
+                    assignedImagesVisualList.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No images assigned yet.</p>`;
+                } else {
+                    assignedImagesVisualList.innerHTML = data.map(a => `
+                        <div class="assigned-img-card">
+                            <img src="${a.url}" style="width:45px;height:45px;object-fit:cover;border-radius:6px;">
+                            <div style="flex:1;min-width:0;">
+                                <strong style="font-size:0.9rem;color:var(--text-primary);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.filename}</strong>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);">${a.section_name} • ${a.position.replace(/_/g," ")}</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);">${a.size} • ${a.alignment}</div>
                             </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${a.size} • ${a.alignment}</div>
-                        </div>
-                    </div>
-                `).join("");
+                        </div>`).join("");
+                }
             }
-
             renderStructureTree();
-        } catch (e) {
-            console.error("Failed to load image assignments", e);
-        }
+        } catch (e) { console.error("Failed to load image assignments", e); }
     }
 
     function renderStructureTree() {
-        if (!activeTemplate || !activeTemplate.sections || !structureTreeDiagram) return;
-
+        if (!activeTemplate?.sections || !structureTreeDiagram) return;
         structureTreeDiagram.innerHTML = activeTemplate.sections.map(s => {
-            const assigned = imageAssignments.filter(a => a.section_id === s.id);
+            const imgs = imageAssignments.filter(a => a.section_id === s.id);
             return `
                 <div class="tree-node">
-                    <strong style="color: var(--text-primary);">${s.name}</strong>
-                    ${assigned.map(a => `
-                        <div style="font-size: 0.8rem; color: #2563EB; margin-left: 12px; margin-top: 2px;">
-                            🖼 ${a.filename} (${a.position.replace('_', ' ')})
-                        </div>
-                    `).join("")}
-                </div>
-            `;
+                    <strong style="color:var(--text-primary);">${s.name}</strong>
+                    ${imgs.map(a => `
+                        <div style="font-size:0.8rem;color:#2563EB;margin-left:14px;margin-top:3px;">
+                            🖼 ${a.filename} — ${a.position.replace(/_/g," ")} • ${a.size} • ${a.alignment}
+                        </div>`).join("")}
+                </div>`;
         }).join("");
     }
 
     if (btnSaveStep3Image) {
         btnSaveStep3Image.addEventListener("click", async () => {
-            if (step3ImageFile.files.length === 0) {
-                alert("Please select an image file to upload");
-                return;
+            if (!step3ImageFile?.files?.length) {
+                showMsg(imgSaveMsg, "Please select an image file.", "error"); return;
+            }
+            const sectionId = step3SectionSelect?.value;
+            if (!sectionId) {
+                showMsg(imgSaveMsg, "Please select a section.", "error"); return;
             }
 
-            const formData = new FormData();
-            formData.append("file", step3ImageFile.files[0]);
+            const fd = new FormData();
+            fd.append("file", step3ImageFile.files[0]);
 
             try {
-                const upRes = await fetch("/api/images/upload", { method: "POST", body: formData });
+                const upRes  = await fetch("/api/images/upload", { method: "POST", body: fd });
                 const upData = await upRes.json();
-                
-                if (!upData.image_id) {
-                    alert("Image upload failed");
-                    return;
-                }
-
-                const assignPayload = {
-                    image_id: upData.image_id,
-                    section_id: step3SectionSelect.value,
-                    position: step3PositionSelect.value,
-                    size: step3SizeSelect.value,
-                    alignment: step3AlignSelect.value,
-                    fallback_behavior: "do_not_publish"
-                };
+                if (!upData.image_id) { showMsg(imgSaveMsg, "Upload failed.", "error"); return; }
 
                 const aRes = await fetch("/api/images/assign", {
-                    method: "POST",
+                    method:  "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(assignPayload)
+                    body:    JSON.stringify({
+                        image_id:         upData.image_id,
+                        section_id:       sectionId,
+                        position:         step3PositionSelect?.value || "after_heading",
+                        size:             step3SizeSelect?.value    || "medium",
+                        alignment:        step3AlignSelect?.value   || "center",
+                        fallback_behavior: "do_not_publish"
+                    })
                 });
-                const aData = await aRes.json();
+                if (aRes.ok) {
+                    showMsg(imgSaveMsg, "✓ Image saved and assigned!", "success");
+                    if (step3ImageFile)    step3ImageFile.value = "";
+                    if (step3ImagePreview) step3ImagePreview.classList.add("hidden");
+                    loadVisualImageAssignments();
+                }
+            } catch (e) { showMsg(imgSaveMsg, "Error: " + e.message, "error"); }
+        });
+    }
 
-                alert("Image uploaded and assigned to section!");
-                step3ImageFile.value = "";
-                loadVisualImageAssignments();
-            } catch (e) {
-                alert("Failed to save image placement: " + e);
+    // ===================================================================
+    // STEP 4 — SEO PREFILL
+    // ===================================================================
+    function prefillSeoStep() {
+        const pk  = document.getElementById("setup_primary_keyword")?.value   || "";
+        const sk  = document.getElementById("setup_secondary_keywords")?.value || "";
+        const kw  = document.getElementById("step4_focus_kw");
+        const sk2 = document.getElementById("step4_secondary_kw");
+        if (kw  && !kw.value  && pk) kw.value  = pk;
+        if (sk2 && !sk2.value && sk) sk2.value = sk;
+    }
+
+    // ===================================================================
+    // STEP 5 — REVIEW & PUBLISH
+    // ===================================================================
+    async function loadStep5Review() {
+        const gameName = document.getElementById("input_game_name")?.value   || "";
+        const url      = document.getElementById("input_target_url")?.value  || "";
+        const market   = document.getElementById("input_market")?.value      || "UK";
+        const tone     = document.getElementById("setup_tone")?.value        || "professional";
+        const length   = document.getElementById("setup_word_count")?.value  || "1500";
+
+        // Fill summary
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+
+        setVal("review-article-name",  gameName || "Not set");
+        setHtml("review-url",          url ? `<a href="${url}" target="_blank" style="color:var(--accent-orange-strong);word-break:break-all;font-size:0.85rem;">${url}</a>` : "Not set");
+        setVal("review-market",        market);
+        setVal("review-content-setup", `${tone.charAt(0).toUpperCase()+tone.slice(1)} • ${length}+ words`);
+        setVal("review-format",        activeTemplate ? `${activeTemplate.name} (${activeTemplate.sections.length} sections)` : "Default");
+        setVal("review-images",        imageAssignments.length > 0 ? `${imageAssignments.length} image(s) assigned` : "No images");
+
+        await renderStep5Validation();
+        await renderStep5Preview();
+    }
+
+    async function renderStep5Validation() {
+        if (!step5ValidationCard) return;
+        step5ValidationCard.innerHTML = `<p style="color:var(--text-secondary);">Running pre-publish checks...</p>`;
+        try {
+            const res  = await fetch("/api/content/validate", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ document: buildPreviewDoc(), template_id: activeTemplate?.id || null })
+            });
+            const data = await res.json();
+            const ok   = data.is_valid;
+            step5ValidationCard.style.cssText = `background:${ok?"rgba(16,185,129,0.1)":"rgba(245,158,11,0.1)"};border:1px solid ${ok?"#10B981":"#F59E0B"};padding:16px;border-radius:12px;`;
+            step5ValidationCard.innerHTML = `
+                <h4 style="margin:0 0 6px 0;color:${ok?"#047857":"#B45309"};">${ok?"✅ Pre-publish checks passed":"⚠️ Pre-publish warnings"}</h4>
+                <div style="font-size:0.9rem;color:${ok?"#047857":"#B45309"};"><strong>${data.checks_passed} / ${data.total_checks} checks passed</strong></div>
+                ${data.errors?.length ? `<ul style="margin-top:8px;padding-left:20px;font-size:0.85rem;color:#B45309;">${data.errors.map(e=>`<li>${e}</li>`).join("")}</ul>` : ""}`;
+        } catch (e) {
+            step5ValidationCard.innerHTML = `<p style="color:var(--text-secondary);">Validation unavailable in preview mode.</p>`;
+        }
+    }
+
+    async function renderStep5Preview() {
+        if (!step5PreviewRendered) return;
+        step5PreviewRendered.innerHTML = `<p style="color:gray;">Generating preview...</p>`;
+        try {
+            const res  = await fetch("/api/content/preview", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ document: buildPreviewDoc() })
+            });
+            const data = await res.json();
+            step5PreviewRendered.innerHTML = `<h1 style="font-size:1.4rem;font-weight:700;margin-bottom:12px;">${data.title}</h1>` + data.html_preview;
+        } catch (e) {
+            step5PreviewRendered.innerHTML = `<p style="color:gray;">Preview unavailable. Article will be generated on publish.</p>`;
+        }
+    }
+
+    function buildPreviewDoc() {
+        const game = document.getElementById("input_game_name")?.value  || "Article";
+        const kw   = document.getElementById("step4_focus_kw")?.value   || game;
+        const desc = document.getElementById("step4_meta_desc")?.value  || `Comprehensive review of ${game}.`;
+        return {
+            title:        `${game} Review`,
+            slug:         game.toLowerCase().replace(/\s+/g, "-"),
+            seo_metadata: { focus_keyword: kw, meta_description: desc },
+            introduction: `Welcome to this review of ${game}.`,
+            sections:     activeTemplate ? activeTemplate.sections.map(s => ({
+                section_id: s.id, heading: s.name, content: `This section covers ${s.name.toLowerCase()}.`
+            })) : [],
+            conclusion: `In conclusion, ${game} is worth exploring.`
+        };
+    }
+
+    if (btnFinalPublish) {
+        btnFinalPublish.addEventListener("click", async () => {
+            const url = document.getElementById("input_target_url")?.value;
+            if (!url) { alert("Please enter a Source URL in Step 1."); goToStep(1); return; }
+
+            btnFinalPublish.disabled    = true;
+            btnFinalPublish.textContent = "🚀 Submitting...";
+
+            const fd = new FormData();
+            fd.append("url",       url);
+            fd.append("game_name", document.getElementById("input_game_name")?.value || "");
+            fd.append("provider",  document.getElementById("input_provider")?.value  || "");
+            fd.append("market",    document.getElementById("input_market")?.value    || "UK");
+
+            try {
+                const res  = await fetch("/api/links", { method: "POST", body: fd });
+                const data = await res.json();
+                alert(data.message || "Job queued successfully!");
+                switchTab("home", navHome);
+            } catch (e) { alert("Submission failed: " + e); }
+            finally {
+                btnFinalPublish.disabled    = false;
+                btnFinalPublish.textContent = "🚀 Start Automation & Publish";
             }
         });
     }
 
+    const btnSaveDraft = document.getElementById("btn-save-draft-publish");
+    if (btnSaveDraft) btnSaveDraft.addEventListener("click", () => alert("Draft saving is available once an article has been generated."));
+
+    // ===================================================================
+    // MEDIA LIBRARY
+    // ===================================================================
     async function loadMediaGallery() {
         try {
-            const res = await fetch("/api/images");
+            const res    = await fetch("/api/images");
             const assets = await res.json();
-            const container = document.getElementById("media-gallery-container");
-            if (!container || !Array.isArray(assets)) return;
-
-            if (assets.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-secondary);">No uploaded images yet.</p>`;
-                return;
-            }
-
-            container.innerHTML = assets.map(a => `
-                <div style="background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 10px; width: 140px; text-align: center;">
-                    <img src="${a.url}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 6px;">
-                    <div style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 6px;">${a.filename}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">${a.width} × ${a.height}</div>
-                </div>
-            `).join("");
+            const c      = document.getElementById("media-gallery-container");
+            if (!c || !Array.isArray(assets)) return;
+            c.innerHTML = assets.length === 0
+                ? `<p style="color:var(--text-secondary);">No images uploaded yet.</p>`
+                : assets.map(a => `
+                    <div style="background:white;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px;width:140px;text-align:center;">
+                        <img src="${a.url}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;">
+                        <div style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px;">${a.filename}</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">${a.width} × ${a.height}</div>
+                    </div>`).join("");
         } catch (e) {}
     }
 
     const mediaUploadForm = document.getElementById("media-upload-form");
     if (mediaUploadForm) {
-        mediaUploadForm.addEventListener("submit", async (e) => {
+        mediaUploadForm.addEventListener("submit", async e => {
             e.preventDefault();
-            const formData = new FormData();
-            formData.append("file", document.getElementById("media_upload_file").files[0]);
-
+            const fd = new FormData();
+            fd.append("file", document.getElementById("media_upload_file")?.files[0]);
             try {
-                const res = await fetch("/api/images/upload", { method: "POST", body: formData });
-                const data = await res.json();
-                alert(data.message || "Image uploaded!");
-                loadMediaGallery();
-            } catch (err) {
-                alert("Upload failed: " + err);
-            }
+                const res = await fetch("/api/images/upload", { method: "POST", body: fd });
+                if (res.ok) loadMediaGallery();
+            } catch (e) {}
         });
     }
 
-    // --- 5. STEP 5 PREVIEW & STEP 6 PUBLISH ---
-
-    async function renderStep5Preview() {
-        step5PreviewRendered.innerHTML = `<p style="color: gray;">Rendering article preview...</p>`;
-        try {
-            const docPayload = {
-                title: "Article Live Preview",
-                seo_metadata: { focus_keyword: "Preview Keyword", meta_description: "Live preview" },
-                introduction: "Sample introduction text for article preview.",
-                sections: activeTemplate ? activeTemplate.sections.map(s => ({
-                    section_id: s.id,
-                    heading: s.name,
-                    content: `Sample content for section ${s.name}.`
-                })) : [],
-                conclusion: "Sample conclusion text."
-            };
-
-            const res = await fetch("/api/content/preview", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ document: docPayload })
-            });
-            const data = await res.json();
-            step5PreviewRendered.innerHTML = `<h1>${data.title}</h1>\n` + data.html_preview;
-        } catch (e) {
-            step5PreviewRendered.innerHTML = `<p style="color: red;">Failed to render preview.</p>`;
-        }
-    }
-
-    async function renderStep6Validation() {
-        step6ValidationCard.innerHTML = `<p style="color: gray;">Running 12-Check Pre-Publishing Validation...</p>`;
-        try {
-            const docPayload = {
-                title: "Article Validation Test",
-                seo_metadata: { focus_keyword: "Validation Keyword", meta_description: "Validation text long enough to pass check." },
-                introduction: "Comprehensive introduction text exceeding validation minimum length requirement.",
-                sections: activeTemplate ? activeTemplate.sections.map(s => ({
-                    section_id: s.id,
-                    heading: s.name,
-                    content: `Detailed section content for ${s.name}.`
-                })) : [],
-                conclusion: "Conclusion text."
-            };
-
-            const res = await fetch("/api/content/validate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ document: docPayload, template_id: activeTemplate ? activeTemplate.id : null })
-            });
-            const data = await res.json();
-
-            let bg = data.is_valid ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)";
-            let color = data.is_valid ? "#047857" : "#B45309";
-            step6ValidationCard.style.cssText = `background: ${bg}; color: ${color}; border: 1px solid ${color}; padding: 16px; border-radius: 12px;`;
-            step6ValidationCard.innerHTML = `
-                <h4 style="margin: 0 0 6px 0;">${data.is_valid ? '✅ PRE-PUBLISHING VALIDATION PASSED' : '⚠️ PRE-PUBLISHING WARNINGS'}</h4>
-                <div><strong>${data.checks_passed} / ${data.total_checks} Checks Passed</strong></div>
-                ${data.errors.length > 0 ? `<ul style="margin-top: 8px; padding-left: 20px; font-size: 0.85rem;">${data.errors.map(err => `<li>${err}</li>`).join("")}</ul>` : ''}
-            `;
-        } catch (e) {
-            step6ValidationCard.innerHTML = `<p style="color: red;">Failed to run validation.</p>`;
-        }
-    }
-
-    if (btnFinalPublish) {
-        btnFinalPublish.addEventListener("click", async () => {
-            const url = document.getElementById("input_target_url").value;
-            if (!url) {
-                alert("Please enter a Target Page / Game URL in Step 1!");
-                goToStep(1);
-                return;
-            }
-
-            btnFinalPublish.disabled = true;
-            btnFinalPublish.textContent = "🚀 Submitting Automation Job...";
-
-            const formData = new FormData();
-            formData.append("url", url);
-            formData.append("game_name", document.getElementById("input_game_name").value);
-            formData.append("provider", document.getElementById("input_provider").value);
-            formData.append("market", document.getElementById("input_market").value);
-
-            try {
-                const res = await fetch("/api/links", { method: "POST", body: formData });
-                const data = await res.json();
-                alert(data.message || "Job queued successfully!");
-                switchTab("home", navHome);
-            } catch (e) {
-                alert("Submission failed: " + e);
-            } finally {
-                btnFinalPublish.disabled = false;
-                btnFinalPublish.textContent = "🚀 Start Automation & Publish to WordPress";
-            }
-        });
-    }
-
-    // --- 6. HISTORY & SETTINGS ---
-
+    // ===================================================================
+    // HISTORY (with checkboxes)
+    // ===================================================================
     async function loadHistory() {
         try {
-            const q = document.getElementById("history_search_input") ? document.getElementById("history_search_input").value : "";
-            const res = await fetch(`/api/history?q=${encodeURIComponent(q)}`);
+            const q      = document.getElementById("history_search_input")?.value || "";
+            const res    = await fetch(`/api/history?q=${encodeURIComponent(q)}`);
             const history = await res.json();
-            const tbody = document.getElementById("history-tbody");
+            const tbody   = document.getElementById("history-tbody");
             if (!tbody || !Array.isArray(history)) return;
 
             if (history.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No publishing history records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:rgba(0,0,0,0.5);">No publishing history records found.</td></tr>`;
+                updateDeleteSelectedBtn();
                 return;
             }
 
             tbody.innerHTML = history.map(h => `
                 <tr>
-                    <td>#${h.id}</td>
-                    <td><strong>${h.game_name}</strong> (${h.provider})</td>
-                    <td><span class="badge ${h.status === 'Published' ? 'badge-success' : 'badge-danger'}">${h.status}</span></td>
-                    <td>${h.article_id ? `#${h.article_id}` : '--'}</td>
-                    <td>${h.published_at || '--'}</td>
+                    <td><input type="checkbox" class="history-row-check" data-id="${h.id}"></td>
                     <td>
-                        <button class="btn-secondary-sm retry-hist-btn" data-id="${h.id}" style="color: #2563EB;">Retry</button>
-                        <button class="btn-secondary-sm delete-hist-btn" data-id="${h.id}" style="color: #EF4444;">Delete</button>
+                        <strong>${h.game_name}</strong>
+                        ${h.provider ? `<br><span style="font-size:0.8rem;color:var(--text-secondary);">${h.provider}</span>` : ""}
                     </td>
-                </tr>
-            `).join("");
+                    <td><span class="badge ${h.status==="Published"?"badge-success":"badge-danger"}">${h.status}</span></td>
+                    <td>${h.article_id ? `#${h.article_id}` : "—"}</td>
+                    <td style="font-size:0.85rem;">${h.published_at || "—"}</td>
+                    <td>
+                        <button class="btn-secondary-sm retry-hist-btn" data-id="${h.id}" style="color:#2563EB;">Retry</button>
+                        <button class="btn-secondary-sm delete-hist-btn" data-id="${h.id}" style="color:#EF4444;">Delete</button>
+                    </td>
+                </tr>`).join("");
 
+            // Row checkbox change
+            document.querySelectorAll(".history-row-check").forEach(c => c.addEventListener("change", updateDeleteSelectedBtn));
+
+            // Select all
+            const selAll = document.getElementById("history-select-all");
+            if (selAll) {
+                selAll.onchange = () => {
+                    document.querySelectorAll(".history-row-check").forEach(c => c.checked = selAll.checked);
+                    updateDeleteSelectedBtn();
+                };
+            }
+
+            // Delete single
             document.querySelectorAll(".delete-hist-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
+                btn.addEventListener("click", async e => {
                     const id = e.target.getAttribute("data-id");
-                    if (confirm("Delete this history entry? (WordPress article will not be deleted)")) {
-                        await fetch(`/api/history/${id}`, { method: "DELETE" });
-                        loadHistory();
-                    }
+                    if (!confirm("Delete this history record?\n\n⚠ This will NOT delete the WordPress article.")) return;
+                    await fetch(`/api/history/${id}`, { method: "DELETE" });
+                    loadHistory();
                 });
             });
 
+            // Retry
             document.querySelectorAll(".retry-hist-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.getAttribute("data-id");
+                btn.addEventListener("click", async e => {
+                    const id  = e.target.getAttribute("data-id");
                     const res = await fetch(`/api/history/${id}/retry`, { method: "POST" });
-                    const data = await res.json();
-                    alert(data.message || "Retry job enqueued!");
+                    const d   = await res.json();
+                    alert(d.message || "Retry queued!");
                     switchTab("home", navHome);
+                });
+            });
+
+            updateDeleteSelectedBtn();
+        } catch (e) {}
+    }
+
+    function updateDeleteSelectedBtn() {
+        const selected = document.querySelectorAll(".history-row-check:checked").length;
+        const btn      = document.getElementById("btn-delete-selected-history");
+        if (btn) {
+            btn.disabled    = selected === 0;
+            btn.textContent = selected > 0 ? `🗑 Delete Selected (${selected})` : "🗑 Delete Selected";
+        }
+    }
+
+    const histSearch = document.getElementById("history_search_input");
+    if (histSearch) histSearch.addEventListener("input", loadHistory);
+
+    const btnDelSelected = document.getElementById("btn-delete-selected-history");
+    if (btnDelSelected) {
+        btnDelSelected.addEventListener("click", async () => {
+            const ids = [...document.querySelectorAll(".history-row-check:checked")].map(c => parseInt(c.getAttribute("data-id")));
+            if (!ids.length) return;
+            if (!confirm(`Delete ${ids.length} selected history record(s)?\n\n⚠ This will NOT delete the WordPress articles.`)) return;
+            try {
+                const params = ids.map(id => `history_ids=${id}`).join("&");
+                await fetch(`/api/history/bulk-delete?${params}`, { method: "POST" });
+                loadHistory();
+            } catch (e) {}
+        });
+    }
+
+    const btnDelAll = document.getElementById("btn-delete-all-history");
+    if (btnDelAll) {
+        btnDelAll.addEventListener("click", async () => {
+            if (!confirm("Delete ALL history records?\n\n⚠ This will NOT delete the WordPress articles.")) return;
+            await fetch("/api/history/bulk-delete?delete_all=true", { method: "POST" });
+            loadHistory();
+        });
+    }
+
+    // ===================================================================
+    // HOME — DRAFTS & HISTORY PREVIEWS
+    // ===================================================================
+    async function loadHomeDrafts() {
+        const c = document.getElementById("home-drafts-list");
+        if (!c) return;
+        try {
+            const res    = await fetch("/api/drafts");
+            const drafts = await res.json();
+            if (!Array.isArray(drafts) || drafts.length === 0) {
+                c.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No drafts pending review.</p>`;
+                return;
+            }
+            c.innerHTML = drafts.slice(0, 5).map(d => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+                    <div>
+                        <strong>${d.game_name}</strong>
+                        <span style="font-size:0.8rem;color:var(--text-secondary);margin-left:8px;">${d.created_at}</span>
+                    </div>
+                    <button class="btn-secondary-sm" data-draft-id="${d.id}" style="font-size:0.8rem;">Publish</button>
+                </div>`).join("");
+        } catch (e) { c.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">Unable to load drafts.</p>`; }
+    }
+
+    async function loadHomeHistory() {
+        const c = document.getElementById("home-history-list");
+        if (!c) return;
+        try {
+            const res     = await fetch("/api/history?q=");
+            const history = await res.json();
+            if (!Array.isArray(history) || history.length === 0) {
+                c.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No published articles yet.</p>`;
+                return;
+            }
+            c.innerHTML = history.slice(0, 5).map(h => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+                    <div>
+                        <strong>${h.game_name}</strong>
+                        <span class="badge ${h.status==="Published"?"badge-success":"badge-danger"}" style="margin-left:8px;">${h.status}</span>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--text-secondary);">${h.published_at || "—"}</span>
+                </div>`).join("");
+        } catch (e) { c.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">Unable to load history.</p>`; }
+    }
+
+    // ===================================================================
+    // DRAFTS PAGE
+    // ===================================================================
+    async function loadDraftsPage() {
+        const c = document.getElementById("drafts-container-page");
+        if (!c) return;
+        try {
+            const res    = await fetch("/api/drafts");
+            const drafts = await res.json();
+            if (!Array.isArray(drafts) || drafts.length === 0) {
+                c.innerHTML = `<p style="color:var(--text-secondary);">No drafts pending review.</p>`;
+                return;
+            }
+            c.innerHTML = drafts.map(d => `
+                <div style="background:white;border:1px solid rgba(0,0,0,0.08);padding:16px;border-radius:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <div>
+                        <strong style="font-size:1.05rem;color:var(--text-primary);">${d.game_name} (${d.provider})</strong>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);">${d.created_at}</div>
+                    </div>
+                    <button class="btn-primary publish-draft-btn" data-id="${d.id}" style="padding:8px 16px;font-size:0.9rem;">🚀 Publish to WordPress</button>
+                </div>`).join("");
+
+            c.querySelectorAll(".publish-draft-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const id = btn.getAttribute("data-id");
+                    if (!confirm("Publish this draft to WordPress?")) return;
+                    const res = await fetch(`/api/publish/${id}`, { method: "POST" });
+                    const d   = await res.json();
+                    alert(d.message || "Published!");
+                    loadDraftsPage();
                 });
             });
         } catch (e) {}
     }
 
-    const historySearchInput = document.getElementById("history_search_input");
-    if (historySearchInput) historySearchInput.addEventListener("input", loadHistory);
+    // ===================================================================
+    // JOBS
+    // ===================================================================
+    async function loadJobsHome() {
+        try {
+            const res  = await fetch("/api/user/jobs?status_filter=ALL");
+            const jobs = await res.json();
+            const tbody = document.getElementById("jobs-tbody-home");
+            if (!tbody || !Array.isArray(jobs)) return;
 
-    const btnDeleteAllHistory = document.getElementById("btn-delete-all-history");
-    if (btnDeleteAllHistory) {
-        btnDeleteAllHistory.addEventListener("click", async () => {
-            if (confirm("Delete ALL history records?")) {
-                await fetch("/api/history/bulk-delete?delete_all=true", { method: "POST" });
-                loadHistory();
+            const running = jobs.filter(j => j.status === "PROCESSING" || j.status === "QUEUED").length;
+            const badge   = document.getElementById("badge-jobs-running");
+            if (badge) badge.textContent = `${running} Running`;
+
+            if (jobs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:rgba(0,0,0,0.5);">No active jobs found.</td></tr>`;
+                return;
             }
-        });
+
+            tbody.innerHTML = jobs.map(j => `
+                <tr>
+                    <td><strong>${j.game_name || "Job"}</strong><br><span style="font-size:0.8rem;color:var(--text-secondary);">${j.provider || ""}</span></td>
+                    <td><span class="badge ${j.status==="FAILED"?"badge-danger":j.status==="PROCESSING"?"badge-warning":"badge-success"}">${j.status}</span></td>
+                    <td><code style="background:rgba(0,0,0,0.06);padding:3px 8px;border-radius:4px;font-size:0.8rem;">${j.current_stage || "QUEUED"}</code></td>
+                    <td>${j.duration ? j.duration.toFixed(1) + "s" : "—"}</td>
+                    <td><button class="btn-secondary-sm view-timeline-btn" data-job-id="${j.job_id}">Timeline</button></td>
+                </tr>`).join("");
+        } catch (e) {}
     }
 
+    // ===================================================================
+    // SETTINGS
+    // ===================================================================
     async function loadSettings() {
         try {
-            const res = await fetch("/api/user/settings");
+            const res  = await fetch("/api/settings");
+            if (!res.ok) return;
             const data = await res.json();
-            if (data.wp_url) document.getElementById("set_wp_url").value = data.wp_url;
-            if (data.wp_username) document.getElementById("set_wp_username").value = data.wp_username;
+            if (data.wp_url      && document.getElementById("set_wp_url"))      document.getElementById("set_wp_url").value      = data.wp_url;
+            if (data.wp_username && document.getElementById("set_wp_username")) document.getElementById("set_wp_username").value = data.wp_username;
+            if (data.theme_type  && document.getElementById("set_theme_type"))  document.getElementById("set_theme_type").value  = data.theme_type;
+            if (data.seo_plugin  && document.getElementById("set_seo_plugin"))  document.getElementById("set_seo_plugin").value  = data.seo_plugin;
         } catch (e) {}
     }
 
     const setupForm = document.getElementById("setup-form");
     if (setupForm) {
-        setupForm.addEventListener("submit", async (e) => {
+        setupForm.addEventListener("submit", async e => {
             e.preventDefault();
             const payload = {
-                wp_url: document.getElementById("set_wp_url").value,
-                wp_username: document.getElementById("set_wp_username").value,
-                wp_password: document.getElementById("set_wp_password").value
+                wp_url:        document.getElementById("set_wp_url")?.value      || "",
+                wp_username:   document.getElementById("set_wp_username")?.value || "",
+                wp_app_password: document.getElementById("set_wp_password")?.value || "",
+                theme_type:    document.getElementById("set_theme_type")?.value   || "standard",
+                seo_plugin:    document.getElementById("set_seo_plugin")?.value   || "none"
             };
             try {
-                await fetch("/api/user/settings", {
-                    method: "POST",
+                const res = await fetch("/api/settings", {
+                    method:  "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    body:    JSON.stringify(payload)
                 });
-                alert("Settings saved successfully!");
-            } catch (err) {
-                alert("Failed to save settings: " + err);
-            }
+                const status = document.getElementById("setup-status");
+                if (status) {
+                    status.className = res.ok ? "success-msg" : "error-msg";
+                    status.textContent = res.ok ? "✓ Settings saved!" : "Failed to save settings.";
+                    status.classList.remove("hidden");
+                    setTimeout(() => status.classList.add("hidden"), 3000);
+                }
+            } catch (err) {}
         });
     }
 
-    // --- 7. DEV MODE & ROLE CHECK ---
+    // ===================================================================
+    // WEBSITES
+    // ===================================================================
+    async function loadWebsitesView() {
+        try {
+            const res  = await fetch("/api/settings");
+            const data = await res.json();
+            const urlEl  = document.getElementById("site_display_url");
+            const userEl = document.getElementById("site_display_user");
+            if (urlEl  && data.wp_url)      urlEl.textContent  = data.wp_url;
+            if (userEl && data.wp_username) userEl.textContent = `Username: ${data.wp_username}`;
+        } catch (e) {}
+    }
 
+    // ===================================================================
+    // USAGE / QUOTA
+    // ===================================================================
+    async function loadUsage() {
+        try {
+            const res  = await fetch("/api/user/usage");
+            if (res.status === 401) { window.location.href = "/login.html"; return; }
+            const data = await res.json();
+            if (data.plan) {
+                const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                setT("user-plan-pill",    `Plan: ${data.plan.toUpperCase()}`);
+                setT("user-quota-pill",   `Quota: ${data.monthly_usage} / ${data.article_limit}`);
+                setT("stat-published",    data.published_count     || 0);
+                setT("stat-drafts",       data.total_drafts        || 0);
+                setT("stat-templates",    data.total_templates     || userTemplates.length || 1);
+                setT("stat-quota-used",   `${data.usage_percentage}%`);
+            }
+        } catch (e) {}
+    }
+
+    // ===================================================================
+    // DEV MODE
+    // ===================================================================
     if (devModeCheckbox) {
         devModeCheckbox.addEventListener("change", () => {
             if (devModeCheckbox.checked) {
-                devModeDrawer.classList.remove("hidden");
+                devModeDrawer?.classList.remove("hidden");
                 updateDevDiagnostics();
             } else {
-                devModeDrawer.classList.add("hidden");
+                devModeDrawer?.classList.add("hidden");
             }
         });
     }
 
     function updateDevDiagnostics() {
-        if (!devUuidLookupContainer || !activeTemplate) return;
-        devUuidLookupContainer.innerHTML = `
+        if (!devUuidContainer || !activeTemplate) return;
+        devUuidContainer.innerHTML = `
             <strong>Active Template ID:</strong> ${activeTemplate.id}<br/>
-            <strong>Internal UUID Section Mappings:</strong><br/>
-            ${activeTemplate.sections.map(s => `• ${s.name} ➔ <code>${s.id}</code>`).join("<br/>")}
-        `;
+            <strong>Section UUID Mappings:</strong><br/>
+            ${activeTemplate.sections.map(s => `• ${s.name} ➔ <code>${s.id}</code>`).join("<br/>")}`;
     }
 
+    // ===================================================================
+    // AUTH / ROLE CHECK
+    // ===================================================================
     async function checkRole() {
         try {
             const res = await fetch("/api/admin/stats");
@@ -836,61 +1455,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Data Loaders
-    async function loadUsage() {
-        try {
-            const res = await fetch("/api/user/usage");
-            if (res.status === 401) { window.location.href = "/login.html"; return; }
-            const data = await res.json();
-            if (data.plan) {
-                document.getElementById("user-plan-pill").textContent = `Plan: ${data.plan}`;
-                document.getElementById("user-quota-pill").textContent = `Quota: ${data.monthly_usage} / ${data.article_limit}`;
-                document.getElementById("stat-published").textContent = data.published_count || 0;
-                document.getElementById("stat-drafts").textContent = data.total_drafts || 0;
-                document.getElementById("stat-templates").textContent = data.total_templates || userTemplates.length || 1;
-                document.getElementById("stat-quota-used").textContent = `${data.usage_percentage}%`;
-            }
-        } catch (e) {}
-    }
-
-    async function loadJobsHome() {
-        try {
-            const res = await fetch("/api/user/jobs?status_filter=ALL");
-            const jobs = await res.json();
-            const tbody = document.getElementById("jobs-tbody-home");
-            if (!tbody || !Array.isArray(jobs)) return;
-
-            const running = jobs.filter(j => j.status === 'PROCESSING' || j.status === 'QUEUED').length;
-            const badge = document.getElementById("badge-jobs-running");
-            if (badge) badge.textContent = `${running} Running`;
-
-            if (jobs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No active jobs found.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = jobs.map(j => `
-                <tr>
-                    <td><strong>${j.job_id}</strong></td>
-                    <td>${j.provider} - ${j.game_name}</td>
-                    <td><span class="badge ${j.status === 'FAILED' ? 'badge-danger' : 'badge-success'}">${j.status}</span></td>
-                    <td><code style="background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: 4px;">${j.current_stage || 'QUEUED'}</code></td>
-                    <td>${j.duration ? j.duration.toFixed(1) + 's' : '--'}</td>
-                    <td><button class="btn-secondary-sm view-timeline-btn" data-job-id="${j.job_id}">Timeline</button></td>
-                </tr>
-            `).join("");
-        } catch (e) {}
-    }
-
-    // Init Page
+    // ===================================================================
+    // BOOTSTRAP
+    // ===================================================================
     switchTab("home", navHome);
-    loadActiveFormat();
-    loadTemplates();
+    loadTemplates().then(() => loadActiveFormat());
     checkRole();
+
+    // Auto-refresh jobs every 5 seconds when home tab is active
     setInterval(() => {
-        const homeView = document.getElementById("view-home");
-        if (homeView && !homeView.classList.contains("hidden")) {
-            loadJobsHome();
-        }
+        const home = document.getElementById("view-home");
+        if (home && !home.classList.contains("hidden")) loadJobsHome();
     }, 5000);
-});
+
+}); // end DOMContentLoaded
