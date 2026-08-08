@@ -256,122 +256,208 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fmtEl)  fmtEl.textContent  = persistentActiveFormat.template_name || "Default Format";
     }
 
+    let fastTrackUploadedImages = []; // Array to store { id, url, filename, section_id, position, size, alignment }
+
     function renderFastTrackImageUploaders() {
-        if (!fastTrackImagesContainer) return;
-        if (!activeTemplate || !activeTemplate.sections || activeTemplate.sections.length === 0) {
-            fastTrackImagesContainer.innerHTML = `<p style="color:var(--text-secondary);font-size:0.9rem;">No sections found in this format.</p>`;
+        const dropZone = document.getElementById("fast-track-drop-zone");
+        const fileInput = document.getElementById("fast-track-unified-upload");
+        const statusEl = document.getElementById("fast-track-upload-status");
+
+        if (!dropZone || !fileInput) return;
+
+        // Clone and replace to prevent duplicate event listeners
+        const newDropZone = dropZone.cloneNode(true);
+        dropZone.replaceWith(newDropZone);
+        const newFileInput = document.getElementById("fast-track-unified-upload");
+
+        newDropZone.addEventListener("click", () => newFileInput.click());
+        newDropZone.addEventListener("dragover", (e) => { e.preventDefault(); newDropZone.classList.add("dragover"); });
+        newDropZone.addEventListener("dragleave", (e) => { e.preventDefault(); newDropZone.classList.remove("dragover"); });
+        newDropZone.addEventListener("drop", async (e) => {
+            e.preventDefault();
+            newDropZone.classList.remove("dragover");
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                await handleUnifiedUpload(e.dataTransfer.files, statusEl);
+            }
+        });
+
+        newFileInput.addEventListener("change", async (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                await handleUnifiedUpload(e.target.files, statusEl);
+            }
+        });
+
+        renderImageGallery();
+        renderImageMap();
+    }
+
+    async function handleUnifiedUpload(files, statusEl) {
+        statusEl.textContent = `Uploading ${files.length} file(s)...`;
+        statusEl.style.color = "var(--text-primary)";
+        
+        let successCount = 0;
+        for (let i = 0; i < files.length; i++) {
+            const formData = new FormData();
+            formData.append("file", files[i]);
+            
+            try {
+                const res = await fetch("/api/images/upload", { method: "POST", body: formData });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                
+                fastTrackUploadedImages.push({
+                    id: data.id,
+                    url: data.url,
+                    filename: files[i].name,
+                    section_id: "", // unassigned
+                    position: "after_heading",
+                    size: "medium",
+                    alignment: "center"
+                });
+                successCount++;
+            } catch (e) {
+                console.error("Failed to upload image", files[i].name, e);
+            }
+        }
+        
+        if (successCount > 0) {
+            statusEl.textContent = `Successfully uploaded ${successCount} image(s).`;
+            statusEl.style.color = "#10B981";
+            setTimeout(() => { statusEl.textContent = ""; }, 3000);
+            renderImageGallery();
+            renderImageMap();
+        } else {
+            statusEl.textContent = "Upload failed.";
+            statusEl.style.color = "#EF4444";
+        }
+    }
+
+    function renderImageGallery() {
+        const gallery = document.getElementById("fast-track-gallery");
+        if (!gallery) return;
+
+        if (fastTrackUploadedImages.length === 0) {
+            gallery.innerHTML = "";
             return;
         }
 
-        fastTrackImagesContainer.innerHTML = activeTemplate.sections.map(s => `
-            <div class="glass-panel" style="padding: 14px; border: 1px solid rgba(0,0,0,0.06); background: rgba(0,0,0,0.015);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                    <strong style="color:var(--text-primary); font-size:1rem;">${s.name}</strong>
-                </div>
-                <div id="img-upload-ui-${s.id}">
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 10px;">
-                        <input type="file" id="img-file-${s.id}" accept="image/*" style="font-size:0.85rem; padding: 4px;">
-                        <select id="img-pos-${s.id}" style="padding: 4px 8px; font-size:0.85rem;">
-                            <option value="after_heading">After Heading</option>
-                            <option value="before_heading">Before Heading</option>
-                            <option value="end_of_section">End of Section</option>
+        let sectionOptions = `<option value="">-- Do Not Use / Unassigned --</option>`;
+        if (activeTemplate && activeTemplate.sections) {
+            sectionOptions += activeTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+        }
+
+        gallery.innerHTML = fastTrackUploadedImages.map((img, index) => `
+            <div class="image-card">
+                <img src="${img.url}" class="image-card-thumbnail" alt="${img.filename}">
+                <div class="image-card-info">
+                    <strong style="font-size:0.95rem; display:block; margin-bottom:4px; word-break: break-all;">${img.filename}</strong>
+                    <div class="image-card-controls">
+                        <select class="assign-section-select" data-index="${index}" style="min-width: 140px;">
+                            ${sectionOptions.replace(`value="${img.section_id}"`, `value="${img.section_id}" selected`)}
                         </select>
-                        <select id="img-size-${s.id}" style="padding: 4px 8px; font-size:0.85rem;">
-                            <option value="medium">Medium</option>
-                            <option value="large">Large</option>
-                            <option value="small">Small</option>
+                        <select class="assign-position-select" data-index="${index}">
+                            <option value="before_heading" ${img.position === 'before_heading' ? 'selected' : ''}>Before Heading</option>
+                            <option value="after_heading" ${img.position === 'after_heading' ? 'selected' : ''}>After Heading</option>
+                            <option value="end_of_section" ${img.position === 'end_of_section' ? 'selected' : ''}>End of Section</option>
+                        </select>
+                        <select class="assign-size-select" data-index="${index}">
+                            <option value="small" ${img.size === 'small' ? 'selected' : ''}>Small</option>
+                            <option value="medium" ${img.size === 'medium' ? 'selected' : ''}>Medium</option>
+                            <option value="large" ${img.size === 'large' ? 'selected' : ''}>Large</option>
+                        </select>
+                        <select class="assign-alignment-select" data-index="${index}">
+                            <option value="left" ${img.alignment === 'left' ? 'selected' : ''}>Left Align</option>
+                            <option value="center" ${img.alignment === 'center' ? 'selected' : ''}>Center Align</option>
+                            <option value="right" ${img.alignment === 'right' ? 'selected' : ''}>Right Align</option>
                         </select>
                     </div>
-                    <button type="button" class="btn-secondary-sm btn-upload-section-img" data-sec-id="${s.id}">Upload to Section</button>
-                    <div id="img-status-${s.id}" style="font-size: 0.8rem; margin-top: 6px;" class="hidden"></div>
                 </div>
-                <div id="img-preview-${s.id}" class="hidden" style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(0,0,0,0.1);">
-                    <!-- Assigned image preview goes here -->
-                </div>
+                <button class="image-card-remove" data-index="${index}" title="Remove Image">✖</button>
             </div>
         `).join("");
 
-        // Attach listeners for upload buttons
-        document.querySelectorAll(".btn-upload-section-img").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-                const secId = e.target.getAttribute("data-sec-id");
-                await handleSectionImageUpload(secId);
+        const attachAssignmentTrigger = (selector, fieldName) => {
+            gallery.querySelectorAll(selector).forEach(sel => {
+                sel.addEventListener("change", async (e) => {
+                    const idx = e.target.getAttribute("data-index");
+                    fastTrackUploadedImages[idx][fieldName] = e.target.value;
+                    renderImageMap();
+                    await syncAssignment(fastTrackUploadedImages[idx]);
+                });
+            });
+        };
+
+        attachAssignmentTrigger(".assign-section-select", "section_id");
+        attachAssignmentTrigger(".assign-position-select", "position");
+        attachAssignmentTrigger(".assign-size-select", "size");
+        attachAssignmentTrigger(".assign-alignment-select", "alignment");
+
+        gallery.querySelectorAll(".image-card-remove").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const idx = e.target.getAttribute("data-index");
+                fastTrackUploadedImages.splice(idx, 1);
+                renderImageGallery();
+                renderImageMap();
             });
         });
     }
 
-    async function handleSectionImageUpload(secId) {
-        const fileInput = document.getElementById(`img-file-${secId}`);
-        const posSelect = document.getElementById(`img-pos-${secId}`);
-        const sizeSelect = document.getElementById(`img-size-${secId}`);
-        const statusEl = document.getElementById(`img-status-${secId}`);
-        
-        if (!fileInput.files || fileInput.files.length === 0) {
-            showMsg(statusEl, "Please select an image first.", "error", 2000);
+    async function syncAssignment(imgObj) {
+        if (!imgObj.section_id) return; // Skip unassigned
+        try {
+            await fetch("/api/images/assign", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    image_id: imgObj.id,
+                    section_id: parseInt(imgObj.section_id),
+                    position: imgObj.position,
+                    size: imgObj.size,
+                    alignment: imgObj.alignment
+                })
+            });
+        } catch (e) {
+            console.error("Failed to sync assignment", e);
+        }
+    }
+
+    function renderImageMap() {
+        const mapContainer = document.getElementById("fast-track-image-map");
+        const mapList = document.getElementById("image-map-list");
+        if (!mapContainer || !mapList) return;
+
+        const assignedImages = fastTrackUploadedImages.filter(img => img.section_id !== "");
+        if (assignedImages.length === 0) {
+            mapContainer.classList.add("hidden");
             return;
         }
 
-        const file = fileInput.files[0];
-        const formData = new FormData();
-        formData.append("file", file);
-
-        showMsg(statusEl, "Uploading...", "success", 0);
-
-        try {
-            const uploadRes = await fetch("/api/images/upload", { method: "POST", body: formData });
-            const uploadData = await uploadRes.json();
-            if (uploadData.error) throw new Error(uploadData.error);
+        mapContainer.classList.remove("hidden");
+        
+        let html = "";
+        assignedImages.forEach(img => {
+            const sec = activeTemplate.sections.find(s => s.id == img.section_id);
+            const secName = sec ? sec.name : "Unknown Section";
             
-            const assetId = uploadData.id;
+            const posMap = { before_heading: "Before Heading", after_heading: "After Heading", end_of_section: "End of Section" };
+            const sizeMap = { small: "Small", medium: "Medium", large: "Large" };
+            const alignMap = { left: "Left Align", center: "Center Align", right: "Right Align" };
 
-            const assignPayload = {
-                image_id: assetId,
-                section_id: secId,
-                position: posSelect.value,
-                size: sizeSelect.value,
-                alignment: "center" // default
-            };
-
-            const assignRes = await fetch("/api/images/assign", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(assignPayload)
-            });
-
-            if (!assignRes.ok) throw new Error("Failed to assign");
-
-            showMsg(statusEl, "Assigned!", "success", 2000);
-
-            // Update UI to show preview
-            const uploadUi = document.getElementById(`img-upload-ui-${secId}`);
-            const previewUi = document.getElementById(`img-preview-${secId}`);
-            
-            uploadUi.classList.add("hidden");
-            previewUi.innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${uploadData.url}" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid rgba(0,0,0,0.1);">
-                    <div style="flex:1;">
-                        <strong style="font-size:0.9rem; display:block;">${file.name}</strong>
-                        <span style="font-size:0.8rem; color:var(--text-secondary);">${posSelect.options[posSelect.selectedIndex].text} • ${sizeSelect.options[sizeSelect.selectedIndex].text}</span>
+            html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-weight:600; color:var(--text-primary);">${secName}</span>
+                        <span style="color:var(--text-muted);">→</span>
+                        <span style="color:var(--text-secondary); font-size:0.9rem;">${img.filename}</span>
                     </div>
-                    <button class="btn-secondary-sm btn-remove-section-img" data-sec-id="${secId}" style="color:#DC2626; border-color:rgba(220,38,38,0.3);">Remove</button>
+                    <div style="font-size:0.8rem; color:var(--text-muted); background:rgba(0,0,0,0.03); padding:4px 8px; border-radius:6px;">
+                        ${posMap[img.position]} • ${sizeMap[img.size]} • ${alignMap[img.alignment]}
+                    </div>
                 </div>
             `;
-            previewUi.classList.remove("hidden");
-
-            // Attach remove listener
-            previewUi.querySelector(".btn-remove-section-img").addEventListener("click", () => {
-                // In a real app we'd call unassign API here, for now just reset UI
-                previewUi.classList.add("hidden");
-                previewUi.innerHTML = "";
-                fileInput.value = "";
-                uploadUi.classList.remove("hidden");
-            });
-
-        } catch (e) {
-            console.error("Upload error:", e);
-            showMsg(statusEl, "Upload failed: " + e.message, "error", 3000);
-        }
+        });
+        
+        mapList.innerHTML = html;
     }
 
     // ===================================================================
