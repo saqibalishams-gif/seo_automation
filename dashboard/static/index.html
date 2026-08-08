@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Automation Platform — Professional SaaS Dashboard</title>
+    <title>SEO Automation Platform — Clean SaaS Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link rel="stylesheet" href="/static/styles.css?v=7">
 </head>
 <body>
     <div class="bg-blobs">
@@ -15,8 +15,8 @@
         <div class="blob blob-blue"></div>
     </div>
 
-    <div class="app-container" style="max-width: 1400px;">
-        <!-- Compact Header Bar -->
+    <div class="app-container">
+        <!-- Navigation Header Bar -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
                 <div class="status-dot-container"><div class="status-dot"></div></div>
@@ -39,79 +39,41 @@
             </div>
         </header>
 
-        <!-- Global Collapsible Controls Bar -->
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 1rem;">
-            <button id="btn-expand-all" class="btn-secondary-sm">Expand All</button>
-            <button id="btn-collapse-all" class="btn-secondary-sm">Collapse All</button>
-        </div>
-
         <main class="main-column">
-            <!-- Summary Stats Row -->
-            <section class="stats-row" id="panel-stats">
-                <div class="glass-panel stat-tile">
-                    <div class="stat-value" id="stat-published">0</div>
-                    <div class="stat-label">Published Articles</div>
-                </div>
-                <div class="glass-panel stat-tile">
-                    <div class="stat-value" id="stat-drafts">0</div>
-                    <div class="stat-label">Pending Drafts</div>
-                </div>
-                <div class="glass-panel stat-tile">
-                    <div class="stat-value" id="stat-templates">1</div>
-                    <div class="stat-label">Templates</div>
-                </div>
-                <div class="glass-panel stat-tile">
-                    <div class="stat-value" id="stat-quota-used">0%</div>
-                    <div class="stat-label">Quota Used</div>
-                </div>
-            </section>
+            <!-- ================= VIEW 1: HOME DASHBOARD (ACTIVE BY DEFAULT) ================= -->
+            <div id="view-home" class="tab-view active">
+                <!-- Summary Stats Row -->
+                <section class="stats-row" style="margin-bottom: 1.5rem;">
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-published">0</div>
+                        <div class="stat-label">Published Articles</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-drafts">0</div>
+                        <div class="stat-label">Pending Drafts</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-templates">1</div>
+                        <div class="stat-label">Saved Templates</div>
+                    </div>
+                    <div class="glass-panel stat-tile">
+                        <div class="stat-value" id="stat-quota-used">0%</div>
+                        <div class="stat-label">Quota Used</div>
+                    </div>
+                </section>
 
-            <!-- GUIDED WORKFLOW STEPPER CONTAINER -->
-            <section id="workflow-container" class="glass-panel">
-                <div class="stepper-bar">
-                    <div class="step-item active" data-step="1">
-                        <div class="step-num">1</div>
-                        <div class="step-label">Content</div>
-                    </div>
-                    <div class="step-connector"></div>
-                    <div class="step-item" data-step="2">
-                        <div class="step-num">2</div>
-                        <div class="step-label">Structure</div>
-                    </div>
-                    <div class="step-connector"></div>
-                    <div class="step-item" data-step="3">
-                        <div class="step-num">3</div>
-                        <div class="step-label">Images</div>
-                    </div>
-                    <div class="step-connector"></div>
-                    <div class="step-item" data-step="4">
-                        <div class="step-num">4</div>
-                        <div class="step-label">SEO</div>
-                    </div>
-                    <div class="step-connector"></div>
-                    <div class="step-item" data-step="5">
-                        <div class="step-num">5</div>
-                        <div class="step-label">Preview</div>
-                    </div>
-                    <div class="step-connector"></div>
-                    <div class="step-item" data-step="6">
-                        <div class="step-num">6</div>
-                        <div class="step-label">Publish</div>
-                    </div>
-                </div>
-
-                <!-- STEP 1: CONTENT -->
-                <div class="workflow-step-content active" id="workflow-step-1">
-                    <h3 class="panel-header">Step 1: Enter Article & Target Page Information</h3>
-                    <form id="url-queue-form" class="run-form">
+                <!-- Quick Queue Automation Form -->
+                <section class="glass-panel" style="margin-bottom: 1.5rem;">
+                    <h3 class="panel-header">🚀 Quick Automation Execution</h3>
+                    <form id="url-queue-form-home" class="run-form">
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div class="form-group" style="flex: 3; min-width: 280px;">
                                 <label>Target Page / Game URL</label>
-                                <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
+                                <input type="url" id="home_input_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
                             </div>
                             <div class="form-group" style="flex: 1; min-width: 130px;">
                                 <label>Market</label>
-                                <select id="input_market" style="padding: 10px;">
+                                <select id="home_input_market" style="padding: 10px;">
                                     <option value="UK">UK (GC Compliance)</option>
                                     <option value="PK">PK (Pakistani Market)</option>
                                 </select>
@@ -119,223 +81,23 @@
                         </div>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
                             <div class="form-group" style="flex: 1;">
-                                <label>Game Name (Optional - AI extracts if blank)</label>
-                                <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                                <label>Game Name (Optional)</label>
+                                <input type="text" id="home_input_game" placeholder="e.g. Sweet Bonanza">
                             </div>
                             <div class="form-group" style="flex: 1;">
-                                <label>Provider (Optional - AI extracts if blank)</label>
-                                <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                                <label>Provider (Optional)</label>
+                                <input type="text" id="home_input_provider" placeholder="e.g. Pragmatic Play">
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-                            <button type="button" class="btn-primary btn-next-step" data-next="2">Continue to Structure ➔</button>
-                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 1rem; padding: 12px 24px; font-size: 1rem;">
+                            🚀 Add to Queue & Start Automation
+                        </button>
                     </form>
-                </div>
+                </section>
 
-                <!-- STEP 2: STRUCTURE -->
-                <div class="workflow-step-content hidden" id="workflow-step-2">
-                    <h3 class="panel-header">Step 2: Article Format & Structure Selection</h3>
-                    
-                    <div class="format-options-grid" style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
-                        <div class="format-card selected" id="card-format-default">
-                            <h4>⚡ Default SEO Format</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
-                                Predefined optimized article structure designed for high SEO rankings.
-                            </p>
-                            <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
-                                <li>✓ Introduction & Overview</li>
-                                <li>✓ Features & Game Mechanics</li>
-                                <li>✓ Pros & Cons Breakdown</li>
-                                <li>✓ FAQ & Conclusion</li>
-                            </ul>
-                        </div>
-                        <div class="format-card" id="card-format-custom">
-                            <h4>🛠 Custom Format Builder</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
-                                Construct your own custom sections, reorder topics, and set AI writing rules.
-                            </p>
-                            <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
-                                <li>+ Create Custom Sections</li>
-                                <li>+ Drag & Reorder Topics</li>
-                                <li>+ Custom AI Section Instructions</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Custom Structure Builder View (Hidden by default until Custom selected) -->
-                    <div id="custom-builder-view" class="hidden" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h4 style="margin: 0;">Build Your Article Structure</h4>
-                            <button id="btn-add-section-ui" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Section</button>
-                        </div>
-                        <div id="custom-sections-list"></div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1">← Back</button>
-                        <button type="button" class="btn-primary btn-next-step" data-next="3">Continue to Images ➔</button>
-                    </div>
-                </div>
-
-                <!-- STEP 3: IMAGES -->
-                <div class="workflow-step-content hidden" id="workflow-step-3">
-                    <h3 class="panel-header">Step 3: Article Image Placement & Sizes</h3>
-                    
-                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                        <!-- Simple Image Upload & Assignment Form -->
-                        <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
-                            <h4 style="margin-bottom: 1rem;">🖼 Add Article Image</h4>
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label>Upload Image File</label>
-                                <input type="file" id="step3_image_file" accept="image/*">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label>Where should this image appear?</label>
-                                <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label>Position</label>
-                                <select id="step3_position_select" style="padding: 8px;">
-                                    <option value="after_heading">After section heading</option>
-                                    <option value="before_heading">Before section heading</option>
-                                    <option value="after_paragraph">After section text</option>
-                                    <option value="end_of_section">End of section</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                <div class="form-group" style="flex: 1;">
-                                    <label>Size</label>
-                                    <select id="step3_size_select" style="padding: 8px;">
-                                        <option value="large">Large (800px)</option>
-                                        <option value="medium">Medium (600px)</option>
-                                        <option value="small">Small (400px)</option>
-                                        <option value="full_width">Full Width</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" style="flex: 1;">
-                                    <label>Alignment</label>
-                                    <select id="step3_align_select" style="padding: 8px;">
-                                        <option value="center">Center</option>
-                                        <option value="left">Left</option>
-                                        <option value="right">Right</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
-                        </div>
-
-                        <!-- Visual Article Structure & Image Map -->
-                        <div style="flex: 1; min-width: 320px;">
-                            <h4 style="margin-bottom: 0.8rem;">Article Images & Placement Map</h4>
-                            <div id="assigned-images-visual-list">
-                                <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>
-                            </div>
-
-                            <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem;">Article Structure Visualization</h4>
-                            <div id="structure-tree-diagram" class="structure-tree"></div>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2">← Back</button>
-                        <button type="button" class="btn-primary btn-next-step" data-next="4">Continue to SEO ➔</button>
-                    </div>
-                </div>
-
-                <!-- STEP 4: SEO -->
-                <div class="workflow-step-content hidden" id="workflow-step-4">
-                    <h3 class="panel-header">Step 4: SEO Metadata & Keywords Inspector</h3>
-                    <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                            <label>Focus Keyword</label>
-                            <input type="text" id="step4_focus_kw" placeholder="Automatically extracted from Game Name..." style="padding: 10px; font-weight: 600;">
-                        </div>
-                        <div class="form-group">
-                            <label>SEO Meta Description</label>
-                            <textarea id="step4_meta_desc" placeholder="1-2 sentence catchy SEO meta description starting with focus keyword..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3">← Back</button>
-                        <button type="button" class="btn-primary btn-next-step" data-next="5">Continue to Preview ➔</button>
-                    </div>
-                </div>
-
-                <!-- STEP 5: PREVIEW -->
-                <div class="workflow-step-content hidden" id="workflow-step-5">
-                    <h3 class="panel-header">Step 5: Article Live Preview</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Review generated article layout, headings, and image placements prior to publishing.</p>
-                    
-                    <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto;">
-                        <p style="color: gray;">Click 'Generate & Preview Article' to render content.</p>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4">← Back</button>
-                        <button type="button" class="btn-primary btn-next-step" data-next="6">Proceed to Validation & Publish ➔</button>
-                    </div>
-                </div>
-
-                <!-- STEP 6: PUBLISH -->
-                <div class="workflow-step-content hidden" id="workflow-step-6">
-                    <h3 class="panel-header">Step 6: 12-Check Validation & WordPress Publishing</h3>
-                    
-                    <div id="step6-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem;"></div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
-                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="5">← Back to Preview</button>
-                        <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation & Publish to WordPress</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- COLLAPSIBLE PANELS (Home / Detail Views) -->
-            
-            <!-- Panel: Custom Template Builder -->
-            <section class="glass-panel collapsible-panel" id="panel-templates">
-                <div class="panel-header-bar">
-                    <h3 class="panel-header">🎨 Custom Content Templates</h3>
-                    <div class="panel-actions">
-                        <button class="btn-toggle-panel" data-target="body-templates">[ − ]</button>
-                    </div>
-                </div>
-                <div class="panel-body" id="body-templates">
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <input type="text" id="builder_template_name" placeholder="Template Name" style="font-weight: bold; flex: 2; padding: 10px;">
-                        <input type="text" id="builder_template_desc" placeholder="Template Description" style="flex: 3; padding: 10px;">
-                    </div>
-                    <div id="builder-sections-container"></div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
-                        <button id="btn-add-builder-section" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Custom Section</button>
-                        <button id="btn-save-template" class="btn-primary">💾 Save Template</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Panel: Drafts Pending Review -->
-            <section class="glass-panel collapsible-panel" id="panel-drafts">
-                <div class="panel-header-bar">
-                    <h3 class="panel-header">📄 Drafts Pending Review <span class="badge badge-info" id="badge-drafts-count">0 Drafts</span></h3>
-                    <div class="panel-actions">
-                        <button class="btn-toggle-panel" data-target="body-drafts">[ − ]</button>
-                    </div>
-                </div>
-                <div class="panel-body" id="body-drafts">
-                    <div id="drafts-container"><p style="color: var(--text-secondary);">Loading drafts...</p></div>
-                </div>
-            </section>
-
-            <!-- Panel: Active Automation Jobs -->
-            <section class="glass-panel collapsible-panel" id="panel-jobs">
-                <div class="panel-header-bar">
+                <!-- Active Jobs Grid -->
+                <section class="glass-panel">
                     <h3 class="panel-header">⚡ Active Automation Jobs <span class="badge badge-warning" id="badge-jobs-running">0 Running</span></h3>
-                    <div class="panel-actions">
-                        <button class="btn-toggle-panel" data-target="body-jobs">[ − ]</button>
-                    </div>
-                </div>
-                <div class="panel-body" id="body-jobs">
                     <table class="table-styled">
                         <thead>
                             <tr>
@@ -347,25 +109,285 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="jobs-tbody">
-                            <tr><td colspan="6" style="text-align: center;">Loading jobs...</td></tr>
+                        <tbody id="jobs-tbody-home">
+                            <tr><td colspan="6" style="text-align: center;">Loading active jobs...</td></tr>
                         </tbody>
                     </table>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- Panel: Article History -->
-            <section class="glass-panel collapsible-panel" id="panel-history">
-                <div class="panel-header-bar">
-                    <h3 class="panel-header">📜 Article Publishing History</h3>
-                    <div class="panel-actions">
-                        <button class="btn-toggle-panel" data-target="body-history">[ − ]</button>
+            <!-- ================= VIEW 2: CREATE ARTICLE GUIDED WIZARD ================= -->
+            <div id="view-create" class="tab-view hidden">
+                <section id="workflow-container" class="glass-panel">
+                    <div class="stepper-bar">
+                        <div class="step-item active" data-step="1">
+                            <div class="step-num">1</div>
+                            <div class="step-label">Content</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-item" data-step="2">
+                            <div class="step-num">2</div>
+                            <div class="step-label">Structure</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-item" data-step="3">
+                            <div class="step-num">3</div>
+                            <div class="step-label">Images</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-item" data-step="4">
+                            <div class="step-num">4</div>
+                            <div class="step-label">SEO</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-item" data-step="5">
+                            <div class="step-num">5</div>
+                            <div class="step-label">Preview</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-item" data-step="6">
+                            <div class="step-num">6</div>
+                            <div class="step-label">Publish</div>
+                        </div>
                     </div>
-                </div>
-                <div class="panel-body" id="body-history">
+
+                    <!-- STEP 1: CONTENT -->
+                    <div class="workflow-step-content active" id="workflow-step-1">
+                        <h3 class="panel-header">Step 1: Target Page & Article Information</h3>
+                        <form id="url-queue-form-step1" class="run-form">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="form-group" style="flex: 3; min-width: 280px;">
+                                    <label>Target Page / Game URL</label>
+                                    <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
+                                </div>
+                                <div class="form-group" style="flex: 1; min-width: 130px;">
+                                    <label>Market</label>
+                                    <select id="input_market" style="padding: 10px;">
+                                        <option value="UK">UK (GC Compliance)</option>
+                                        <option value="PK">PK (Pakistani Market)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Game Name (Optional)</label>
+                                    <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Provider (Optional)</label>
+                                    <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                                <button type="button" class="btn-primary btn-next-step" data-next="2">Continue to Structure ➔</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- STEP 2: STRUCTURE -->
+                    <div class="workflow-step-content hidden" id="workflow-step-2">
+                        <h3 class="panel-header">Step 2: Article Format & Structure Selection</h3>
+                        
+                        <div class="format-options-grid" style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="format-card selected" id="card-format-default">
+                                <h4>⚡ Default SEO Format</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
+                                    Predefined optimized article structure designed for high SEO rankings.
+                                </p>
+                                <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
+                                    <li>✓ Introduction & Overview</li>
+                                    <li>✓ Features & Mechanics</li>
+                                    <li>✓ Pros & Cons Breakdown</li>
+                                    <li>✓ FAQ & Conclusion</li>
+                                </ul>
+                            </div>
+                            <div class="format-card" id="card-format-custom">
+                                <h4>🛠 Custom Format Builder</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
+                                    Construct custom sections, reorder topics, and set AI writing rules.
+                                </p>
+                                <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
+                                    <li>+ Create Custom Sections</li>
+                                    <li>+ Reorder Topics</li>
+                                    <li>+ Custom AI Instructions</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Custom Builder Container -->
+                        <div id="custom-builder-view" class="hidden" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="margin: 0;">Build Your Article Structure</h4>
+                                <button id="btn-add-section-ui" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Section</button>
+                            </div>
+                            <div id="custom-sections-list"></div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="3">Continue to Images ➔</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: IMAGES -->
+                    <div class="workflow-step-content hidden" id="workflow-step-3">
+                        <h3 class="panel-header">Step 3: Article Image Placement & Sizes</h3>
+                        
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
+                                <h4 style="margin-bottom: 1rem;">🖼 Add Article Image</h4>
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label>Upload Image File</label>
+                                    <input type="file" id="step3_image_file" accept="image/*">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label>Where should this image appear?</label>
+                                    <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1rem;">
+                                    <label>Position</label>
+                                    <select id="step3_position_select" style="padding: 8px;">
+                                        <option value="after_heading">After section heading</option>
+                                        <option value="before_heading">Before section heading</option>
+                                        <option value="after_paragraph">After section text</option>
+                                        <option value="end_of_section">End of section</option>
+                                    </select>
+                                </div>
+                                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Size</label>
+                                        <select id="step3_size_select" style="padding: 8px;">
+                                            <option value="large">Large (800px)</option>
+                                            <option value="medium">Medium (600px)</option>
+                                            <option value="small">Small (400px)</option>
+                                            <option value="full_width">Full Width</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Alignment</label>
+                                        <select id="step3_align_select" style="padding: 8px;">
+                                            <option value="center">Center</option>
+                                            <option value="left">Left</option>
+                                            <option value="right">Right</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
+                            </div>
+
+                            <div style="flex: 1; min-width: 320px;">
+                                <h4 style="margin-bottom: 0.8rem;">Article Images & Placement Map</h4>
+                                <div id="assigned-images-visual-list">
+                                    <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>
+                                </div>
+
+                                <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem;">Article Structure Visualization</h4>
+                                <div id="structure-tree-diagram" class="structure-tree"></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="4">Continue to SEO ➔</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: SEO -->
+                    <div class="workflow-step-content hidden" id="workflow-step-4">
+                        <h3 class="panel-header">Step 4: SEO Metadata & Keywords Inspector</h3>
+                        <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Focus Keyword</label>
+                                <input type="text" id="step4_focus_kw" placeholder="Automatically extracted from Game Name..." style="padding: 10px; font-weight: 600;">
+                            </div>
+                            <div class="form-group">
+                                <label>SEO Meta Description</label>
+                                <textarea id="step4_meta_desc" placeholder="1-2 sentence catchy SEO meta description starting with focus keyword..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="5">Continue to Preview ➔</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: PREVIEW -->
+                    <div class="workflow-step-content hidden" id="workflow-step-5">
+                        <h3 class="panel-header">Step 5: Article Live Preview</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Review generated article layout and image placements prior to publishing.</p>
+                        
+                        <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto;">
+                            <p style="color: gray;">Rendering article preview...</p>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4">← Back</button>
+                            <button type="button" class="btn-primary btn-next-step" data-next="6">Proceed to Validation & Publish ➔</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 6: PUBLISH -->
+                    <div class="workflow-step-content hidden" id="workflow-step-6">
+                        <h3 class="panel-header">Step 6: 12-Check Validation & WordPress Publishing</h3>
+                        <div id="step6-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem;"></div>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                            <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="5">← Back to Preview</button>
+                            <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation & Publish to WordPress</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= VIEW 3: TEMPLATES VIEW ================= -->
+            <div id="view-templates" class="tab-view hidden">
+                <section class="glass-panel">
+                    <h3 class="panel-header">🎨 Custom Content Templates Builder</h3>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <input type="text" id="builder_template_name" placeholder="Template Name" style="font-weight: bold; flex: 2; padding: 10px;">
+                        <input type="text" id="builder_template_desc" placeholder="Template Description" style="flex: 3; padding: 10px;">
+                    </div>
+                    <div id="builder-sections-container"></div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <button id="btn-add-builder-section" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Custom Section</button>
+                        <button id="btn-save-template" class="btn-primary">💾 Save Template</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= VIEW 4: MEDIA LIBRARY VIEW ================= -->
+            <div id="view-media" class="tab-view hidden">
+                <section class="glass-panel">
+                    <h3 class="panel-header">🖼 Image Library & Section Assignments</h3>
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        <form id="media-upload-form" class="run-form" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
+                            <h4 style="margin-bottom: 0.5rem;">Upload Image Asset</h4>
+                            <div class="form-group">
+                                <label>Image File (JPG, PNG, WEBP)</label>
+                                <input type="file" id="media_upload_file" accept="image/*" required>
+                            </div>
+                            <button type="submit" class="btn-primary" style="padding: 8px;">Upload Image Asset</button>
+                        </form>
+                        <div style="flex: 2; min-width: 320px;">
+                            <h4 style="margin-bottom: 0.8rem;">Uploaded Image Assets:</h4>
+                            <div id="media-gallery-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <p style="color: var(--text-secondary);">No images uploaded yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= VIEW 5: HISTORY VIEW ================= -->
+            <div id="view-history" class="tab-view hidden">
+                <section class="glass-panel">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <input type="text" id="history_search_input" placeholder="Search by title..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
-                        <button id="btn-delete-all-history" class="nav-btn" style="color: #EF4444;">🗑 Delete All History</button>
+                        <h3 class="panel-header" style="margin: 0;">📜 Article Publishing History</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="history_search_input" placeholder="Search by title..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
+                            <button id="btn-delete-all-history" class="nav-btn" style="color: #EF4444;">🗑 Delete All History</button>
+                        </div>
                     </div>
                     <table class="table-styled">
                         <thead>
@@ -379,21 +401,16 @@
                             </tr>
                         </thead>
                         <tbody id="history-tbody">
-                            <tr><td colspan="6" style="text-align: center;">Loading history...</td></tr>
+                            <tr><td colspan="6" style="text-align: center;">Loading publishing history...</td></tr>
                         </tbody>
                     </table>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- Panel: Connected WordPress Sites & Settings -->
-            <section class="glass-panel collapsible-panel hidden" id="panel-setup">
-                <div class="panel-header-bar">
-                    <h3 class="panel-header">⚙ Connection Settings</h3>
-                    <div class="panel-actions">
-                        <button class="btn-toggle-panel" data-target="body-setup">[ − ]</button>
-                    </div>
-                </div>
-                <div class="panel-body" id="body-setup">
+            <!-- ================= VIEW 6: SETTINGS VIEW ================= -->
+            <div id="view-settings" class="tab-view hidden">
+                <section class="glass-panel">
+                    <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
                     <form id="setup-form" class="run-form">
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div class="form-group" style="flex: 2;">
@@ -412,11 +429,11 @@
                         <button type="submit" class="btn-primary">Save Settings</button>
                         <div id="setup-status" class="status-msg hidden"></div>
                     </form>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- DEV MODE / ADVANCED SETTINGS DRAWER (Hidden unless Dev Mode checked) -->
-            <section class="glass-panel hidden" id="dev-mode-drawer" style="border: 2px dashed #F59E0B; background: rgba(245,158,11,0.05);">
+            <!-- DEV MODE DIAGNOSTICS DRAWER -->
+            <section class="glass-panel hidden" id="dev-mode-drawer" style="border: 2px dashed #F59E0B; background: rgba(245,158,11,0.05); margin-top: 1rem;">
                 <h4 style="color: #B45309; margin-bottom: 0.5rem;">⚙ Advanced Developer Diagnostics & Internal UUIDs</h4>
                 <div id="dev-uuid-lookup-container" style="font-family: monospace; font-size: 0.85rem;"></div>
             </section>
@@ -456,17 +473,6 @@
         </div>
     </div>
 
-    <!-- Timeline Modal -->
-    <div id="timeline-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 id="modal-job-title" style="margin: 0;">Job Event Timeline</h3>
-                <button id="close-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div id="timeline-events-container" class="timeline-container"></div>
-        </div>
-    </div>
-
-    <script src="/static/app.js?v=6"></script>
+    <script src="/static/app.js?v=7"></script>
 </body>
 </html>

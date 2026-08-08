@@ -1,14 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // LocalStorage Collapse Preference Key
-    const STORAGE_KEY_PANELS = "seo_app_panel_states_v2";
-
-    // DOM Elements - Stepper Workflow
-    const workflowStepContents = document.querySelectorAll(".workflow-step-content");
-    const stepItems = document.querySelectorAll(".step-item");
-    const btnNextSteps = document.querySelectorAll(".btn-next-step");
-    const btnPrevSteps = document.querySelectorAll(".btn-prev-step");
-
-    // Navigation Buttons
+    // DOM Elements — Navigation Views
+    const tabViews = document.querySelectorAll(".tab-view");
     const navHome = document.getElementById("nav-home");
     const navCreate = document.getElementById("nav-create");
     const navTemplates = document.getElementById("nav-templates");
@@ -21,19 +13,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const devUuidLookupContainer = document.getElementById("dev-uuid-lookup-container");
     const logoutBtn = document.getElementById("logout-btn");
 
-    // Collapsible Panel Elements
-    const collapsiblePanels = document.querySelectorAll(".collapsible-panel");
-    const btnExpandAll = document.getElementById("btn-expand-all");
-    const btnCollapseAll = document.getElementById("btn-collapse-all");
+    // Stepper Elements
+    const workflowStepContents = document.querySelectorAll(".workflow-step-content");
+    const stepItems = document.querySelectorAll(".step-item");
+    const btnNextSteps = document.querySelectorAll(".btn-next-step");
+    const btnPrevSteps = document.querySelectorAll(".btn-prev-step");
 
-    // Format Mode Elements
+    // Format Cards Elements
     const cardFormatDefault = document.getElementById("card-format-default");
     const cardFormatCustom = document.getElementById("card-format-custom");
     const customBuilderView = document.getElementById("custom-builder-view");
     const customSectionsList = document.getElementById("custom-sections-list");
     const btnAddSectionUi = document.getElementById("btn-add-section-ui");
 
-    // Step 3 Image Manager
+    // Step 3 Image Manager Elements
     const step3ImageFile = document.getElementById("step3_image_file");
     const step3SectionSelect = document.getElementById("step3_section_select");
     const step3PositionSelect = document.getElementById("step3_position_select");
@@ -43,12 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const assignedImagesVisualList = document.getElementById("assigned-images-visual-list");
     const structureTreeDiagram = document.getElementById("structure-tree-diagram");
 
-    // Step 5 & 6 Preview / Publish
+    // Step 5 & 6 Preview & Publish
     const step5PreviewRendered = document.getElementById("step5-preview-rendered");
     const step6ValidationCard = document.getElementById("step6-validation-card");
     const btnFinalPublish = document.getElementById("btn-final-publish");
 
-    // Section Editor Modal
+    // Section Editor Modal Elements
     const sectionEditorModal = document.getElementById("section-editor-modal");
     const closeSecModalBtn = document.getElementById("close-sec-modal-btn");
     const editSecName = document.getElementById("edit_sec_name");
@@ -57,16 +50,53 @@ document.addEventListener("DOMContentLoaded", () => {
     const editSecReq = document.getElementById("edit_sec_req");
     const btnSaveSectionModal = document.getElementById("btn-save-section-modal");
 
-    // Global App State
+    // Global State
     let activeStep = 1;
     let selectedFormatMode = "default";
     let userTemplates = [];
     let activeTemplate = null;
     let currentEditingSecCard = null;
-    let userImages = [];
     let imageAssignments = [];
 
-    // --- 1. GUIDED WORKFLOW STEPPER MANAGER ---
+    // --- 1. CLEAN TABBED VIEW SWITCHER ---
+
+    function switchTab(viewName, navBtn) {
+        tabViews.forEach(v => v.classList.add("hidden"));
+        const targetView = document.getElementById(`view-${viewName}`);
+        if (targetView) targetView.classList.remove("hidden");
+
+        [navHome, navCreate, navTemplates, navMedia, navHistory, navSettings, navAdmin].forEach(b => {
+            if (b) b.classList.remove("active");
+        });
+        if (navBtn) navBtn.classList.add("active");
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Trigger specific view loaders
+        if (viewName === "home") {
+            loadUsage();
+            loadJobsHome();
+        } else if (viewName === "create") {
+            goToStep(1);
+        } else if (viewName === "templates") {
+            loadTemplates();
+        } else if (viewName === "media") {
+            loadMediaGallery();
+        } else if (viewName === "history") {
+            loadHistory();
+        } else if (viewName === "settings") {
+            loadSettings();
+        }
+    }
+
+    if (navHome) navHome.addEventListener("click", () => switchTab("home", navHome));
+    if (navCreate) navCreate.addEventListener("click", () => switchTab("create", navCreate));
+    if (navTemplates) navTemplates.addEventListener("click", () => switchTab("templates", navTemplates));
+    if (navMedia) navMedia.addEventListener("click", () => switchTab("media", navMedia));
+    if (navHistory) navHistory.addEventListener("click", () => switchTab("history", navHistory));
+    if (navSettings) navSettings.addEventListener("click", () => switchTab("settings", navSettings));
+
+    // --- 2. GUIDED WORKFLOW STEPPER MANAGER ---
 
     function goToStep(stepNum) {
         activeStep = parseInt(stepNum);
@@ -82,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetContent = document.getElementById(`workflow-step-${activeStep}`);
         if (targetContent) targetContent.classList.remove("hidden");
 
-        // Specific actions on step entry
         if (activeStep === 3) {
             loadStep3Data();
         } else if (activeStep === 5) {
@@ -113,107 +142,48 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- 2. COLLAPSIBLE PANELS WITH LOCALSTORAGE MEMORY ---
+    // Quick Form on Home View
+    const urlQueueFormHome = document.getElementById("url-queue-form-home");
+    if (urlQueueFormHome) {
+        urlQueueFormHome.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append("url", document.getElementById("home_input_url").value);
+            formData.append("game_name", document.getElementById("home_input_game").value);
+            formData.append("provider", document.getElementById("home_input_provider").value);
+            formData.append("market", document.getElementById("home_input_market").value);
 
-    function getPanelStates() {
-        try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY_PANELS)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function savePanelState(panelId, isCollapsed) {
-        const states = getPanelStates();
-        states[panelId] = isCollapsed;
-        localStorage.setItem(STORAGE_KEY_PANELS, JSON.stringify(states));
-    }
-
-    function applyPanelStates() {
-        const states = getPanelStates();
-        collapsiblePanels.forEach(panel => {
-            const toggleBtn = panel.querySelector(".btn-toggle-panel");
-            const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
-            const body = targetId ? document.getElementById(targetId) : null;
-            if (!body) return;
-
-            const isCollapsed = !!states[panel.id];
-            if (isCollapsed) {
-                body.style.display = "none";
-                toggleBtn.textContent = "[ + ]";
-            } else {
-                body.style.display = "block";
-                toggleBtn.textContent = "[ − ]";
+            try {
+                const res = await fetch("/api/links", { method: "POST", body: formData });
+                const data = await res.json();
+                alert(data.message || "Job queued successfully!");
+                document.getElementById("home_input_url").value = "";
+                loadJobsHome();
+            } catch (err) {
+                alert("Queueing failed: " + err);
             }
         });
     }
 
-    collapsiblePanels.forEach(panel => {
-        const toggleBtn = panel.querySelector(".btn-toggle-panel");
-        if (!toggleBtn) return;
-        toggleBtn.addEventListener("click", () => {
-            const targetId = toggleBtn.getAttribute("data-target");
-            const body = document.getElementById(targetId);
-            if (!body) return;
+    // --- 3. FORMAT MODE & TEMPLATES ---
 
-            const isCurrentlyCollapsed = body.style.display === "none";
-            if (isCurrentlyCollapsed) {
-                body.style.display = "block";
-                toggleBtn.textContent = "[ − ]";
-                savePanelState(panel.id, false);
-            } else {
-                body.style.display = "none";
-                toggleBtn.textContent = "[ + ]";
-                savePanelState(panel.id, true);
-            }
-        });
-    });
-
-    if (btnExpandAll) {
-        btnExpandAll.addEventListener("click", () => {
-            collapsiblePanels.forEach(panel => {
-                const toggleBtn = panel.querySelector(".btn-toggle-panel");
-                const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
-                const body = targetId ? document.getElementById(targetId) : null;
-                if (body) {
-                    body.style.display = "block";
-                    if (toggleBtn) toggleBtn.textContent = "[ − ]";
-                    savePanelState(panel.id, false);
-                }
-            });
+    if (cardFormatDefault) {
+        cardFormatDefault.addEventListener("click", () => {
+            selectedFormatMode = "default";
+            cardFormatDefault.classList.add("selected");
+            cardFormatCustom.classList.remove("selected");
+            customBuilderView.classList.add("hidden");
         });
     }
 
-    if (btnCollapseAll) {
-        btnCollapseAll.addEventListener("click", () => {
-            collapsiblePanels.forEach(panel => {
-                const toggleBtn = panel.querySelector(".btn-toggle-panel");
-                const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
-                const body = targetId ? document.getElementById(targetId) : null;
-                if (body) {
-                    body.style.display = "none";
-                    if (toggleBtn) toggleBtn.textContent = "[ + ]";
-                    savePanelState(panel.id, true);
-                }
-            });
+    if (cardFormatCustom) {
+        cardFormatCustom.addEventListener("click", () => {
+            selectedFormatMode = "custom";
+            cardFormatCustom.classList.add("selected");
+            cardFormatDefault.classList.remove("selected");
+            customBuilderView.classList.remove("hidden");
         });
     }
-
-    // --- 3. FORMAT SELECTION & TEMPLATES ---
-
-    cardFormatDefault.addEventListener("click", () => {
-        selectedFormatMode = "default";
-        cardFormatDefault.classList.add("selected");
-        cardFormatCustom.classList.remove("selected");
-        customBuilderView.classList.add("hidden");
-    });
-
-    cardFormatCustom.addEventListener("click", () => {
-        selectedFormatMode = "custom";
-        cardFormatCustom.classList.add("selected");
-        cardFormatDefault.classList.remove("selected");
-        customBuilderView.classList.remove("hidden");
-    });
 
     async function loadTemplates() {
         try {
@@ -328,12 +298,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 4. STEP 3 IMAGE MANAGER & VISUALIZATION ---
+    // --- 4. STEP 3 IMAGE MANAGER & MEDIA LIBRARY ---
 
     async function loadStep3Data() {
+        if (!activeTemplate) await loadTemplates();
         if (!activeTemplate || !activeTemplate.sections) return;
 
-        // Populate human-readable section dropdown
         step3SectionSelect.innerHTML = activeTemplate.sections.map(s => `
             <option value="${s.id}">${s.name}</option>
         `).join("");
@@ -408,7 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // Assign image to section
                 const assignPayload = {
                     image_id: upData.image_id,
                     section_id: step3SectionSelect.value,
@@ -430,6 +399,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadVisualImageAssignments();
             } catch (e) {
                 alert("Failed to save image placement: " + e);
+            }
+        });
+    }
+
+    async function loadMediaGallery() {
+        try {
+            const res = await fetch("/api/images");
+            const assets = await res.json();
+            const container = document.getElementById("media-gallery-container");
+            if (!container || !Array.isArray(assets)) return;
+
+            if (assets.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary);">No uploaded images yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = assets.map(a => `
+                <div style="background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 10px; width: 140px; text-align: center;">
+                    <img src="${a.url}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 6px;">
+                    <div style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 6px;">${a.filename}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${a.width} × ${a.height}</div>
+                </div>
+            `).join("");
+        } catch (e) {}
+    }
+
+    const mediaUploadForm = document.getElementById("media-upload-form");
+    if (mediaUploadForm) {
+        mediaUploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append("file", document.getElementById("media_upload_file").files[0]);
+
+            try {
+                const res = await fetch("/api/images/upload", { method: "POST", body: formData });
+                const data = await res.json();
+                alert(data.message || "Image uploaded!");
+                loadMediaGallery();
+            } catch (err) {
+                alert("Upload failed: " + err);
             }
         });
     }
@@ -520,8 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const res = await fetch("/api/links", { method: "POST", body: formData });
                 const data = await res.json();
                 alert(data.message || "Job queued successfully!");
-                goToStep(1);
-                loadJobs();
+                switchTab("home", navHome);
             } catch (e) {
                 alert("Submission failed: " + e);
             } finally {
@@ -531,7 +539,102 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 6. DEVELOPER MODE DIAGNOSTICS ---
+    // --- 6. HISTORY & SETTINGS ---
+
+    async function loadHistory() {
+        try {
+            const q = document.getElementById("history_search_input") ? document.getElementById("history_search_input").value : "";
+            const res = await fetch(`/api/history?q=${encodeURIComponent(q)}`);
+            const history = await res.json();
+            const tbody = document.getElementById("history-tbody");
+            if (!tbody || !Array.isArray(history)) return;
+
+            if (history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No publishing history records found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = history.map(h => `
+                <tr>
+                    <td>#${h.id}</td>
+                    <td><strong>${h.game_name}</strong> (${h.provider})</td>
+                    <td><span class="badge ${h.status === 'Published' ? 'badge-success' : 'badge-danger'}">${h.status}</span></td>
+                    <td>${h.article_id ? `#${h.article_id}` : '--'}</td>
+                    <td>${h.published_at || '--'}</td>
+                    <td>
+                        <button class="btn-secondary-sm retry-hist-btn" data-id="${h.id}" style="color: #2563EB;">Retry</button>
+                        <button class="btn-secondary-sm delete-hist-btn" data-id="${h.id}" style="color: #EF4444;">Delete</button>
+                    </td>
+                </tr>
+            `).join("");
+
+            document.querySelectorAll(".delete-hist-btn").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.getAttribute("data-id");
+                    if (confirm("Delete this history entry? (WordPress article will not be deleted)")) {
+                        await fetch(`/api/history/${id}`, { method: "DELETE" });
+                        loadHistory();
+                    }
+                });
+            });
+
+            document.querySelectorAll(".retry-hist-btn").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.getAttribute("data-id");
+                    const res = await fetch(`/api/history/${id}/retry`, { method: "POST" });
+                    const data = await res.json();
+                    alert(data.message || "Retry job enqueued!");
+                    switchTab("home", navHome);
+                });
+            });
+        } catch (e) {}
+    }
+
+    const historySearchInput = document.getElementById("history_search_input");
+    if (historySearchInput) historySearchInput.addEventListener("input", loadHistory);
+
+    const btnDeleteAllHistory = document.getElementById("btn-delete-all-history");
+    if (btnDeleteAllHistory) {
+        btnDeleteAllHistory.addEventListener("click", async () => {
+            if (confirm("Delete ALL history records?")) {
+                await fetch("/api/history/bulk-delete?delete_all=true", { method: "POST" });
+                loadHistory();
+            }
+        });
+    }
+
+    async function loadSettings() {
+        try {
+            const res = await fetch("/api/user/settings");
+            const data = await res.json();
+            if (data.wp_url) document.getElementById("set_wp_url").value = data.wp_url;
+            if (data.wp_username) document.getElementById("set_wp_username").value = data.wp_username;
+        } catch (e) {}
+    }
+
+    const setupForm = document.getElementById("setup-form");
+    if (setupForm) {
+        setupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const payload = {
+                wp_url: document.getElementById("set_wp_url").value,
+                wp_username: document.getElementById("set_wp_username").value,
+                wp_password: document.getElementById("set_wp_password").value
+            };
+            try {
+                await fetch("/api/user/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                alert("Settings saved successfully!");
+            } catch (err) {
+                alert("Failed to save settings: " + err);
+            }
+        });
+    }
+
+    // --- 7. DEV MODE & ROLE CHECK ---
 
     if (devModeCheckbox) {
         devModeCheckbox.addEventListener("change", () => {
@@ -553,52 +656,15 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 7. NAVIGATION CONTROLS ---
-
-    function setActiveNav(btn) {
-        [navHome, navCreate, navTemplates, navMedia, navHistory, navSettings, navAdmin].forEach(b => {
-            if (b) b.classList.remove("active");
-        });
-        if (btn) btn.classList.add("active");
+    async function checkRole() {
+        try {
+            const res = await fetch("/api/admin/stats");
+            if (res.ok && navAdmin) {
+                navAdmin.classList.remove("hidden");
+                navAdmin.addEventListener("click", () => window.location.href = "/admin");
+            }
+        } catch (e) {}
     }
-
-    function expandAndScrollTo(panelId) {
-        const panel = document.getElementById(panelId);
-        if (!panel) return;
-        panel.classList.remove("hidden");
-        const body = panel.querySelector(".panel-body");
-        const toggleBtn = panel.querySelector(".btn-toggle-panel");
-        if (body) body.style.display = "block";
-        if (toggleBtn) toggleBtn.textContent = "[ − ]";
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    if (navHome) navHome.addEventListener("click", () => {
-        setActiveNav(navHome);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-    if (navCreate) navCreate.addEventListener("click", () => {
-        setActiveNav(navCreate);
-        goToStep(1);
-        document.getElementById("workflow-container").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    if (navTemplates) navTemplates.addEventListener("click", () => {
-        setActiveNav(navTemplates);
-        expandAndScrollTo("panel-templates");
-    });
-    if (navMedia) navMedia.addEventListener("click", () => {
-        setActiveNav(navMedia);
-        goToStep(3);
-        document.getElementById("workflow-container").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    if (navHistory) navHistory.addEventListener("click", () => {
-        setActiveNav(navHistory);
-        expandAndScrollTo("panel-history");
-    });
-    if (navSettings) navSettings.addEventListener("click", () => {
-        setActiveNav(navSettings);
-        expandAndScrollTo("panel-setup");
-    });
 
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {
@@ -618,25 +684,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("user-quota-pill").textContent = `Quota: ${data.monthly_usage} / ${data.article_limit}`;
                 document.getElementById("stat-published").textContent = data.published_count || 0;
                 document.getElementById("stat-drafts").textContent = data.total_drafts || 0;
+                document.getElementById("stat-templates").textContent = data.total_templates || userTemplates.length || 1;
                 document.getElementById("stat-quota-used").textContent = `${data.usage_percentage}%`;
-                document.getElementById("badge-drafts-count").textContent = `${data.total_drafts || 0} Drafts`;
             }
         } catch (e) {}
     }
 
-    async function loadJobs() {
+    async function loadJobsHome() {
         try {
             const res = await fetch("/api/user/jobs?status_filter=ALL");
             const jobs = await res.json();
-            if (!Array.isArray(jobs)) return;
-            const running = jobs.filter(j => j.status === 'PROCESSING' || j.status === 'QUEUED').length;
-            document.getElementById("badge-jobs-running").textContent = `${running} Running`;
+            const tbody = document.getElementById("jobs-tbody-home");
+            if (!tbody || !Array.isArray(jobs)) return;
 
-            const tbody = document.getElementById("jobs-tbody");
+            const running = jobs.filter(j => j.status === 'PROCESSING' || j.status === 'QUEUED').length;
+            const badge = document.getElementById("badge-jobs-running");
+            if (badge) badge.textContent = `${running} Running`;
+
             if (jobs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No active jobs found.</td></tr>`;
                 return;
             }
+
             tbody.innerHTML = jobs.map(j => `
                 <tr>
                     <td><strong>${j.job_id}</strong></td>
@@ -651,9 +720,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Init Page
-    applyPanelStates();
-    loadUsage();
+    switchTab("home", navHome);
     loadTemplates();
-    loadJobs();
-    setInterval(loadJobs, 5000);
+    checkRole();
+    setInterval(() => {
+        const homeView = document.getElementById("view-home");
+        if (homeView && !homeView.classList.contains("hidden")) {
+            loadJobsHome();
+        }
+    }, 5000);
 });
