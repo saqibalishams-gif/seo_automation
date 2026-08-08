@@ -562,12 +562,43 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn) btn.classList.add("active");
     }
 
-    if (navHome) navHome.addEventListener("click", () => { setActiveNav(navHome); });
-    if (navCreate) navCreate.addEventListener("click", () => { setActiveNav(navCreate); goToStep(1); });
-    if (navTemplates) navTemplates.addEventListener("click", () => { setActiveNav(navTemplates); });
-    if (navMedia) navMedia.addEventListener("click", () => { setActiveNav(navMedia); goToStep(3); });
-    if (navHistory) navHistory.addEventListener("click", () => { setActiveNav(navHistory); });
-    if (navSettings) navSettings.addEventListener("click", () => { setActiveNav(navSettings); });
+    function expandAndScrollTo(panelId) {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+        panel.classList.remove("hidden");
+        const body = panel.querySelector(".panel-body");
+        const toggleBtn = panel.querySelector(".btn-toggle-panel");
+        if (body) body.style.display = "block";
+        if (toggleBtn) toggleBtn.textContent = "[ − ]";
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (navHome) navHome.addEventListener("click", () => {
+        setActiveNav(navHome);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    if (navCreate) navCreate.addEventListener("click", () => {
+        setActiveNav(navCreate);
+        goToStep(1);
+        document.getElementById("workflow-container").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    if (navTemplates) navTemplates.addEventListener("click", () => {
+        setActiveNav(navTemplates);
+        expandAndScrollTo("panel-templates");
+    });
+    if (navMedia) navMedia.addEventListener("click", () => {
+        setActiveNav(navMedia);
+        goToStep(3);
+        document.getElementById("workflow-container").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    if (navHistory) navHistory.addEventListener("click", () => {
+        setActiveNav(navHistory);
+        expandAndScrollTo("panel-history");
+    });
+    if (navSettings) navSettings.addEventListener("click", () => {
+        setActiveNav(navSettings);
+        expandAndScrollTo("panel-setup");
+    });
 
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {

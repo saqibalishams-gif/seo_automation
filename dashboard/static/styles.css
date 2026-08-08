@@ -90,23 +90,24 @@ body {
     opacity: 0.4;
 }
 
-/* Layout Grid */
+/* Layout Container */
 .app-container {
     position: relative;
     z-index: 1;
-    max-width: 1220px;
+    max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
-    padding: 36px;
-    display: grid;
-    grid-template-columns: minmax(0, 7.3fr) minmax(0, 2.7fr);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
 }
 
 @media (max-width: 900px) {
     .app-container {
-        grid-template-columns: 1fr;
+        padding: 16px;
     }
-    .header-content {
+    .header-bar {
         flex-direction: column;
         gap: 1rem;
     }
