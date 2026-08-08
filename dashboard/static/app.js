@@ -1,537 +1,573 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // DOM Elements
-    const urlQueueForm = document.getElementById("url-queue-form");
-    const btnQueueUrl = document.getElementById("btn-queue-url");
-    const urlQueueStatus = document.getElementById("url-queue-status");
-    
-    const userPlanPill = document.getElementById("user-plan-pill");
-    const userQuotaPill = document.getElementById("user-quota-pill");
-    const statPublished = document.getElementById("stat-published");
-    const statDrafts = document.getElementById("stat-drafts");
-    const statTemplates = document.getElementById("stat-templates");
-    const statQuotaUsed = document.getElementById("stat-quota-used");
-    
-    const selectActiveTemplate = document.getElementById("select_active_template");
-    const modeDefaultRadio = document.getElementById("mode-default-radio");
-    const modeCustomRadio = document.getElementById("mode-custom-radio");
-    
-    // Template Builder Elements
-    const builderTemplateName = document.getElementById("builder_template_name");
-    const builderTemplateDesc = document.getElementById("builder_template_desc");
-    const builderSectionsContainer = document.getElementById("builder-sections-container");
-    const btnAddBuilderSection = document.getElementById("btn-add-builder-section");
-    const btnSaveTemplate = document.getElementById("btn-save-template");
-    const btnNewTemplate = document.getElementById("btn-new-template");
-    const btnDuplicateTemplate = document.getElementById("btn-duplicate-template");
-    
-    // Image Manager Elements
-    const imageUploadForm = document.getElementById("image-upload-form");
-    const imageAssignForm = document.getElementById("image-assign-form");
-    const assignImageId = document.getElementById("assign_image_id");
-    const assignSectionId = document.getElementById("assign_section_id");
-    const imageGalleryContainer = document.getElementById("image-gallery-container");
+    // LocalStorage Collapse Preference Key
+    const STORAGE_KEY_PANELS = "seo_app_panel_states_v2";
 
-    // History & Tables
-    const historyTbody = document.getElementById("history-tbody");
-    const historySearchInput = document.getElementById("history_search_input");
-    const btnDeleteAllHistory = document.getElementById("btn-delete-all-history");
-    const historyContentWrapper = document.getElementById("history-content-wrapper");
-    const navHistoryToggle = document.getElementById("nav-history-toggle");
+    // DOM Elements - Stepper Workflow
+    const workflowStepContents = document.querySelectorAll(".workflow-step-content");
+    const stepItems = document.querySelectorAll(".step-item");
+    const btnNextSteps = document.querySelectorAll(".btn-next-step");
+    const btnPrevSteps = document.querySelectorAll(".btn-prev-step");
 
-    const jobsTbody = document.getElementById("jobs-tbody");
-    const jobStatusFilter = document.getElementById("job-status-filter");
-    const draftsContainer = document.getElementById("drafts-container");
-
-    // Modals
-    const previewModal = document.getElementById("preview-modal");
-    const closePreviewModalBtn = document.getElementById("close-preview-modal-btn");
-    const previewHtmlContent = document.getElementById("preview-html-content");
-    const previewValidationBanner = document.getElementById("preview-validation-banner");
-    
-    const timelineModal = document.getElementById("timeline-modal");
-    const closeModalBtn = document.getElementById("close-modal-btn");
-    const modalJobTitle = document.getElementById("modal-job-title");
-    const timelineEventsContainer = document.getElementById("timeline-events-container");
-    
+    // Navigation Buttons
+    const navHome = document.getElementById("nav-home");
+    const navCreate = document.getElementById("nav-create");
+    const navTemplates = document.getElementById("nav-templates");
+    const navMedia = document.getElementById("nav-media");
+    const navHistory = document.getElementById("nav-history");
+    const navSettings = document.getElementById("nav-settings");
     const navAdmin = document.getElementById("nav-admin");
+    const devModeCheckbox = document.getElementById("dev-mode-checkbox");
+    const devModeDrawer = document.getElementById("dev-mode-drawer");
+    const devUuidLookupContainer = document.getElementById("dev-uuid-lookup-container");
     const logoutBtn = document.getElementById("logout-btn");
 
-    let currentTemplates = [];
-    let activeTemplateId = null;
+    // Collapsible Panel Elements
+    const collapsiblePanels = document.querySelectorAll(".collapsible-panel");
+    const btnExpandAll = document.getElementById("btn-expand-all");
+    const btnCollapseAll = document.getElementById("btn-collapse-all");
 
-    // Load Usage & Templates
-    async function loadUsage() {
-        try {
-            const res = await fetch("/api/user/usage");
-            if (res.status === 401) {
-                window.location.href = "/login.html";
-                return;
-            }
-            const data = await res.json();
-            if (data.plan) {
-                userPlanPill.textContent = `Plan: ${data.plan}`;
-                userQuotaPill.textContent = `Quota: ${data.monthly_usage} / ${data.article_limit}`;
-                statQuotaUsed.textContent = `${data.usage_percentage}%`;
-                statPublished.textContent = data.published_count || 0;
-                statDrafts.textContent = data.total_drafts || 0;
-            }
-        } catch (e) {
-            console.error("Failed to load usage summary", e);
+    // Format Mode Elements
+    const cardFormatDefault = document.getElementById("card-format-default");
+    const cardFormatCustom = document.getElementById("card-format-custom");
+    const customBuilderView = document.getElementById("custom-builder-view");
+    const customSectionsList = document.getElementById("custom-sections-list");
+    const btnAddSectionUi = document.getElementById("btn-add-section-ui");
+
+    // Step 3 Image Manager
+    const step3ImageFile = document.getElementById("step3_image_file");
+    const step3SectionSelect = document.getElementById("step3_section_select");
+    const step3PositionSelect = document.getElementById("step3_position_select");
+    const step3SizeSelect = document.getElementById("step3_size_select");
+    const step3AlignSelect = document.getElementById("step3_align_select");
+    const btnSaveStep3Image = document.getElementById("btn-save-step3-image");
+    const assignedImagesVisualList = document.getElementById("assigned-images-visual-list");
+    const structureTreeDiagram = document.getElementById("structure-tree-diagram");
+
+    // Step 5 & 6 Preview / Publish
+    const step5PreviewRendered = document.getElementById("step5-preview-rendered");
+    const step6ValidationCard = document.getElementById("step6-validation-card");
+    const btnFinalPublish = document.getElementById("btn-final-publish");
+
+    // Section Editor Modal
+    const sectionEditorModal = document.getElementById("section-editor-modal");
+    const closeSecModalBtn = document.getElementById("close-sec-modal-btn");
+    const editSecName = document.getElementById("edit_sec_name");
+    const editSecInstruction = document.getElementById("edit_sec_instruction");
+    const editSecType = document.getElementById("edit_sec_type");
+    const editSecReq = document.getElementById("edit_sec_req");
+    const btnSaveSectionModal = document.getElementById("btn-save-section-modal");
+
+    // Global App State
+    let activeStep = 1;
+    let selectedFormatMode = "default";
+    let userTemplates = [];
+    let activeTemplate = null;
+    let currentEditingSecCard = null;
+    let userImages = [];
+    let imageAssignments = [];
+
+    // --- 1. GUIDED WORKFLOW STEPPER MANAGER ---
+
+    function goToStep(stepNum) {
+        activeStep = parseInt(stepNum);
+        stepItems.forEach(item => {
+            const num = parseInt(item.getAttribute("data-step"));
+            item.classList.toggle("active", num === activeStep);
+        });
+
+        workflowStepContents.forEach(content => {
+            content.classList.add("hidden");
+        });
+
+        const targetContent = document.getElementById(`workflow-step-${activeStep}`);
+        if (targetContent) targetContent.classList.remove("hidden");
+
+        // Specific actions on step entry
+        if (activeStep === 3) {
+            loadStep3Data();
+        } else if (activeStep === 5) {
+            renderStep5Preview();
+        } else if (activeStep === 6) {
+            renderStep6Validation();
         }
     }
+
+    stepItems.forEach(item => {
+        item.addEventListener("click", () => {
+            const stepNum = item.getAttribute("data-step");
+            goToStep(stepNum);
+        });
+    });
+
+    btnNextSteps.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const next = btn.getAttribute("data-next");
+            goToStep(next);
+        });
+    });
+
+    btnPrevSteps.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const prev = btn.getAttribute("data-prev");
+            goToStep(prev);
+        });
+    });
+
+    // --- 2. COLLAPSIBLE PANELS WITH LOCALSTORAGE MEMORY ---
+
+    function getPanelStates() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY_PANELS)) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function savePanelState(panelId, isCollapsed) {
+        const states = getPanelStates();
+        states[panelId] = isCollapsed;
+        localStorage.setItem(STORAGE_KEY_PANELS, JSON.stringify(states));
+    }
+
+    function applyPanelStates() {
+        const states = getPanelStates();
+        collapsiblePanels.forEach(panel => {
+            const toggleBtn = panel.querySelector(".btn-toggle-panel");
+            const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
+            const body = targetId ? document.getElementById(targetId) : null;
+            if (!body) return;
+
+            const isCollapsed = !!states[panel.id];
+            if (isCollapsed) {
+                body.style.display = "none";
+                toggleBtn.textContent = "[ + ]";
+            } else {
+                body.style.display = "block";
+                toggleBtn.textContent = "[ − ]";
+            }
+        });
+    }
+
+    collapsiblePanels.forEach(panel => {
+        const toggleBtn = panel.querySelector(".btn-toggle-panel");
+        if (!toggleBtn) return;
+        toggleBtn.addEventListener("click", () => {
+            const targetId = toggleBtn.getAttribute("data-target");
+            const body = document.getElementById(targetId);
+            if (!body) return;
+
+            const isCurrentlyCollapsed = body.style.display === "none";
+            if (isCurrentlyCollapsed) {
+                body.style.display = "block";
+                toggleBtn.textContent = "[ − ]";
+                savePanelState(panel.id, false);
+            } else {
+                body.style.display = "none";
+                toggleBtn.textContent = "[ + ]";
+                savePanelState(panel.id, true);
+            }
+        });
+    });
+
+    if (btnExpandAll) {
+        btnExpandAll.addEventListener("click", () => {
+            collapsiblePanels.forEach(panel => {
+                const toggleBtn = panel.querySelector(".btn-toggle-panel");
+                const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
+                const body = targetId ? document.getElementById(targetId) : null;
+                if (body) {
+                    body.style.display = "block";
+                    if (toggleBtn) toggleBtn.textContent = "[ − ]";
+                    savePanelState(panel.id, false);
+                }
+            });
+        });
+    }
+
+    if (btnCollapseAll) {
+        btnCollapseAll.addEventListener("click", () => {
+            collapsiblePanels.forEach(panel => {
+                const toggleBtn = panel.querySelector(".btn-toggle-panel");
+                const targetId = toggleBtn ? toggleBtn.getAttribute("data-target") : null;
+                const body = targetId ? document.getElementById(targetId) : null;
+                if (body) {
+                    body.style.display = "none";
+                    if (toggleBtn) toggleBtn.textContent = "[ + ]";
+                    savePanelState(panel.id, true);
+                }
+            });
+        });
+    }
+
+    // --- 3. FORMAT SELECTION & TEMPLATES ---
+
+    cardFormatDefault.addEventListener("click", () => {
+        selectedFormatMode = "default";
+        cardFormatDefault.classList.add("selected");
+        cardFormatCustom.classList.remove("selected");
+        customBuilderView.classList.add("hidden");
+    });
+
+    cardFormatCustom.addEventListener("click", () => {
+        selectedFormatMode = "custom";
+        cardFormatCustom.classList.add("selected");
+        cardFormatDefault.classList.remove("selected");
+        customBuilderView.classList.remove("hidden");
+    });
 
     async function loadTemplates() {
         try {
             const res = await fetch("/api/templates");
             const data = await res.json();
             if (!Array.isArray(data)) return;
-            currentTemplates = data;
-            if (statTemplates) statTemplates.textContent = data.length;
-
-            selectActiveTemplate.innerHTML = data.map(t => `<option value="${t.id}">${t.name} ${t.is_default ? '(Default)' : ''}</option>`).join("");
-            
-            if (data.length > 0 && !activeTemplateId) {
-                activeTemplateId = data[0].id;
-                renderTemplateInBuilder(data[0]);
-            }
-
-            // Update assign_section_id dropdown
-            updateSectionDropdowns();
+            userTemplates = data;
+            activeTemplate = data.find(t => t.is_default) || data[0];
+            renderCustomSectionsList(activeTemplate);
+            updateDevDiagnostics();
         } catch (e) {
             console.error("Failed to load templates", e);
         }
     }
 
-    function updateSectionDropdowns() {
-        const activeTmpl = currentTemplates.find(t => t.id == activeTemplateId) || currentTemplates[0];
-        if (!activeTmpl || !assignSectionId) return;
-
-        assignSectionId.innerHTML = activeTmpl.sections.map(s => `<option value="${s.id}">${s.name} (ID: ${s.id})</option>`).join("");
-    }
-
-    function renderTemplateInBuilder(tmpl) {
-        if (!tmpl) return;
-        activeTemplateId = tmpl.id;
-        builderTemplateName.value = tmpl.name;
-        builderTemplateDesc.value = tmpl.description || "";
-
-        builderSectionsContainer.innerHTML = tmpl.sections.map((s, idx) => `
-            <div class="builder-section-card" data-sec-id="${s.id}" style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-                <div style="display: flex; gap: 10px; align-items: center;">
+    function renderCustomSectionsList(tmpl) {
+        if (!tmpl || !customSectionsList) return;
+        customSectionsList.innerHTML = tmpl.sections.map((s, idx) => `
+            <div class="custom-sec-row" data-sec-id="${s.id}" data-name="${s.name}" data-type="${s.content_type || 'paragraph'}" data-instruction="${s.ai_instruction || ''}" data-req="${s.required ? 'true' : 'false'}" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.08);">
+                <div style="display: flex; align-items: center; gap: 10px;">
                     <strong style="color: var(--text-muted);">${idx + 1}.</strong>
-                    <input type="text" class="sec-name-input" value="${s.name}" placeholder="Section Heading" style="font-weight: bold; flex: 2; padding: 6px;">
-                    <span class="badge badge-info" style="font-family: monospace;">${s.id}</span>
-                    <select class="sec-type-select" style="padding: 6px;">
-                        <option value="paragraph" ${s.content_type === 'paragraph' ? 'selected' : ''}>Paragraph</option>
-                        <option value="bullet_list" ${s.content_type === 'bullet_list' ? 'selected' : ''}>Bullet List</option>
-                        <option value="table" ${s.content_type === 'table' ? 'selected' : ''}>Table</option>
-                        <option value="faq" ${s.content_type === 'faq' ? 'selected' : ''}>FAQ</option>
-                    </select>
-                    <label style="font-size: 0.85rem;"><input type="checkbox" class="sec-req-check" ${s.required ? 'checked' : ''}> Required</label>
-                    <button class="nav-btn delete-builder-sec-btn" style="color: #EF4444;">&times;</button>
+                    <span style="font-weight: 700; color: var(--text-primary);">${s.name}</span>
+                    <span class="badge badge-info" style="text-transform: capitalize;">${s.content_type || 'paragraph'}</span>
+                    ${s.required ? '<span class="badge badge-success">Required</span>' : ''}
                 </div>
-                <textarea class="sec-inst-input" placeholder="AI Instructions for this section..." style="width: 100%; margin-top: 8px; padding: 6px; font-size: 0.85rem; height: 45px;">${s.ai_instruction || ''}</textarea>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-secondary-sm edit-sec-btn">Edit</button>
+                    <button class="btn-secondary-sm del-sec-btn" style="color: #EF4444;">Delete</button>
+                </div>
             </div>
         `).join("");
 
-        document.querySelectorAll(".delete-builder-sec-btn").forEach(btn => {
+        document.querySelectorAll(".edit-sec-btn").forEach(btn => {
             btn.addEventListener("click", (e) => {
-                e.target.closest(".builder-section-card").remove();
+                const row = e.target.closest(".custom-sec-row");
+                openSectionModal(row);
+            });
+        });
+
+        document.querySelectorAll(".del-sec-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.target.closest(".custom-sec-row").remove();
             });
         });
     }
 
-    if (btnAddBuilderSection) {
-        btnAddBuilderSection.addEventListener("click", () => {
-            const secId = `sec-${Math.random().toString(36).substr(2, 9)}`;
-            const count = builderSectionsContainer.children.length + 1;
-            const newCard = document.createElement("div");
-            newCard.className = "builder-section-card";
-            newCard.setAttribute("data-sec-id", secId);
-            newCard.style.cssText = "background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); padding: 12px; border-radius: 8px; margin-bottom: 8px;";
-            newCard.innerHTML = `
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <strong style="color: var(--text-muted);">${count}.</strong>
-                    <input type="text" class="sec-name-input" placeholder="New Section Heading" style="font-weight: bold; flex: 2; padding: 6px;">
-                    <span class="badge badge-info" style="font-family: monospace;">${secId}</span>
-                    <select class="sec-type-select" style="padding: 6px;">
-                        <option value="paragraph">Paragraph</option>
-                        <option value="bullet_list">Bullet List</option>
-                        <option value="table">Table</option>
-                        <option value="faq">FAQ</option>
-                    </select>
-                    <label style="font-size: 0.85rem;"><input type="checkbox" class="sec-req-check" checked> Required</label>
-                    <button class="nav-btn delete-builder-sec-btn" style="color: #EF4444;">&times;</button>
-                </div>
-                <textarea class="sec-inst-input" placeholder="AI Instructions for this section..." style="width: 100%; margin-top: 8px; padding: 6px; font-size: 0.85rem; height: 45px;"></textarea>
-            `;
-            builderSectionsContainer.appendChild(newCard);
-            newCard.querySelector(".delete-builder-sec-btn").addEventListener("click", () => newCard.remove());
-        });
+    function openSectionModal(rowCard) {
+        currentEditingSecCard = rowCard;
+        if (rowCard) {
+            editSecName.value = rowCard.getAttribute("data-name") || "";
+            editSecInstruction.value = rowCard.getAttribute("data-instruction") || "";
+            editSecType.value = rowCard.getAttribute("data-type") || "paragraph";
+            editSecReq.checked = rowCard.getAttribute("data-req") === "true";
+        } else {
+            editSecName.value = "";
+            editSecInstruction.value = "";
+            editSecType.value = "paragraph";
+            editSecReq.checked = true;
+        }
+        sectionEditorModal.classList.remove("hidden");
     }
 
-    if (btnSaveTemplate) {
-        btnSaveTemplate.addEventListener("click", async () => {
-            const name = builderTemplateName.value.trim();
+    if (btnAddSectionUi) {
+        btnAddSectionUi.addEventListener("click", () => openSectionModal(null));
+    }
+
+    if (closeSecModalBtn) {
+        closeSecModalBtn.addEventListener("click", () => sectionEditorModal.classList.add("hidden"));
+    }
+
+    if (btnSaveSectionModal) {
+        btnSaveSectionModal.addEventListener("click", () => {
+            const name = editSecName.value.trim();
             if (!name) {
-                alert("Please enter a template name");
+                alert("Please enter a section name");
                 return;
             }
-            const secCards = document.querySelectorAll(".builder-section-card");
-            const sections = Array.from(secCards).map((card, idx) => ({
-                id: card.getAttribute("data-sec-id"),
-                name: card.querySelector(".sec-name-input").value.trim() || `Section ${idx + 1}`,
-                order: idx + 1,
-                required: card.querySelector(".sec-req-check").checked,
-                content_type: card.querySelector(".sec-type-select").value,
-                ai_instruction: card.querySelector(".sec-inst-input").value
-            }));
-
-            const payload = {
-                name: name,
-                description: builderTemplateDesc.value,
-                mode: "custom",
-                is_default: false,
-                sections: sections
-            };
-
-            try {
-                const res = await fetch("/api/templates", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                alert(data.message || "Template saved successfully!");
-                loadTemplates();
-            } catch (err) {
-                alert("Failed to save template: " + err);
-            }
-        });
-    }
-
-    if (selectActiveTemplate) {
-        selectActiveTemplate.addEventListener("change", (e) => {
-            const tmpl = currentTemplates.find(t => t.id == e.target.value);
-            if (tmpl) {
-                renderTemplateInBuilder(tmpl);
-                updateSectionDropdowns();
-            }
-        });
-    }
-
-    // Image Upload & Gallery
-    async function loadImages() {
-        try {
-            const res = await fetch("/api/images");
-            const assets = await res.json();
-            if (!Array.isArray(assets)) return;
-
-            assignImageId.innerHTML = assets.map(a => `<option value="${a.id}">${a.filename} (${a.width}x${a.height})</option>`).join("");
-
-            if (assets.length === 0) {
-                imageGalleryContainer.innerHTML = `<p style="color: var(--text-secondary);">No images uploaded yet.</p>`;
-                return;
-            }
-
-            imageGalleryContainer.innerHTML = assets.map(a => `
-                <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 8px; width: 140px; text-align: center;">
-                    <img src="${a.url}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px;">
-                    <div style="font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px;">${a.filename}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted);">${a.width} × ${a.height}</div>
-                </div>
-            `).join("");
-        } catch (e) {
-            console.error("Failed to load images", e);
-        }
-    }
-
-    if (imageUploadForm) {
-        imageUploadForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append("file", document.getElementById("upload_image_file").files[0]);
-            const w = document.getElementById("upload_width").value;
-            const h = document.getElementById("upload_height").value;
-            if (w) formData.append("target_width", w);
-            if (h) formData.append("target_height", h);
-
-            try {
-                const res = await fetch("/api/images/upload", { method: "POST", body: formData });
-                const data = await res.json();
-                alert(data.message || "Image uploaded successfully!");
-                loadImages();
-            } catch (err) {
-                alert("Upload failed: " + err);
-            }
-        });
-    }
-
-    if (imageAssignForm) {
-        imageAssignForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const payload = {
-                image_id: assignImageId.value,
-                section_id: assignSectionId.value,
-                position: document.getElementById("assign_position").value,
-                alignment: document.getElementById("assign_alignment").value,
-                fallback_behavior: document.getElementById("assign_fallback").value
-            };
-
-            try {
-                const res = await fetch("/api/images/assign", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                alert(data.message || "Image assignment saved!");
-            } catch (err) {
-                alert("Assignment failed: " + err);
-            }
-        });
-    }
-
-    // Article Drafts, Validation & Live Preview
-    async function loadDrafts() {
-        try {
-            const res = await fetch("/api/drafts");
-            const drafts = await res.json();
-            if (!Array.isArray(drafts) || drafts.length === 0) {
-                draftsContainer.innerHTML = `<p style="color: var(--text-secondary);">No drafts pending review.</p>`;
-                return;
-            }
-            draftsContainer.innerHTML = drafts.map(d => `
-                <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">${d.game_name} (${d.provider})</strong>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${d.created_at}</div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="nav-btn preview-draft-btn" data-id="${d.id}" style="color: #2563EB;">🔍 Validate & Preview</button>
-                        <button class="btn-primary publish-draft-btn" data-id="${d.id}" style="padding: 8px 16px; font-size: 0.9rem;">🚀 Publish to WP</button>
-                    </div>
-                </div>
-            `).join("");
-
-            document.querySelectorAll(".preview-draft-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.getAttribute("data-id");
-                    openPreviewModal(id);
-                });
-            });
-
-            document.querySelectorAll(".publish-draft-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.getAttribute("data-id");
-                    e.target.disabled = true;
-                    e.target.textContent = "Publishing...";
-                    try {
-                        const pRes = await fetch(`/api/publish/${id}`, { method: "POST" });
-                        const pData = await pRes.json();
-                        alert(pData.message || pData.detail || "Published successfully!");
-                        loadDrafts();
-                        loadJobs();
-                        loadHistory();
-                    } catch (err) {
-                        alert("Publishing failed: " + err);
-                        e.target.disabled = false;
-                        e.target.textContent = "Publish to WP";
-                    }
-                });
-            });
-        } catch (e) {
-            console.error("Failed to load drafts", e);
-        }
-    }
-
-    async function openPreviewModal(draftId) {
-        previewModal.classList.remove("hidden");
-        previewHtmlContent.innerHTML = `<p style="color: gray;">Rendering article preview...</p>`;
-        previewValidationBanner.innerHTML = "";
-
-        try {
-            // Run 12-Check Validation
-            const valRes = await fetch("/api/content/validate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ draft_id: parseInt(draftId), template_id: activeTemplateId })
-            });
-            const valData = await valRes.json();
-
-            let bannerBg = valData.is_valid ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
-            let bannerColor = valData.is_valid ? "#047857" : "#B91C1C";
-            previewValidationBanner.style.cssText = `background: ${bannerBg}; color: ${bannerColor}; border: 1px solid ${bannerColor}; padding: 12px; border-radius: 8px; margin-bottom: 1rem;`;
-            previewValidationBanner.innerHTML = `
-                <strong>${valData.is_valid ? 'READY TO PUBLISH' : 'VALIDATION ISSUES FOUND'} (${valData.checks_passed}/${valData.total_checks} Checks Passed)</strong>
-                ${valData.errors.length > 0 ? `<ul style="margin-top: 6px; padding-left: 20px;">${valData.errors.map(err => `<li>${err}</li>`).join("")}</ul>` : ''}
-            `;
-
-            // Run Live Preview Render
-            const prevRes = await fetch("/api/content/preview", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ draft_id: parseInt(draftId) })
-            });
-            const prevData = await prevRes.json();
-            previewHtmlContent.innerHTML = `<h1>${prevData.title}</h1>\n` + prevData.html_preview;
-        } catch (e) {
-            previewHtmlContent.innerHTML = `<p style="color: red;">Failed to load preview.</p>`;
-        }
-    }
-
-    if (closePreviewModalBtn) {
-        closePreviewModalBtn.addEventListener("click", () => previewModal.classList.add("hidden"));
-    }
-
-    // Collapsible History Panel
-    async function loadHistory() {
-        try {
-            const query = historySearchInput ? historySearchInput.value : "";
-            const res = await fetch(`/api/history?q=${encodeURIComponent(query)}`);
-            const history = await res.json();
-            if (!Array.isArray(history)) return;
-
-            if (history.length === 0) {
-                historyTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No history records found.</td></tr>`;
-                return;
-            }
-
-            historyTbody.innerHTML = history.map(h => `
-                <tr>
-                    <td>#${h.id}</td>
-                    <td><strong>${h.game_name}</strong> (${h.provider})</td>
-                    <td><span class="badge ${h.status === 'Published' ? 'badge-success' : 'badge-danger'}">${h.status}</span></td>
-                    <td>${h.article_id ? `#${h.article_id}` : '--'}</td>
-                    <td>${h.published_at || '--'}</td>
-                    <td>
-                        <button class="nav-btn retry-hist-btn" data-id="${h.id}" style="color: #2563EB;">🔄 Retry</button>
-                        <button class="nav-btn delete-hist-btn" data-id="${h.id}" style="color: #EF4444;">🗑 Delete</button>
-                    </td>
-                </tr>
-            `).join("");
-
-            document.querySelectorAll(".delete-hist-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.getAttribute("data-id");
-                    if (confirm("Delete this history entry? (Note: WordPress article will NOT be deleted)")) {
-                        await fetch(`/api/history/${id}`, { method: "DELETE" });
-                        loadHistory();
-                    }
-                });
-            });
-
-            document.querySelectorAll(".retry-hist-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.getAttribute("data-id");
-                    const res = await fetch(`/api/history/${id}/retry`, { method: "POST" });
-                    const data = await res.json();
-                    alert(data.message || "Retry job enqueued!");
-                    loadJobs();
-                });
-            });
-        } catch (e) {
-            console.error("Failed to load history", e);
-        }
-    }
-
-    if (historySearchInput) historySearchInput.addEventListener("input", loadHistory);
-    if (btnDeleteAllHistory) {
-        btnDeleteAllHistory.addEventListener("click", async () => {
-            if (confirm("Are you sure you want to delete ALL history entries?")) {
-                await fetch("/api/history/bulk-delete?delete_all=true", { method: "POST" });
-                loadHistory();
-            }
-        });
-    }
-
-    if (navHistoryToggle) {
-        let collapsed = false;
-        navHistoryToggle.addEventListener("click", () => {
-            collapsed = !collapsed;
-            if (collapsed) {
-                historyContentWrapper.style.display = "none";
-                navHistoryToggle.textContent = "📜 History [+]";
+            if (currentEditingSecCard) {
+                currentEditingSecCard.setAttribute("data-name", name);
+                currentEditingSecCard.setAttribute("data-instruction", editSecInstruction.value);
+                currentEditingSecCard.setAttribute("data-type", editSecType.value);
+                currentEditingSecCard.setAttribute("data-req", editSecReq.checked ? "true" : "false");
+                currentEditingSecCard.querySelector("span:nth-child(2)").textContent = name;
             } else {
-                historyContentWrapper.style.display = "block";
-                navHistoryToggle.textContent = "📜 History [-]";
+                const secId = `sec-${Math.random().toString(36).substr(2, 9)}`;
+                const count = customSectionsList.children.length + 1;
+                const newRow = document.createElement("div");
+                newRow.className = "custom-sec-row";
+                newRow.setAttribute("data-sec-id", secId);
+                newRow.setAttribute("data-name", name);
+                newRow.setAttribute("data-type", editSecType.value);
+                newRow.setAttribute("data-instruction", editSecInstruction.value);
+                newRow.setAttribute("data-req", editSecReq.checked ? "true" : "false");
+                newRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.08);";
+                newRow.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong style="color: var(--text-muted);">${count}.</strong>
+                        <span style="font-weight: 700; color: var(--text-primary);">${name}</span>
+                        <span class="badge badge-info" style="text-transform: capitalize;">${editSecType.value}</span>
+                        ${editSecReq.checked ? '<span class="badge badge-success">Required</span>' : ''}
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn-secondary-sm edit-sec-btn">Edit</button>
+                        <button class="btn-secondary-sm del-sec-btn" style="color: #EF4444;">Delete</button>
+                    </div>
+                `;
+                customSectionsList.appendChild(newRow);
+                newRow.querySelector(".edit-sec-btn").addEventListener("click", () => openSectionModal(newRow));
+                newRow.querySelector(".del-sec-btn").addEventListener("click", () => newRow.remove());
+            }
+            sectionEditorModal.classList.add("hidden");
+        });
+    }
+
+    // --- 4. STEP 3 IMAGE MANAGER & VISUALIZATION ---
+
+    async function loadStep3Data() {
+        if (!activeTemplate || !activeTemplate.sections) return;
+
+        // Populate human-readable section dropdown
+        step3SectionSelect.innerHTML = activeTemplate.sections.map(s => `
+            <option value="${s.id}">${s.name}</option>
+        `).join("");
+
+        loadVisualImageAssignments();
+    }
+
+    async function loadVisualImageAssignments() {
+        try {
+            const res = await fetch("/api/images/assignments");
+            const data = await res.json();
+            if (!Array.isArray(data)) return;
+            imageAssignments = data;
+
+            if (data.length === 0) {
+                assignedImagesVisualList.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>`;
+            } else {
+                assignedImagesVisualList.innerHTML = data.map(a => `
+                    <div class="assigned-img-card">
+                        <img src="${a.url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                        <div style="flex: 1;">
+                            <strong style="font-size: 0.9rem; color: var(--text-primary);">${a.filename}</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                Assigned to <strong>${a.section_name}</strong> • ${a.position.replace('_', ' ')}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${a.size} • ${a.alignment}</div>
+                        </div>
+                    </div>
+                `).join("");
+            }
+
+            renderStructureTree();
+        } catch (e) {
+            console.error("Failed to load image assignments", e);
+        }
+    }
+
+    function renderStructureTree() {
+        if (!activeTemplate || !activeTemplate.sections || !structureTreeDiagram) return;
+
+        structureTreeDiagram.innerHTML = activeTemplate.sections.map(s => {
+            const assigned = imageAssignments.filter(a => a.section_id === s.id);
+            return `
+                <div class="tree-node">
+                    <strong style="color: var(--text-primary);">${s.name}</strong>
+                    ${assigned.map(a => `
+                        <div style="font-size: 0.8rem; color: #2563EB; margin-left: 12px; margin-top: 2px;">
+                            🖼 ${a.filename} (${a.position.replace('_', ' ')})
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+        }).join("");
+    }
+
+    if (btnSaveStep3Image) {
+        btnSaveStep3Image.addEventListener("click", async () => {
+            if (step3ImageFile.files.length === 0) {
+                alert("Please select an image file to upload");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", step3ImageFile.files[0]);
+
+            try {
+                const upRes = await fetch("/api/images/upload", { method: "POST", body: formData });
+                const upData = await upRes.json();
+                
+                if (!upData.image_id) {
+                    alert("Image upload failed");
+                    return;
+                }
+
+                // Assign image to section
+                const assignPayload = {
+                    image_id: upData.image_id,
+                    section_id: step3SectionSelect.value,
+                    position: step3PositionSelect.value,
+                    size: step3SizeSelect.value,
+                    alignment: step3AlignSelect.value,
+                    fallback_behavior: "do_not_publish"
+                };
+
+                const aRes = await fetch("/api/images/assign", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(assignPayload)
+                });
+                const aData = await aRes.json();
+
+                alert("Image uploaded and assigned to section!");
+                step3ImageFile.value = "";
+                loadVisualImageAssignments();
+            } catch (e) {
+                alert("Failed to save image placement: " + e);
             }
         });
     }
 
-    // Load Jobs
-    async function loadJobs() {
+    // --- 5. STEP 5 PREVIEW & STEP 6 PUBLISH ---
+
+    async function renderStep5Preview() {
+        step5PreviewRendered.innerHTML = `<p style="color: gray;">Rendering article preview...</p>`;
         try {
-            const filter = jobStatusFilter ? jobStatusFilter.value : "ALL";
-            const res = await fetch(`/api/user/jobs?status_filter=${filter}`);
-            const jobs = await res.json();
-            if (!Array.isArray(jobs)) return;
+            const docPayload = {
+                title: "Article Live Preview",
+                seo_metadata: { focus_keyword: "Preview Keyword", meta_description: "Live preview" },
+                introduction: "Sample introduction text for article preview.",
+                sections: activeTemplate ? activeTemplate.sections.map(s => ({
+                    section_id: s.id,
+                    heading: s.name,
+                    content: `Sample content for section ${s.name}.`
+                })) : [],
+                conclusion: "Sample conclusion text."
+            };
 
-            if (jobs.length === 0) {
-                jobsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No active jobs found.</td></tr>`;
-                return;
-            }
-
-            jobsTbody.innerHTML = jobs.map(j => `
-                <tr>
-                    <td><strong>${j.job_id}</strong></td>
-                    <td>${j.provider} - ${j.game_name}</td>
-                    <td><span class="badge ${j.status === 'FAILED' ? 'badge-danger' : 'badge-success'}">${j.status}</span></td>
-                    <td><code style="background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: 4px;">${j.current_stage || 'QUEUED'}</code></td>
-                    <td>${j.duration ? j.duration.toFixed(1) + 's' : '--'}</td>
-                    <td>
-                        <button class="nav-btn view-timeline-btn" data-job-id="${j.job_id}" style="color: #2563EB;">🔍 View Timeline</button>
-                    </td>
-                </tr>
-            `).join("");
-
-            document.querySelectorAll(".view-timeline-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    openTimelineModal(e.target.getAttribute("data-job-id"));
-                });
+            const res = await fetch("/api/content/preview", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ document: docPayload })
             });
+            const data = await res.json();
+            step5PreviewRendered.innerHTML = `<h1>${data.title}</h1>\n` + data.html_preview;
         } catch (e) {
-            console.error("Failed to load jobs", e);
+            step5PreviewRendered.innerHTML = `<p style="color: red;">Failed to render preview.</p>`;
         }
     }
 
-    async function openTimelineModal(jobId) {
-        modalJobTitle.textContent = `Job Event Timeline (${jobId})`;
-        timelineEventsContainer.innerHTML = `<p style="color: gray;">Loading timeline events...</p>`;
-        timelineModal.classList.remove("hidden");
-
+    async function renderStep6Validation() {
+        step6ValidationCard.innerHTML = `<p style="color: gray;">Running 12-Check Pre-Publishing Validation...</p>`;
         try {
-            const res = await fetch(`/api/user/jobs/${jobId}/timeline`);
+            const docPayload = {
+                title: "Article Validation Test",
+                seo_metadata: { focus_keyword: "Validation Keyword", meta_description: "Validation text long enough to pass check." },
+                introduction: "Comprehensive introduction text exceeding validation minimum length requirement.",
+                sections: activeTemplate ? activeTemplate.sections.map(s => ({
+                    section_id: s.id,
+                    heading: s.name,
+                    content: `Detailed section content for ${s.name}.`
+                })) : [],
+                conclusion: "Conclusion text."
+            };
+
+            const res = await fetch("/api/content/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ document: docPayload, template_id: activeTemplate ? activeTemplate.id : null })
+            });
             const data = await res.json();
-            if (!data.timeline || data.timeline.length === 0) {
-                timelineEventsContainer.innerHTML = `<p style="color: gray;">No events recorded.</p>`;
+
+            let bg = data.is_valid ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)";
+            let color = data.is_valid ? "#047857" : "#B45309";
+            step6ValidationCard.style.cssText = `background: ${bg}; color: ${color}; border: 1px solid ${color}; padding: 16px; border-radius: 12px;`;
+            step6ValidationCard.innerHTML = `
+                <h4 style="margin: 0 0 6px 0;">${data.is_valid ? '✅ PRE-PUBLISHING VALIDATION PASSED' : '⚠️ PRE-PUBLISHING WARNINGS'}</h4>
+                <div><strong>${data.checks_passed} / ${data.total_checks} Checks Passed</strong></div>
+                ${data.errors.length > 0 ? `<ul style="margin-top: 8px; padding-left: 20px; font-size: 0.85rem;">${data.errors.map(err => `<li>${err}</li>`).join("")}</ul>` : ''}
+            `;
+        } catch (e) {
+            step6ValidationCard.innerHTML = `<p style="color: red;">Failed to run validation.</p>`;
+        }
+    }
+
+    if (btnFinalPublish) {
+        btnFinalPublish.addEventListener("click", async () => {
+            const url = document.getElementById("input_target_url").value;
+            if (!url) {
+                alert("Please enter a Target Page / Game URL in Step 1!");
+                goToStep(1);
                 return;
             }
 
-            timelineEventsContainer.innerHTML = data.timeline.map(ev => `
-                <div class="timeline-event">
-                    <div class="timeline-time">${ev.timestamp || ''} (${ev.worker_id || 'system'})</div>
-                    <div class="timeline-title">${ev.event_type} — <span style="color: #FF7A3D;">${ev.stage}</span></div>
-                    <div class="timeline-msg">${ev.message || ev.status}</div>
-                </div>
-            `).join("");
-        } catch (e) {
-            timelineEventsContainer.innerHTML = `<p style="color: red;">Failed to load timeline.</p>`;
-        }
-    }
+            btnFinalPublish.disabled = true;
+            btnFinalPublish.textContent = "🚀 Submitting Automation Job...";
 
-    if (closeModalBtn) closeModalBtn.addEventListener("click", () => timelineModal.classList.add("hidden"));
+            const formData = new FormData();
+            formData.append("url", url);
+            formData.append("game_name", document.getElementById("input_game_name").value);
+            formData.append("provider", document.getElementById("input_provider").value);
+            formData.append("market", document.getElementById("input_market").value);
 
-    // Check Role
-    async function checkRole() {
-        try {
-            const res = await fetch("/api/admin/stats");
-            if (res.ok && navAdmin) {
-                navAdmin.classList.remove("hidden");
-                navAdmin.addEventListener("click", () => window.location.href = "/admin");
+            try {
+                const res = await fetch("/api/links", { method: "POST", body: formData });
+                const data = await res.json();
+                alert(data.message || "Job queued successfully!");
+                goToStep(1);
+                loadJobs();
+            } catch (e) {
+                alert("Submission failed: " + e);
+            } finally {
+                btnFinalPublish.disabled = false;
+                btnFinalPublish.textContent = "🚀 Start Automation & Publish to WordPress";
             }
-        } catch (e) {}
+        });
     }
+
+    // --- 6. DEVELOPER MODE DIAGNOSTICS ---
+
+    if (devModeCheckbox) {
+        devModeCheckbox.addEventListener("change", () => {
+            if (devModeCheckbox.checked) {
+                devModeDrawer.classList.remove("hidden");
+                updateDevDiagnostics();
+            } else {
+                devModeDrawer.classList.add("hidden");
+            }
+        });
+    }
+
+    function updateDevDiagnostics() {
+        if (!devUuidLookupContainer || !activeTemplate) return;
+        devUuidLookupContainer.innerHTML = `
+            <strong>Active Template ID:</strong> ${activeTemplate.id}<br/>
+            <strong>Internal UUID Section Mappings:</strong><br/>
+            ${activeTemplate.sections.map(s => `• ${s.name} ➔ <code>${s.id}</code>`).join("<br/>")}
+        `;
+    }
+
+    // --- 7. NAVIGATION CONTROLS ---
+
+    function setActiveNav(btn) {
+        [navHome, navCreate, navTemplates, navMedia, navHistory, navSettings, navAdmin].forEach(b => {
+            if (b) b.classList.remove("active");
+        });
+        if (btn) btn.classList.add("active");
+    }
+
+    if (navHome) navHome.addEventListener("click", () => { setActiveNav(navHome); });
+    if (navCreate) navCreate.addEventListener("click", () => { setActiveNav(navCreate); goToStep(1); });
+    if (navTemplates) navTemplates.addEventListener("click", () => { setActiveNav(navTemplates); });
+    if (navMedia) navMedia.addEventListener("click", () => { setActiveNav(navMedia); goToStep(3); });
+    if (navHistory) navHistory.addEventListener("click", () => { setActiveNav(navHistory); });
+    if (navSettings) navSettings.addEventListener("click", () => { setActiveNav(navSettings); });
 
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {
@@ -540,17 +576,53 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Initial Loads & Automatic Polling
+    // Data Loaders
+    async function loadUsage() {
+        try {
+            const res = await fetch("/api/user/usage");
+            if (res.status === 401) { window.location.href = "/login.html"; return; }
+            const data = await res.json();
+            if (data.plan) {
+                document.getElementById("user-plan-pill").textContent = `Plan: ${data.plan}`;
+                document.getElementById("user-quota-pill").textContent = `Quota: ${data.monthly_usage} / ${data.article_limit}`;
+                document.getElementById("stat-published").textContent = data.published_count || 0;
+                document.getElementById("stat-drafts").textContent = data.total_drafts || 0;
+                document.getElementById("stat-quota-used").textContent = `${data.usage_percentage}%`;
+                document.getElementById("badge-drafts-count").textContent = `${data.total_drafts || 0} Drafts`;
+            }
+        } catch (e) {}
+    }
+
+    async function loadJobs() {
+        try {
+            const res = await fetch("/api/user/jobs?status_filter=ALL");
+            const jobs = await res.json();
+            if (!Array.isArray(jobs)) return;
+            const running = jobs.filter(j => j.status === 'PROCESSING' || j.status === 'QUEUED').length;
+            document.getElementById("badge-jobs-running").textContent = `${running} Running`;
+
+            const tbody = document.getElementById("jobs-tbody");
+            if (jobs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: rgba(0,0,0,0.5);">No active jobs found.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = jobs.map(j => `
+                <tr>
+                    <td><strong>${j.job_id}</strong></td>
+                    <td>${j.provider} - ${j.game_name}</td>
+                    <td><span class="badge ${j.status === 'FAILED' ? 'badge-danger' : 'badge-success'}">${j.status}</span></td>
+                    <td><code style="background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: 4px;">${j.current_stage || 'QUEUED'}</code></td>
+                    <td>${j.duration ? j.duration.toFixed(1) + 's' : '--'}</td>
+                    <td><button class="btn-secondary-sm view-timeline-btn" data-job-id="${j.job_id}">Timeline</button></td>
+                </tr>
+            `).join("");
+        } catch (e) {}
+    }
+
+    // Init Page
+    applyPanelStates();
     loadUsage();
     loadTemplates();
-    loadImages();
-    loadDrafts();
     loadJobs();
-    loadHistory();
-    checkRole();
-
-    setInterval(() => {
-        loadJobs();
-        loadHistory();
-    }, 5000);
+    setInterval(loadJobs, 5000);
 });

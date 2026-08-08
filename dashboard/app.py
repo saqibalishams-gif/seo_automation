@@ -805,6 +805,30 @@ def serve_image_file(image_id: str):
             raise HTTPException(status_code=404, detail="Image file not found")
         return FileResponse(asset.file_path, media_type=asset.mime_type)
 
+@app.get("/api/images/assignments")
+def get_image_assignments_endpoint(user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        assignments = db.query(ImageAssignment).filter(ImageAssignment.user_id == user_id).all()
+        result = []
+        for a in assignments:
+            asset = db.query(ImageAsset).filter(ImageAsset.id == a.image_id).first()
+            sec = db.query(TemplateSection).filter(TemplateSection.id == a.section_id).first()
+            result.append({
+                "id": a.id,
+                "image_id": a.image_id,
+                "filename": asset.filename if asset else "Image",
+                "url": f"/api/images/{a.image_id}/file" if asset else "",
+                "section_id": a.section_id,
+                "section_name": sec.name if sec else "Assigned Section",
+                "position": a.position,
+                "alignment": a.alignment,
+                "size": a.size,
+                "width": a.custom_width or (asset.width if asset else 800),
+                "height": a.custom_height or (asset.height if asset else 0),
+                "fallback_behavior": a.fallback_behavior
+            })
+        return result
+
 @app.post("/api/images/assign")
 def assign_image_to_section(payload: ImageAssignmentCreate, user_id: int = Depends(get_current_user_id)):
     with SessionLocal() as db:

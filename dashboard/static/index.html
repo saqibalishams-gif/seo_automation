@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO SaaS Automation — Advanced Content & Template Platform</title>
+    <title>SEO Automation Platform — Professional SaaS Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css?v=6">
 </head>
 <body>
     <div class="bg-blobs">
@@ -16,30 +16,38 @@
     </div>
 
     <div class="app-container" style="max-width: 1400px;">
-        <!-- Header Bar -->
+        <!-- Compact Header Bar -->
         <header class="glass-panel header-bar">
             <div class="brand-section">
                 <div class="status-dot-container"><div class="status-dot"></div></div>
-                <h1>SEO Automation Platform</h1>
+                <h1>SEO Auto Platform</h1>
             </div>
             <div class="status-pills">
                 <div class="status-pill" id="user-plan-pill">Plan: FREE</div>
                 <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
-                <button id="nav-overview" class="nav-btn">Overview</button>
-                <button id="nav-mode" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">📝 Format Modes</button>
-                <button id="nav-templates" class="nav-btn">🎨 Template Builder</button>
-                <button id="nav-images" class="nav-btn">🖼 Image Manager</button>
-                <button id="nav-jobs" class="nav-btn">⚡ Jobs & Timelines</button>
-                <button id="nav-history-toggle" class="nav-btn" style="color: #60A5FA;">📜 History [-]</button>
-                <button id="nav-setup" class="nav-btn">⚙ Sites & Settings</button>
-                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin Console</button>
+                <button id="nav-home" class="nav-btn active">🏠 Home</button>
+                <button id="nav-create" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">✍ Create Article</button>
+                <button id="nav-templates" class="nav-btn">🎨 Templates</button>
+                <button id="nav-media" class="nav-btn">🖼 Media</button>
+                <button id="nav-history" class="nav-btn">📜 History</button>
+                <button id="nav-settings" class="nav-btn">⚙ Settings</button>
+                <button id="nav-admin" class="nav-btn hidden" style="color: #F59E0B;">⚡ Admin</button>
+                <label class="dev-mode-toggle" style="font-size: 0.8rem; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-muted); margin-left: 10px;">
+                    <input type="checkbox" id="dev-mode-checkbox"> ⚙ Dev Mode
+                </label>
                 <button id="logout-btn" class="nav-btn btn-logout">Log Out</button>
             </div>
         </header>
 
+        <!-- Global Collapsible Controls Bar -->
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 1rem;">
+            <button id="btn-expand-all" class="btn-secondary-sm">Expand All</button>
+            <button id="btn-collapse-all" class="btn-secondary-sm">Collapse All</button>
+        </div>
+
         <main class="main-column">
-            <!-- Stats Row -->
-            <section class="stats-row">
+            <!-- Summary Stats Row -->
+            <section class="stats-row" id="panel-stats">
                 <div class="glass-panel stat-tile">
                     <div class="stat-value" id="stat-published">0</div>
                     <div class="stat-label">Published Articles</div>
@@ -50,212 +58,315 @@
                 </div>
                 <div class="glass-panel stat-tile">
                     <div class="stat-value" id="stat-templates">1</div>
-                    <div class="stat-label">Saved Templates</div>
+                    <div class="stat-label">Templates</div>
                 </div>
                 <div class="glass-panel stat-tile">
                     <div class="stat-value" id="stat-quota-used">0%</div>
-                    <div class="stat-label">Monthly Quota Used</div>
+                    <div class="stat-label">Quota Used</div>
                 </div>
             </section>
 
-            <!-- 1. Content Mode Selector & Automation Form -->
-            <section id="content-mode-section" class="glass-panel">
-                <h3 class="panel-header">📝 Content Mode & Automation Execution</h3>
-                <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 12px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold;">
-                        <input type="radio" name="content_mode" value="default" checked id="mode-default-radio">
-                        <span>Default Format (Predefined Optimized Structure)</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold;">
-                        <input type="radio" name="content_mode" value="custom" id="mode-custom-radio">
-                        <span>Custom Format (User-Defined Template)</span>
-                    </label>
-                </div>
-
-                <form id="url-queue-form" enctype="multipart/form-data" class="run-form">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 3; min-width: 300px;">
-                            <label>Target Page / Game URL</label>
-                            <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
-                        </div>
-                        <div class="form-group" style="flex: 2; min-width: 200px;" id="template-select-group">
-                            <label>Select Template</label>
-                            <select id="select_active_template" style="padding: 10px; font-weight: 600;">
-                                <option value="default">Default Optimized Format</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex: 1; min-width: 130px;">
-                            <label>Market</label>
-                            <select id="input_market" style="padding: 10px;">
-                                <option value="UK">UK (GC)</option>
-                                <option value="PK">PK (Pakistani)</option>
-                            </select>
-                        </div>
+            <!-- GUIDED WORKFLOW STEPPER CONTAINER -->
+            <section id="workflow-container" class="glass-panel">
+                <div class="stepper-bar">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-num">1</div>
+                        <div class="step-label">Content</div>
                     </div>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Game Name (Optional - AI extracts if blank)</label>
-                            <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Provider (Optional - AI extracts if blank)</label>
-                            <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
-                        </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-num">2</div>
+                        <div class="step-label">Structure</div>
                     </div>
-                    <button type="submit" class="btn-primary" id="btn-queue-url" style="margin-top: 0.5rem;">
-                        <span class="btn-text">🚀 Add to Queue & Start Automation</span>
-                    </button>
-                    <div id="url-queue-status" class="status-msg hidden"></div>
-                </form>
-            </section>
-
-            <!-- 2. Template Builder Section -->
-            <section id="templates-section" class="glass-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 class="panel-header" style="margin: 0;">🎨 Custom Template Builder (Stable Section IDs)</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="btn-new-template" class="nav-btn" style="color: #10B981; border: 1px solid #10B981;">➕ Create New Template</button>
-                        <button id="btn-duplicate-template" class="nav-btn" style="color: #60A5FA; border: 1px solid #60A5FA;">📋 Duplicate Active</button>
+                    <div class="step-connector"></div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-num">3</div>
+                        <div class="step-label">Images</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-num">4</div>
+                        <div class="step-label">SEO</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" data-step="5">
+                        <div class="step-num">5</div>
+                        <div class="step-label">Preview</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item" data-step="6">
+                        <div class="step-num">6</div>
+                        <div class="step-label">Publish</div>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                    <input type="text" id="builder_template_name" placeholder="Template Name (e.g., Product Review)" style="font-weight: bold; font-size: 1.1rem; flex: 2; padding: 10px;">
-                    <input type="text" id="builder_template_desc" placeholder="Template Description" style="flex: 3; padding: 10px;">
-                </div>
-
-                <h4 style="margin-bottom: 0.8rem; color: var(--text-secondary);">Template Sections (Drag or Reorder):</h4>
-                <div id="builder-sections-container">
-                    <!-- Dynamic section cards -->
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-                    <button id="btn-add-builder-section" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">➕ Add Custom Section</button>
-                    <button id="btn-save-template" class="btn-primary" style="padding: 10px 20px;">💾 Save Template Configuration</button>
-                </div>
-            </section>
-
-            <!-- 3. Section-Based Image Manager Section -->
-            <section id="images-section" class="glass-panel">
-                <h3 class="panel-header">🖼 Section-Based Image Management (Pillow Aspect Ratio Control)</h3>
-                
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    <form id="image-upload-form" class="run-form" style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
-                        <h4 style="margin-bottom: 0.5rem;">Upload & Resize Image Asset</h4>
-                        <div class="form-group">
-                            <label>Select Image File (JPG, PNG, WEBP)</label>
-                            <input type="file" id="upload_image_file" accept="image/*" required>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <div class="form-group" style="flex: 1;">
-                                <label>Target Width (px)</label>
-                                <input type="number" id="upload_width" placeholder="800">
+                <!-- STEP 1: CONTENT -->
+                <div class="workflow-step-content active" id="workflow-step-1">
+                    <h3 class="panel-header">Step 1: Enter Article & Target Page Information</h3>
+                    <form id="url-queue-form" class="run-form">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 3; min-width: 280px;">
+                                <label>Target Page / Game URL</label>
+                                <input type="url" id="input_target_url" placeholder="https://example.com/games/sweet-bonanza" required style="font-size: 1rem; padding: 10px;">
                             </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Target Height (px)</label>
-                                <input type="number" id="upload_height" placeholder="Auto">
+                            <div class="form-group" style="flex: 1; min-width: 130px;">
+                                <label>Market</label>
+                                <select id="input_market" style="padding: 10px;">
+                                    <option value="UK">UK (GC Compliance)</option>
+                                    <option value="PK">PK (Pakistani Market)</option>
+                                </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary" style="padding: 8px;">Upload Asset</button>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Game Name (Optional - AI extracts if blank)</label>
+                                <input type="text" id="input_game_name" placeholder="e.g. Sweet Bonanza">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Provider (Optional - AI extracts if blank)</label>
+                                <input type="text" id="input_provider" placeholder="e.g. Pragmatic Play">
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                            <button type="button" class="btn-primary btn-next-step" data-next="2">Continue to Structure ➔</button>
+                        </div>
                     </form>
+                </div>
 
-                    <form id="image-assign-form" class="run-form" style="flex: 2; min-width: 350px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
-                        <h4 style="margin-bottom: 0.5rem;">Assign Image to Stable Section ID</h4>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <div class="form-group" style="flex: 1;">
-                                <label>Image Asset</label>
-                                <select id="assign_image_id" required><option value="">Select Asset...</option></select>
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Target Section ID</label>
-                                <select id="assign_section_id" required><option value="">Select Section...</option></select>
-                            </div>
+                <!-- STEP 2: STRUCTURE -->
+                <div class="workflow-step-content hidden" id="workflow-step-2">
+                    <h3 class="panel-header">Step 2: Article Format & Structure Selection</h3>
+                    
+                    <div class="format-options-grid" style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="format-card selected" id="card-format-default">
+                            <h4>⚡ Default SEO Format</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
+                                Predefined optimized article structure designed for high SEO rankings.
+                            </p>
+                            <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
+                                <li>✓ Introduction & Overview</li>
+                                <li>✓ Features & Game Mechanics</li>
+                                <li>✓ Pros & Cons Breakdown</li>
+                                <li>✓ FAQ & Conclusion</li>
+                            </ul>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <div class="form-group" style="flex: 1;">
+                        <div class="format-card" id="card-format-custom">
+                            <h4>🛠 Custom Format Builder</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
+                                Construct your own custom sections, reorder topics, and set AI writing rules.
+                            </p>
+                            <ul class="check-list" style="margin-top: 10px; font-size: 0.85rem;">
+                                <li>+ Create Custom Sections</li>
+                                <li>+ Drag & Reorder Topics</li>
+                                <li>+ Custom AI Section Instructions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Custom Structure Builder View (Hidden by default until Custom selected) -->
+                    <div id="custom-builder-view" class="hidden" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0;">Build Your Article Structure</h4>
+                            <button id="btn-add-section-ui" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Section</button>
+                        </div>
+                        <div id="custom-sections-list"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="1">← Back</button>
+                        <button type="button" class="btn-primary btn-next-step" data-next="3">Continue to Images ➔</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: IMAGES -->
+                <div class="workflow-step-content hidden" id="workflow-step-3">
+                    <h3 class="panel-header">Step 3: Article Image Placement & Sizes</h3>
+                    
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        <!-- Simple Image Upload & Assignment Form -->
+                        <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
+                            <h4 style="margin-bottom: 1rem;">🖼 Add Article Image</h4>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Upload Image File</label>
+                                <input type="file" id="step3_image_file" accept="image/*">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Where should this image appear?</label>
+                                <select id="step3_section_select" style="padding: 8px;"><option value="">Select Section...</option></select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
                                 <label>Position</label>
-                                <select id="assign_position">
-                                    <option value="after_heading">After Heading</option>
-                                    <option value="before_heading">Before Heading</option>
-                                    <option value="after_paragraph">After Paragraph</option>
-                                    <option value="end_of_section">End of Section</option>
+                                <select id="step3_position_select" style="padding: 8px;">
+                                    <option value="after_heading">After section heading</option>
+                                    <option value="before_heading">Before section heading</option>
+                                    <option value="after_paragraph">After section text</option>
+                                    <option value="end_of_section">End of section</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Alignment</label>
-                                <select id="assign_alignment">
-                                    <option value="center">Center</option>
-                                    <option value="left">Left</option>
-                                    <option value="right">Right</option>
-                                    <option value="full_width">Full Width</option>
-                                </select>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Size</label>
+                                    <select id="step3_size_select" style="padding: 8px;">
+                                        <option value="large">Large (800px)</option>
+                                        <option value="medium">Medium (600px)</option>
+                                        <option value="small">Small (400px)</option>
+                                        <option value="full_width">Full Width</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Alignment</label>
+                                    <select id="step3_align_select" style="padding: 8px;">
+                                        <option value="center">Center</option>
+                                        <option value="left">Left</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Fallback Rule (If Section Missing)</label>
-                                <select id="assign_fallback">
-                                    <option value="do_not_publish">Do Not Publish (Safeguard)</option>
-                                    <option value="end_of_article">Publish at End of Article</option>
-                                </select>
-                            </div>
+                            <button id="btn-save-step3-image" class="btn-primary" style="width: 100%; padding: 10px;">Save Image Placement</button>
                         </div>
-                        <button type="submit" class="btn-primary" style="padding: 8px;">Save Image Assignment</button>
-                    </form>
-                </div>
 
-                <h4 style="margin-bottom: 0.8rem;">Uploaded Image Assets:</h4>
-                <div id="image-gallery-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <p style="color: var(--text-secondary);">No images uploaded yet.</p>
-                </div>
-            </section>
+                        <!-- Visual Article Structure & Image Map -->
+                        <div style="flex: 1; min-width: 320px;">
+                            <h4 style="margin-bottom: 0.8rem;">Article Images & Placement Map</h4>
+                            <div id="assigned-images-visual-list">
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">No images assigned to sections yet.</p>
+                            </div>
 
-            <!-- 4. Drafts, Validation & Article Preview Section -->
-            <section id="drafts-section" class="glass-panel">
-                <h3 class="panel-header">📄 Generated Drafts & 12-Check Validation</h3>
-                <div id="drafts-container">
-                    <p style="color: var(--text-secondary);">Loading drafts...</p>
-                </div>
-            </section>
+                            <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem;">Article Structure Visualization</h4>
+                            <div id="structure-tree-diagram" class="structure-tree"></div>
+                        </div>
+                    </div>
 
-            <!-- 5. Active Jobs Section -->
-            <section id="jobs-section" class="glass-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 class="panel-header" style="margin: 0;">⚡ Active Automation Jobs</h3>
-                    <select id="job-status-filter" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
-                        <option value="ALL">All Statuses</option>
-                        <option value="QUEUED">Queued</option>
-                        <option value="PROCESSING">Processing</option>
-                        <option value="PENDING_REVIEW">Pending Review</option>
-                        <option value="PUBLISHED">Published</option>
-                        <option value="FAILED">Failed</option>
-                    </select>
-                </div>
-                <table class="table-styled">
-                    <thead>
-                        <tr>
-                            <th>Job ID</th>
-                            <th>Game / Provider</th>
-                            <th>Status</th>
-                            <th>Current Stage</th>
-                            <th>Duration</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="jobs-tbody">
-                        <tr><td colspan="6" style="text-align: center;">Loading jobs...</td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- 6. Collapsible History Panel -->
-            <section id="history-section" class="glass-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 class="panel-header" style="margin: 0;">📜 Article Publishing History</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="history_search_input" placeholder="Search by title..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
-                        <button id="btn-delete-all-history" class="nav-btn" style="color: #EF4444; border: 1px solid #EF4444;">🗑 Delete All History</button>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="2">← Back</button>
+                        <button type="button" class="btn-primary btn-next-step" data-next="4">Continue to SEO ➔</button>
                     </div>
                 </div>
-                <div id="history-content-wrapper">
+
+                <!-- STEP 4: SEO -->
+                <div class="workflow-step-content hidden" id="workflow-step-4">
+                    <h3 class="panel-header">Step 4: SEO Metadata & Keywords Inspector</h3>
+                    <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Focus Keyword</label>
+                            <input type="text" id="step4_focus_kw" placeholder="Automatically extracted from Game Name..." style="padding: 10px; font-weight: 600;">
+                        </div>
+                        <div class="form-group">
+                            <label>SEO Meta Description</label>
+                            <textarea id="step4_meta_desc" placeholder="1-2 sentence catchy SEO meta description starting with focus keyword..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="3">← Back</button>
+                        <button type="button" class="btn-primary btn-next-step" data-next="5">Continue to Preview ➔</button>
+                    </div>
+                </div>
+
+                <!-- STEP 5: PREVIEW -->
+                <div class="workflow-step-content hidden" id="workflow-step-5">
+                    <h3 class="panel-header">Step 5: Article Live Preview</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Review generated article layout, headings, and image placements prior to publishing.</p>
+                    
+                    <div id="step5-preview-rendered" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto;">
+                        <p style="color: gray;">Click 'Generate & Preview Article' to render content.</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="4">← Back</button>
+                        <button type="button" class="btn-primary btn-next-step" data-next="6">Proceed to Validation & Publish ➔</button>
+                    </div>
+                </div>
+
+                <!-- STEP 6: PUBLISH -->
+                <div class="workflow-step-content hidden" id="workflow-step-6">
+                    <h3 class="panel-header">Step 6: 12-Check Validation & WordPress Publishing</h3>
+                    
+                    <div id="step6-validation-card" style="padding: 16px; border-radius: 12px; margin-bottom: 1.5rem;"></div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                        <button type="button" class="btn-secondary-sm btn-prev-step" data-prev="5">← Back to Preview</button>
+                        <button type="button" id="btn-final-publish" class="btn-primary" style="padding: 12px 28px; font-size: 1.05rem;">🚀 Start Automation & Publish to WordPress</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COLLAPSIBLE PANELS (Home / Detail Views) -->
+            
+            <!-- Panel: Custom Template Builder -->
+            <section class="glass-panel collapsible-panel" id="panel-templates">
+                <div class="panel-header-bar">
+                    <h3 class="panel-header">🎨 Custom Content Templates</h3>
+                    <div class="panel-actions">
+                        <button class="btn-toggle-panel" data-target="body-templates">[ − ]</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="body-templates">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <input type="text" id="builder_template_name" placeholder="Template Name" style="font-weight: bold; flex: 2; padding: 10px;">
+                        <input type="text" id="builder_template_desc" placeholder="Template Description" style="flex: 3; padding: 10px;">
+                    </div>
+                    <div id="builder-sections-container"></div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <button id="btn-add-builder-section" class="nav-btn" style="color: #FF7A3D; font-weight: bold;">+ Add Custom Section</button>
+                        <button id="btn-save-template" class="btn-primary">💾 Save Template</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel: Drafts Pending Review -->
+            <section class="glass-panel collapsible-panel" id="panel-drafts">
+                <div class="panel-header-bar">
+                    <h3 class="panel-header">📄 Drafts Pending Review <span class="badge badge-info" id="badge-drafts-count">0 Drafts</span></h3>
+                    <div class="panel-actions">
+                        <button class="btn-toggle-panel" data-target="body-drafts">[ − ]</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="body-drafts">
+                    <div id="drafts-container"><p style="color: var(--text-secondary);">Loading drafts...</p></div>
+                </div>
+            </section>
+
+            <!-- Panel: Active Automation Jobs -->
+            <section class="glass-panel collapsible-panel" id="panel-jobs">
+                <div class="panel-header-bar">
+                    <h3 class="panel-header">⚡ Active Automation Jobs <span class="badge badge-warning" id="badge-jobs-running">0 Running</span></h3>
+                    <div class="panel-actions">
+                        <button class="btn-toggle-panel" data-target="body-jobs">[ − ]</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="body-jobs">
+                    <table class="table-styled">
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>Game / Provider</th>
+                                <th>Status</th>
+                                <th>Current Stage</th>
+                                <th>Duration</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-tbody">
+                            <tr><td colspan="6" style="text-align: center;">Loading jobs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel: Article History -->
+            <section class="glass-panel collapsible-panel" id="panel-history">
+                <div class="panel-header-bar">
+                    <h3 class="panel-header">📜 Article Publishing History</h3>
+                    <div class="panel-actions">
+                        <button class="btn-toggle-panel" data-target="body-history">[ − ]</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="body-history">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <input type="text" id="history_search_input" placeholder="Search by title..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15);">
+                        <button id="btn-delete-all-history" class="nav-btn" style="color: #EF4444;">🗑 Delete All History</button>
+                    </div>
                     <table class="table-styled">
                         <thead>
                             <tr>
@@ -274,40 +385,74 @@
                 </div>
             </section>
 
-            <!-- 7. Sites & Integration Settings Section -->
-            <section id="setup-section" class="glass-panel hidden">
-                <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
-                <form id="setup-form" class="run-form">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 2;">
-                            <label>WordPress Site URL</label>
-                            <input type="url" id="set_wp_url" placeholder="https://example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="set_wp_username" required>
-                        </div>
-                        <div class="form-group">
-                            <label>App Password (Encrypted at Rest)</label>
-                            <input type="password" id="set_wp_password" placeholder="••••••••••••" required>
-                        </div>
+            <!-- Panel: Connected WordPress Sites & Settings -->
+            <section class="glass-panel collapsible-panel hidden" id="panel-setup">
+                <div class="panel-header-bar">
+                    <h3 class="panel-header">⚙ Connection Settings</h3>
+                    <div class="panel-actions">
+                        <button class="btn-toggle-panel" data-target="body-setup">[ − ]</button>
                     </div>
-                    <button type="submit" class="btn-primary">Save Settings</button>
-                    <div id="setup-status" class="status-msg hidden"></div>
-                </form>
+                </div>
+                <div class="panel-body" id="body-setup">
+                    <form id="setup-form" class="run-form">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 2;">
+                                <label>WordPress Site URL</label>
+                                <input type="url" id="set_wp_url" placeholder="https://example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="set_wp_username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>App Password (Encrypted)</label>
+                                <input type="password" id="set_wp_password" placeholder="••••••••••••" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Settings</button>
+                        <div id="setup-status" class="status-msg hidden"></div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- DEV MODE / ADVANCED SETTINGS DRAWER (Hidden unless Dev Mode checked) -->
+            <section class="glass-panel hidden" id="dev-mode-drawer" style="border: 2px dashed #F59E0B; background: rgba(245,158,11,0.05);">
+                <h4 style="color: #B45309; margin-bottom: 0.5rem;">⚙ Advanced Developer Diagnostics & Internal UUIDs</h4>
+                <div id="dev-uuid-lookup-container" style="font-family: monospace; font-size: 0.85rem;"></div>
             </section>
         </main>
     </div>
 
-    <!-- Article Live Preview Modal -->
-    <div id="preview-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel" style="max-width: 900px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
-                <h3 id="preview-modal-title" style="margin: 0;">Article Preview</h3>
-                <button id="close-preview-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    <!-- Section Editor Modal -->
+    <div id="section-editor-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0;">Edit Article Section</h3>
+                <button id="close-sec-modal-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
-            <div id="preview-validation-banner" style="margin-bottom: 1rem; padding: 12px; border-radius: 8px;"></div>
-            <div id="preview-html-content" style="background: white; color: #1F2937; padding: 24px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); max-height: 60vh; overflow-y: auto;"></div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Section Name</label>
+                <input type="text" id="edit_sec_name" placeholder="e.g. Key Features" style="padding: 10px; font-weight: bold;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label>What should AI write?</label>
+                <textarea id="edit_sec_instruction" placeholder="Instructions for AI..." style="width: 100%; height: 70px; padding: 10px;"></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Content Format</label>
+                    <select id="edit_sec_type" style="padding: 8px;">
+                        <option value="paragraph">Paragraph</option>
+                        <option value="bullet_list">Bullet List</option>
+                        <option value="table">Table</option>
+                        <option value="faq">FAQ</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; justify-content: center;">
+                    <label><input type="checkbox" id="edit_sec_req" checked> Required Section</label>
+                </div>
+            </div>
+            <button id="btn-save-section-modal" class="btn-primary" style="width: 100%;">Save Section</button>
         </div>
     </div>
 
@@ -322,6 +467,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=5"></script>
+    <script src="/static/app.js?v=6"></script>
 </body>
 </html>
