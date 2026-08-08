@@ -39,6 +39,14 @@ def init_db(db_path=DB_PATH, schema_path=SCHEMA_PATH):
             conn.execute("ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT 'free'")
         if 'is_active' not in cols:
             conn.execute("ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1")
+
+        # Migration: Ensure user_settings table has active_format_mode and active_template_id
+        cursor = conn.execute("PRAGMA table_info(user_settings)")
+        us_cols = [row['name'] for row in cursor.fetchall()]
+        if 'active_format_mode' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN active_format_mode TEXT DEFAULT 'default'")
+        if 'active_template_id' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN active_template_id INTEGER DEFAULT NULL")
             
         conn.commit()
     logger.info("Database initialized with column migrations.")

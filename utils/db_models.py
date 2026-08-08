@@ -73,6 +73,9 @@ class UserSettings(Base):
     airtable_base_id = Column(String, nullable=True)
     airtable_table_name = Column(String, default="Links")
     
+    active_format_mode = Column(String, default="default") # "default" or "custom"
+    active_template_id = Column(Integer, nullable=True)
+    
     user = relationship("User", back_populates="settings")
 
 class ContentDraft(Base):

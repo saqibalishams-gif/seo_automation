@@ -55,8 +55,116 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedFormatMode = "default";
     let userTemplates = [];
     let activeTemplate = null;
+    let persistentActiveFormat = { mode: "default", template_id: null, template_name: "Default SEO Format" };
     let currentEditingSecCard = null;
     let imageAssignments = [];
+
+    // --- Active Format & Database Memory Loader ---
+    async function loadActiveFormat() {
+        try {
+            const res = await fetch("/api/user/active-format");
+            const data = await res.json();
+            if (data.mode) {
+                persistentActiveFormat = data;
+                selectedFormatMode = data.mode;
+                
+                const activeTitle = document.getElementById("active-format-title");
+                if (activeTitle) {
+                    if (data.mode === "custom" && data.template_name) {
+                        activeTitle.textContent = `🛠 Custom Format: ${data.template_name}`;
+                    } else {
+                        activeTitle.textContent = `⚡ Default SEO Format`;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Failed to load active format", e);
+        }
+    }
+
+    // Change Format Modal Handlers
+    const btnOpenChangeFormat = document.getElementById("btn-open-change-format");
+    const changeFormatModal = document.getElementById("change-format-modal");
+    const closeFormatModalBtn = document.getElementById("close-format-modal-btn");
+    const modalSavedTemplateSelect = document.getElementById("modal_saved_template_select");
+    const btnApplyFormatModal = document.getElementById("btn-apply-format-modal");
+    const btnResetFormatDefault = document.getElementById("btn-reset-format-default");
+
+    if (btnOpenChangeFormat) {
+        btnOpenChangeFormat.addEventListener("click", async () => {
+            if (userTemplates.length === 0) await loadTemplates();
+            
+            if (modalSavedTemplateSelect) {
+                modalSavedTemplateSelect.innerHTML = userTemplates.map(t => `
+                    <option value="${t.id}">${t.name} ${t.is_default ? '(Default)' : ''}</option>
+                `).join("");
+            }
+            changeFormatModal.classList.remove("hidden");
+        });
+    }
+
+    if (closeFormatModalBtn) {
+        closeFormatModalBtn.addEventListener("click", () => changeFormatModal.classList.add("hidden"));
+    }
+
+    if (btnApplyFormatModal) {
+        btnApplyFormatModal.addEventListener("click", async () => {
+            const modeRadios = document.getElementsByName("modal_format_mode");
+            let chosenMode = "default";
+            for (const r of modeRadios) {
+                if (r.checked) chosenMode = r.value;
+            }
+
+            const tmplId = chosenMode === "custom" ? parseInt(modalSavedTemplateSelect.value) : null;
+            const prefRadios = document.getElementsByName("modal_usage_pref");
+            let saveAsActive = true;
+            for (const r of prefRadios) {
+                if (r.checked) saveAsActive = (r.value === "active");
+            }
+
+            if (saveAsActive) {
+                try {
+                    await fetch("/api/user/active-format", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ mode: chosenMode, template_id: tmplId, save_as_active: true })
+                    });
+                    alert("Active format saved permanently to database!");
+                } catch (e) {
+                    alert("Failed to save format preference: " + e);
+                }
+            } else {
+                alert("Format applied for current article only.");
+            }
+
+            selectedFormatMode = chosenMode;
+            if (chosenMode === "custom" && tmplId) {
+                activeTemplate = userTemplates.find(t => t.id === tmplId) || activeTemplate;
+            }
+            changeFormatModal.classList.add("hidden");
+            loadActiveFormat();
+        });
+    }
+
+    if (btnResetFormatDefault) {
+        btnResetFormatDefault.addEventListener("click", async () => {
+            if (confirm("Reset active format to Default SEO Format? This will be used automatically for all future articles.")) {
+                try {
+                    await fetch("/api/user/active-format", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ mode: "default", template_id: null, save_as_active: true })
+                    });
+                    alert("Reset to Default SEO Format.");
+                    selectedFormatMode = "default";
+                    changeFormatModal.classList.add("hidden");
+                    loadActiveFormat();
+                } catch (e) {
+                    alert("Reset failed: " + e);
+                }
+            }
+        });
+    }
 
     // --- 1. CLEAN TABBED VIEW SWITCHER ---
 
@@ -721,6 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Init Page
     switchTab("home", navHome);
+    loadActiveFormat();
     loadTemplates();
     checkRole();
     setInterval(() => {

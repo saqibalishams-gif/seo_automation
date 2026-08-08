@@ -267,6 +267,56 @@ def trigger_run(config: RunConfig, user_id: int = Depends(get_current_user_id)):
     
     return {"message": "Job enqueued successfully", "job_id": job_id, "status": "QUEUED"}
 
+class ActiveFormatRequest(BaseModel):
+    mode: str = "default" # "default" or "custom"
+    template_id: Optional[int] = None
+    save_as_active: bool = True
+
+@app.get("/api/user/active-format")
+def get_user_active_format(user_id: int = Depends(get_current_user_id)):
+    from utils.db_models import ContentTemplate
+    with SessionLocal() as db:
+        settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+        mode = settings.active_format_mode if (settings and settings.active_format_mode) else "default"
+        template_id = settings.active_template_id if settings else None
+        
+        template_name = "Default SEO Format"
+        if mode == "custom" and template_id:
+            tmpl = db.query(ContentTemplate).filter(ContentTemplate.id == template_id).first()
+            if tmpl:
+                template_name = tmpl.name
+            else:
+                mode = "default"
+                template_id = None
+                
+        return {
+            "mode": mode,
+            "template_id": template_id,
+            "template_name": template_name,
+            "is_active_saved": True
+        }
+
+@app.post("/api/user/active-format")
+def set_user_active_format(req: ActiveFormatRequest, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+        if not settings:
+            settings = UserSettings(user_id=user_id)
+            db.add(settings)
+            
+        if req.save_as_active:
+            settings.active_format_mode = req.mode
+            settings.active_template_id = req.template_id
+            db.commit()
+            log_audit_event(user_id, "ACTIVE_FORMAT_SAVED", "UserSettings", str(settings.id), details={"mode": req.mode, "template_id": req.template_id})
+            
+        return {
+            "message": "Active format updated in database",
+            "mode": req.mode,
+            "template_id": req.template_id,
+            "saved_permanently": req.save_as_active
+        }
+
 # --- TENANT-ISOLATED USER DASHBOARD APIS ---
 
 @app.get("/api/user/jobs")
