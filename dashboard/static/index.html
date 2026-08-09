@@ -361,10 +361,38 @@
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.2rem; align-items: center;">
                         <div id="builder-save-msg" class="hidden" style="flex: 1;"></div>
-                        <button id="btn-cancel-builder" class="btn-secondary-sm" style="padding: 9px 16px;">Cancel</button>
-                        <button id="btn-save-template" class="btn-primary" style="padding: 10px 24px;">💾 Save Format</button>
+                        <button id="btn-cancel-builder" class="btn-secondary-sm" style="padding: 9px 16px;" onclick="document.getElementById('formats-list-view').classList.remove('hidden'); document.getElementById('format-builder-view').classList.add('hidden');">Cancel</button>
+                        <button id="btn-save-template" class="btn-primary" style="padding: 10px 24px;" onclick="window.forceSaveFormat()">💾 Save Format</button>
                     </div>
                 </section>
+                <script>
+                    window.forceSaveFormat = async function() {
+                        const nameEl = document.getElementById('builder_template_name');
+                        const descEl = document.getElementById('builder_template_desc');
+                        const msg = document.getElementById('builder-save-msg');
+                        if (!nameEl.value.trim()) { msg.textContent = 'Please enter a format name.'; msg.className = 'error-msg'; msg.classList.remove('hidden'); return; }
+                        
+                        const sections = [];
+                        document.getElementById('builder-sections-container').querySelectorAll('.builder-section-row').forEach((row, i) => {
+                            sections.push({
+                                id: row.getAttribute('data-sec-id') || null,
+                                name: row.getAttribute('data-name'),
+                                order: i + 1,
+                                content_type: row.getAttribute('data-type') || 'paragraph',
+                                ai_instruction: row.getAttribute('data-instruction') || '',
+                                required: row.getAttribute('data-req') === 'true'
+                            });
+                        });
+                        
+                        try {
+                            const res = await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nameEl.value.trim(), description: descEl.value.trim(), mode: 'custom', is_default: false, sections }) });
+                            if (res.ok) {
+                                msg.textContent = '✓ Format saved!'; msg.className = 'success-msg'; msg.classList.remove('hidden');
+                                setTimeout(() => { document.getElementById('formats-list-view').classList.remove('hidden'); document.getElementById('format-builder-view').classList.add('hidden'); location.reload(); }, 1500);
+                            } else { msg.textContent = 'Failed to save.'; msg.className = 'error-msg'; msg.classList.remove('hidden'); }
+                        } catch (e) { msg.textContent = 'Error: ' + e.message; msg.className = 'error-msg'; msg.classList.remove('hidden'); }
+                    };
+                </script>
             </div>
 
             <!-- ================= VIEW 4: MEDIA LIBRARY ================= -->
