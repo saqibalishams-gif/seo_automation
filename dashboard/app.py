@@ -800,6 +800,15 @@ def duplicate_template_endpoint(template_id: int, user_id: int = Depends(get_cur
     log_audit_event(user_id, "TEMPLATE_DUPLICATED", "ContentTemplate", str(dup.id))
     return {"message": "Template duplicated successfully", "template_id": dup.id}
 
+@app.post("/api/templates/{template_id}/set-default")
+def set_template_default_endpoint(template_id: int, user_id: int = Depends(get_current_user_id)):
+    from services.template_service import set_template_default
+    success = set_template_default(template_id, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Template not found")
+    log_audit_event(user_id, "TEMPLATE_SET_DEFAULT", "ContentTemplate", str(template_id))
+    return {"message": "Template set as default"}
+
 @app.delete("/api/templates/{template_id}")
 def delete_template_endpoint(template_id: int, user_id: int = Depends(get_current_user_id)):
     from services.template_service import delete_template

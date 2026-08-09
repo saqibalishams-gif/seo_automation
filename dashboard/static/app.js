@@ -342,8 +342,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         let sectionOptions = `<option value="">-- Do Not Use / Unassigned --</option>`;
-        if (activeTemplate && activeTemplate.sections) {
-            sectionOptions += activeTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+        // Resolve the correct active template (same logic as updateFormatStepDisplay)
+        let resolvedTemplate = null;
+        if (persistentActiveFormat && persistentActiveFormat.mode === "custom" && persistentActiveFormat.template_id) {
+            resolvedTemplate = userTemplates.find(t => t.id === persistentActiveFormat.template_id) || null;
+        }
+        if (!resolvedTemplate) resolvedTemplate = userTemplates.find(t => t.is_default) || userTemplates[0] || activeTemplate || null;
+        if (resolvedTemplate && resolvedTemplate.sections) {
+            sectionOptions += resolvedTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
         }
 
         gallery.innerHTML = fastTrackUploadedImages.map((img, index) => `
@@ -700,6 +706,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===================================================================
     // EDIT FORMAT (navigate to builder)
     // ===================================================================
+    const btnEditFormat = document.getElementById("btn-edit-format");
     if (btnEditFormat) {
         btnEditFormat.addEventListener("click", () => {
             if (activeTemplate && activeTemplate.id) {
@@ -756,7 +763,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button class="btn-secondary-sm format-use-btn" data-id="${t.id}" style="color:var(--accent-orange-strong);">Use</button>
                     <button class="btn-secondary-sm format-edit-btn" data-id="${t.id}">Edit</button>
                     <button class="btn-secondary-sm format-dup-btn"  data-id="${t.id}">Duplicate</button>
-                    ${!t.is_default ? `<button class="btn-secondary-sm format-del-btn" data-id="${t.id}" style="color:#EF4444;">Delete</button>` : ""}
+                    ${!t.is_default ? `<button class="btn-secondary-sm format-default-btn" data-id="${t.id}" style="color:#10B981;">Make Default</button>` : ""}
+                    ${!t.is_default ? `<button class="btn-secondary-sm format-del-btn" data-id="${t.id}" style="color:#EF4444;">Delete</button><button class="btn-secondary-sm format-del-confirm-btn" data-id="${t.id}" style="display:none;color:#EF4444;font-weight:700;">Confirm?</button>` : ""}
                 </div>
             </div>
         `).join("");
@@ -798,16 +806,17 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        formatsListContainer.querySelectorAll(".format-del-btn").forEach(btn => {
+        formatsListContainer.querySelectorAll(".format-default-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = parseInt(btn.getAttribute("data-id"));
-                if (!confirm("Delete this format? This cannot be undone.")) return;
                 try {
-                    const res = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+                    const res = await fetch(`/api/templates/${id}/set-default`, { method: "POST" });
                     if (res.ok) { await loadTemplates(); renderFormatsList(); }
                 } catch (e) {}
             });
         });
+
+        // delete buttons wired via event delegation below
     }
 
     // Use event delegation for Create New Format button to ensure it fires reliably
@@ -826,6 +835,27 @@ document.addEventListener("DOMContentLoaded", () => {
             if (formatsListView)   formatsListView.classList.remove("hidden");
             if (formatBuilderView) formatBuilderView.classList.add("hidden");
             renderFormatsList();
+        }
+    });
+
+    // Delete button: first click shows "Confirm?", second click deletes
+    document.addEventListener("click", async (e) => {
+        const delBtn = e.target.closest(".format-del-btn");
+        if (delBtn) {
+            e.preventDefault();
+            // Show the confirm button next to it
+            const confirmBtn = delBtn.parentElement.querySelector(".format-del-confirm-btn");
+            if (confirmBtn) { confirmBtn.style.display = "inline-flex"; delBtn.style.display = "none"; }
+            return;
+        }
+        const confirmBtn = e.target.closest(".format-del-confirm-btn");
+        if (confirmBtn) {
+            e.preventDefault();
+            const id = parseInt(confirmBtn.getAttribute("data-id"));
+            try {
+                const res = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+                if (res.ok) { await loadTemplates(); renderFormatsList(); }
+            } catch (err) {}
         }
     });
 

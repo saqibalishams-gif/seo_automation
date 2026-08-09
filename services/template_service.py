@@ -171,6 +171,17 @@ def duplicate_template(template_id: int, user_id: int) -> Optional[ContentTempla
         db.refresh(dup)
         return dup
 
+def set_template_default(template_id: int, user_id: int) -> bool:
+    with SessionLocal() as db:
+        db.query(ContentTemplate).filter(ContentTemplate.user_id == user_id).update({"is_default": False})
+        t = db.query(ContentTemplate).filter(ContentTemplate.id == template_id, ContentTemplate.user_id == user_id).first()
+        if t:
+            t.is_default = True
+            db.commit()
+            return True
+        db.commit()
+        return False
+
 def delete_template(template_id: int, user_id: int) -> bool:
     with SessionLocal() as db:
         t = db.query(ContentTemplate).filter(ContentTemplate.id == template_id, ContentTemplate.user_id == user_id).first()
