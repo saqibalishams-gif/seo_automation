@@ -820,15 +820,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    if (btnBackToFormatsList || btnCancelBuilder) {
-        [btnBackToFormatsList, btnCancelBuilder].forEach(btn => {
-            if (btn) btn.addEventListener("click", () => {
-                if (formatsListView)   formatsListView.classList.remove("hidden");
-                if (formatBuilderView) formatBuilderView.classList.add("hidden");
-                renderFormatsList();
-            });
-        });
-    }
+    document.addEventListener("click", (e) => {
+        if (e.target.closest("#btn-back-to-formats-list") || e.target.closest("#btn-cancel-builder")) {
+            e.preventDefault();
+            if (formatsListView)   formatsListView.classList.remove("hidden");
+            if (formatBuilderView) formatBuilderView.classList.add("hidden");
+            renderFormatsList();
+        }
+    });
 
     function openFormatBuilder(tmpl) {
         if (builderViewTitle)       builderViewTitle.textContent   = tmpl ? "📐 Edit Article Format" : "📐 Create Article Format";
@@ -882,10 +881,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (btnAddBuilderSection) btnAddBuilderSection.addEventListener("click", () => openSectionModal(null));
+    document.addEventListener("click", (e) => {
+        if (e.target.closest("#btn-add-builder-section")) {
+            e.preventDefault();
+            openSectionModal(null);
+        }
+    });
 
-    if (btnSaveTemplate) {
-        btnSaveTemplate.addEventListener("click", async () => {
+    document.addEventListener("click", async (e) => {
+        if (e.target.closest("#btn-save-template")) {
+            e.preventDefault();
             const name = builderTemplateNameEl?.value?.trim();
             if (!name) { showMsg(builderSaveMsg, "Please enter a format name.", "error"); return; }
 
@@ -926,9 +931,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     showMsg(builderSaveMsg, "Failed to save format.", "error");
                 }
-            } catch (e) { showMsg(builderSaveMsg, "Error: " + e.message, "error"); }
-        });
-    }
+            } catch (err) { showMsg(builderSaveMsg, "Error: " + err.message, "error"); }
+        }
+    });
 
     // ===================================================================
     // SECTION EDITOR MODAL
