@@ -62,8 +62,7 @@ class WordPressSite(Base):
 class UserSettings(Base):
     __tablename__ = "user_settings"
     
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True, unique=True, index=True)
     
     wp_url = Column(String, nullable=True)
     wp_username = Column(String, nullable=True)

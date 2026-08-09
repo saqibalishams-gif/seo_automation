@@ -695,20 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle "Also make default" checkbox from Step 2 override notice
-    if (chkMakeFormatDefault) {
-        chkMakeFormatDefault.addEventListener("change", async () => {
-            if (chkMakeFormatDefault.checked && articleFormat) {
-                try {
-                    await fetch("/api/user/active-format", {
-                        method:  "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body:    JSON.stringify({ mode: "custom", template_id: articleFormat.id, save_as_active: true })
-                    });
-                } catch (e) {}
-            }
-        });
-    }
+    // Removed obsolete chkMakeFormatDefault block
 
     // ===================================================================
     // EDIT FORMAT (navigate to builder)
@@ -823,12 +810,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (btnCreateNewFormat) {
-        btnCreateNewFormat.addEventListener("click", () => {
+    // Use event delegation for Create New Format button to ensure it fires reliably
+    document.addEventListener("click", (e) => {
+        const target = e.target.closest("#btn-create-new-format");
+        if (target) {
+            e.preventDefault();
             currentEditingTemplateId = null;
             openFormatBuilder(null);
-        });
-    }
+        }
+    });
 
     if (btnBackToFormatsList || btnCancelBuilder) {
         [btnBackToFormatsList, btnCancelBuilder].forEach(btn => {
