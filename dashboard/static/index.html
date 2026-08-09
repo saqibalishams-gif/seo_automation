@@ -324,7 +324,7 @@
                             <h3 class="panel-header" style="margin: 0;">🎨 Content Formats</h3>
                             <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">Saved article structures. Select a default or choose one per article.</p>
                         </div>
-                        <button id="btn-create-new-format" class="btn-primary" style="padding: 9px 20px; flex-shrink: 0;">+ Create New Format</button>
+                        <button id="btn-create-new-format" class="btn-primary" style="padding: 9px 20px; flex-shrink: 0;" onclick="document.getElementById('formats-list-view').classList.add('hidden'); document.getElementById('format-builder-view').classList.remove('hidden'); window.currentEditingTemplateId = null; const title = document.getElementById('builder-view-title'); if (title) title.textContent = '📐 Create Article Format'; const name = document.getElementById('builder_template_name'); if (name) name.value = ''; const desc = document.getElementById('builder_template_desc'); if (desc) desc.value = ''; const container = document.getElementById('builder-sections-container'); if (container) container.innerHTML = '';">+ Create New Format</button>
                     </div>
                     <div id="formats-list-container">
                         <p style="color: var(--text-secondary);">Loading saved formats...</p>
