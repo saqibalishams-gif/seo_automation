@@ -5,7 +5,7 @@ import re
 
 class GutenbergAdapter:
     @staticmethod
-    def format_content(doc: ContentDocument) -> Dict[str, Any]:
+    def format_content(doc: ContentDocument, image_assignments: list = None, post_status: str = "publish") -> Dict[str, Any]:
         """
         Formats the ContentDocument into Gutenberg Block markup.
         Currently falls back to Classic HTML blocks for complex nested sections,
@@ -26,7 +26,7 @@ class GutenbergAdapter:
             
         # To avoid complex recursive block parsing right now, we can render the rest of the sections as classic HTML
         # and wrap them in a Freeform (Classic) block, which Gutenberg handles natively.
-        html_content = RenderingEngine.render_classic_html(doc)
+        html_content = RenderingEngine.render_classic_html(doc, image_assignments)
         
         # Strip out the stuff we already added manually (intro and featured image)
         # This is simplified; ideally we recursively generate proper wp:heading and wp:list blocks.
@@ -38,5 +38,5 @@ class GutenbergAdapter:
             "title": doc.title,
             "content": gutenberg_content,
             "excerpt": doc.seo_metadata.meta_description,
-            "status": "draft"
+            "status": post_status
         }

@@ -156,6 +156,65 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnHomeCreate) btnHomeCreate.addEventListener("click", () => switchTab("create", navCreate));
 
     // ===================================================================
+    // SETTINGS — LOAD & SAVE WORDPRESS CONNECTION
+    // ===================================================================
+    async function loadSettings() {
+        try {
+            const res  = await fetch("/api/settings");
+            const data = await res.json();
+            const urlEl  = document.getElementById("set_wp_url");
+            const userEl = document.getElementById("set_wp_username");
+            const passEl = document.getElementById("set_wp_password");
+            const themeEl = document.getElementById("set_theme_type");
+            const seoEl  = document.getElementById("set_seo_plugin");
+            if (urlEl   && data.wp_url)      urlEl.value   = data.wp_url;
+            if (userEl  && data.wp_username) userEl.value  = data.wp_username;
+            if (passEl  && data.wp_app_password) passEl.value = data.wp_app_password;
+            if (themeEl && data.theme_type)  themeEl.value = data.theme_type;
+            if (seoEl   && data.seo_plugin)  seoEl.value   = data.seo_plugin;
+        } catch (e) { console.error("Failed to load settings", e); }
+    }
+
+    const wpSetupForm   = document.getElementById("setup-form");
+    const wpSetupStatus = document.getElementById("setup-status");
+    if (wpSetupForm) {
+        wpSetupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const payload = {
+                wp_url:        document.getElementById("set_wp_url")?.value?.trim(),
+                wp_username:   document.getElementById("set_wp_username")?.value?.trim(),
+                wp_app_password: document.getElementById("set_wp_password")?.value?.trim(),
+                theme_type:    document.getElementById("set_theme_type")?.value,
+                seo_plugin:    document.getElementById("set_seo_plugin")?.value
+            };
+            try {
+                const res = await fetch("/api/settings", {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify(payload)
+                });
+                if (wpSetupStatus) {
+                    if (res.ok) {
+                        wpSetupStatus.textContent = "✓ WordPress settings saved successfully!";
+                        wpSetupStatus.className   = "success-msg";
+                    } else {
+                        wpSetupStatus.textContent = "Failed to save settings.";
+                        wpSetupStatus.className   = "error-msg";
+                    }
+                    wpSetupStatus.classList.remove("hidden");
+                    setTimeout(() => wpSetupStatus.classList.add("hidden"), 3500);
+                }
+            } catch (err) {
+                if (wpSetupStatus) {
+                    wpSetupStatus.textContent = "Error: " + err.message;
+                    wpSetupStatus.className   = "error-msg";
+                    wpSetupStatus.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // ===================================================================
     // COLLAPSIBLE SECTIONS (Home Dashboard)
     // ===================================================================
     function setupCollapsibles() {
@@ -306,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.error) throw new Error(data.error);
                 
                 fastTrackUploadedImages.push({
-                    id: data.id,
+                    id: data.image_id,
                     url: data.url,
                     filename: files[i].name,
                     section_id: "", // unassigned
@@ -342,6 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         let sectionOptions = `<option value="">-- Do Not Use / Unassigned --</option>`;
+        sectionOptions += `<option value="featured" style="font-weight:bold;color:var(--primary-color);">🌟 Featured Image</option>`;
         // Resolve the correct active template (same logic as updateFormatStepDisplay)
         let resolvedTemplate = null;
         if (persistentActiveFormat && persistentActiveFormat.mode === "custom" && persistentActiveFormat.template_id) {
@@ -352,41 +412,61 @@ document.addEventListener("DOMContentLoaded", () => {
             sectionOptions += resolvedTemplate.sections.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
         }
 
-        gallery.innerHTML = fastTrackUploadedImages.map((img, index) => `
+        gallery.innerHTML = fastTrackUploadedImages.map((img, index) => {
+            const isFeatured = img.section_id === "featured";
+            const showCustomSize = img.size === "custom" && !isFeatured;
+            
+            return `
             <div class="image-card">
                 <img src="${img.url}" class="image-card-thumbnail" alt="${img.filename}">
                 <div class="image-card-info">
                     <strong style="font-size:0.95rem; display:block; margin-bottom:4px; word-break: break-all;">${img.filename}</strong>
                     <div class="image-card-controls">
-                        <select class="assign-section-select" data-index="${index}" style="min-width: 140px;">
+                        <select class="assign-section-select" data-index="${index}" style="min-width: 140px; margin-bottom: 5px;">
                             ${sectionOptions.replace(`value="${img.section_id}"`, `value="${img.section_id}" selected`)}
                         </select>
-                        <select class="assign-position-select" data-index="${index}">
-                            <option value="before_heading" ${img.position === 'before_heading' ? 'selected' : ''}>Before Heading</option>
-                            <option value="after_heading" ${img.position === 'after_heading' ? 'selected' : ''}>After Heading</option>
-                            <option value="end_of_section" ${img.position === 'end_of_section' ? 'selected' : ''}>End of Section</option>
-                        </select>
-                        <select class="assign-size-select" data-index="${index}">
-                            <option value="small" ${img.size === 'small' ? 'selected' : ''}>Small</option>
-                            <option value="medium" ${img.size === 'medium' ? 'selected' : ''}>Medium</option>
-                            <option value="large" ${img.size === 'large' ? 'selected' : ''}>Large</option>
-                        </select>
-                        <select class="assign-alignment-select" data-index="${index}">
-                            <option value="left" ${img.alignment === 'left' ? 'selected' : ''}>Left Align</option>
-                            <option value="center" ${img.alignment === 'center' ? 'selected' : ''}>Center Align</option>
-                            <option value="right" ${img.alignment === 'right' ? 'selected' : ''}>Right Align</option>
-                        </select>
+                        <div class="image-formatting-controls" id="format-controls-${index}" style="display: ${isFeatured ? 'none' : 'block'};">
+                            <select class="assign-position-select" data-index="${index}">
+                                <option value="before_heading" ${img.position === 'before_heading' ? 'selected' : ''}>Before Heading</option>
+                                <option value="after_heading" ${img.position === 'after_heading' ? 'selected' : ''}>After Heading</option>
+                                <option value="end_of_section" ${img.position === 'end_of_section' ? 'selected' : ''}>End of Section</option>
+                            </select>
+                            <select class="assign-size-select" data-index="${index}">
+                                <option value="small" ${img.size === 'small' ? 'selected' : ''}>Small</option>
+                                <option value="medium" ${img.size === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="large" ${img.size === 'large' ? 'selected' : ''}>Large</option>
+                                <option value="custom" ${img.size === 'custom' ? 'selected' : ''}>Custom Size</option>
+                            </select>
+                            <select class="assign-alignment-select" data-index="${index}">
+                                <option value="left" ${img.alignment === 'left' ? 'selected' : ''}>Left Align</option>
+                                <option value="center" ${img.alignment === 'center' ? 'selected' : ''}>Center Align</option>
+                                <option value="right" ${img.alignment === 'right' ? 'selected' : ''}>Right Align</option>
+                            </select>
+                            
+                            <div class="custom-size-inputs" id="custom-size-${index}" style="display: ${showCustomSize ? 'inline-block' : 'none'}; margin-top:5px;">
+                                <input type="number" class="custom-width-input form-input" data-index="${index}" placeholder="W (px)" value="${img.custom_width || ''}" style="width:70px; padding:4px;"> 
+                                <span style="color:#666;">x</span> 
+                                <input type="number" class="custom-height-input form-input" data-index="${index}" placeholder="H (px)" value="${img.custom_height || ''}" style="width:70px; padding:4px;">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <button class="image-card-remove" data-index="${index}" title="Remove Image">✖</button>
             </div>
-        `).join("");
+            `;
+        }).join("");
 
         const attachAssignmentTrigger = (selector, fieldName) => {
             gallery.querySelectorAll(selector).forEach(sel => {
                 sel.addEventListener("change", async (e) => {
                     const idx = e.target.getAttribute("data-index");
                     fastTrackUploadedImages[idx][fieldName] = e.target.value;
+                    
+                    if (selector === ".assign-section-select" || selector === ".assign-size-select") {
+                        // Re-render to update UI toggles for custom sizes and featured images
+                        renderImageGallery();
+                    }
+                    
                     renderImageMap();
                     await syncAssignment(fastTrackUploadedImages[idx]);
                 });
@@ -397,6 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
         attachAssignmentTrigger(".assign-position-select", "position");
         attachAssignmentTrigger(".assign-size-select", "size");
         attachAssignmentTrigger(".assign-alignment-select", "alignment");
+        attachAssignmentTrigger(".custom-width-input", "custom_width");
+        attachAssignmentTrigger(".custom-height-input", "custom_height");
 
         gallery.querySelectorAll(".image-card-remove").forEach(btn => {
             btn.addEventListener("click", (e) => {
@@ -416,10 +498,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     image_id: imgObj.id,
-                    section_id: parseInt(imgObj.section_id),
+                    section_id: imgObj.section_id,
                     position: imgObj.position,
                     size: imgObj.size,
-                    alignment: imgObj.alignment
+                    alignment: imgObj.alignment,
+                    custom_width: imgObj.custom_width ? parseInt(imgObj.custom_width) : null,
+                    custom_height: imgObj.custom_height ? parseInt(imgObj.custom_height) : null
                 })
             });
         } catch (e) {
@@ -1042,6 +1126,18 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const res  = await fetch("/api/links", { method: "POST", body: fd });
                 const data = await res.json();
+                
+                if (data.job_id && fastTrackUploadedImages.length > 0) {
+                    await fetch("/api/images/link-job", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            job_id: data.job_id,
+                            image_ids: fastTrackUploadedImages.map(img => img.id)
+                        })
+                    });
+                }
+                
                 alert(data.message || "Job queued successfully!");
                 switchTab("home", navHome);
             } catch (e) { alert("Submission failed: " + e); }
@@ -1252,22 +1348,121 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             c.innerHTML = drafts.map(d => `
-                <div style="background:white;border:1px solid rgba(0,0,0,0.08);padding:16px;border-radius:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                    <div>
-                        <strong style="font-size:1.05rem;color:var(--text-primary);">${d.game_name} (${d.provider})</strong>
-                        <div style="font-size:0.85rem;color:var(--text-secondary);">${d.created_at}</div>
+                <div class="draft-card" style="background:white;border:1px solid rgba(0,0,0,0.08);padding:16px;border-radius:12px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                        <div>
+                            <strong style="font-size:1.05rem;color:var(--text-primary);">${d.game_name} (${d.provider})</strong>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">${d.created_at} - Status: ${d.status}</div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            ${d.status === 'draft' ? `<button class="btn-secondary-sm edit-draft-btn" data-id="${d.id}" data-title="${encodeURIComponent(d.title || '')}" data-content="${encodeURIComponent(d.html_content || '')}">✏️ Edit</button>` : ''}
+                            <button class="btn-secondary-sm delete-draft-btn" data-id="${d.id}" style="color: #dc3545; border-color: rgba(220,53,69,0.3);">🗑️ Delete</button>
+                            <button class="btn-primary publish-draft-btn" data-id="${d.id}" data-action="publish" style="padding:8px 16px;font-size:0.9rem;">🚀 Publish Live</button>
+                            <button class="btn-secondary publish-draft-btn" data-id="${d.id}" data-action="draft" style="padding:8px 16px;font-size:0.9rem;background-color:#f0ad4e;color:white;">📝 Send as Draft</button>
+                        </div>
                     </div>
-                    <button class="btn-primary publish-draft-btn" data-id="${d.id}" style="padding:8px 16px;font-size:0.9rem;">🚀 Publish to WordPress</button>
+                    <div class="draft-edit-area hidden" id="draft-edit-${d.id}" style="margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+                        <input type="text" id="draft-title-${d.id}" class="form-input" style="width:100%; margin-bottom:10px;" placeholder="Article Title">
+                        <textarea id="draft-content-${d.id}" class="form-input" style="width:100%; height:200px; resize:vertical; font-family:monospace;" placeholder="HTML Content"></textarea>
+                        <div style="margin-top:10px; display:flex; justify-content:flex-end; gap:8px;">
+                            <button class="btn-secondary cancel-edit-btn" data-id="${d.id}">Cancel</button>
+                            <button class="btn-primary save-edit-btn" data-id="${d.id}">💾 Save Changes</button>
+                        </div>
+                    </div>
+                    <div class="draft-success-area hidden" id="draft-success-${d.id}" style="margin-top:10px; padding:10px; background:rgba(40,167,69,0.1); border-radius:8px; color:#28a745; font-size:0.9rem;">
+                    </div>
                 </div>`).join("");
 
+            // Delete Drafts
+            c.querySelectorAll(".delete-draft-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    if (!confirm("Are you sure you want to delete this draft? This cannot be undone.")) return;
+                    const id = btn.getAttribute("data-id");
+                    try {
+                        await fetch(`/api/drafts/${id}`, { method: "DELETE" });
+                        loadDraftsPage();
+                    } catch (e) { alert("Failed to delete draft."); }
+                });
+            });
+
+            // Edit Drafts
+            c.querySelectorAll(".edit-draft-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.getAttribute("data-id");
+                    const title = decodeURIComponent(btn.getAttribute("data-title"));
+                    const content = decodeURIComponent(btn.getAttribute("data-content"));
+                    document.getElementById(`draft-title-${id}`).value = title;
+                    document.getElementById(`draft-content-${id}`).value = content;
+                    document.getElementById(`draft-edit-${id}`).classList.remove("hidden");
+                });
+            });
+
+            c.querySelectorAll(".cancel-edit-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.getAttribute("data-id");
+                    document.getElementById(`draft-edit-${id}`).classList.add("hidden");
+                });
+            });
+
+            c.querySelectorAll(".save-edit-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const id = btn.getAttribute("data-id");
+                    const title = document.getElementById(`draft-title-${id}`).value;
+                    const content = document.getElementById(`draft-content-${id}`).value;
+                    try {
+                        const res = await fetch(`/api/drafts/${id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ title: title, html_content: content })
+                        });
+                        if (res.ok) {
+                            document.getElementById(`draft-edit-${id}`).classList.add("hidden");
+                            loadDraftsPage();
+                        } else {
+                            alert("Failed to save changes.");
+                        }
+                    } catch (e) { alert("Error saving changes."); }
+                });
+            });
+
+            // Publish Drafts
             c.querySelectorAll(".publish-draft-btn").forEach(btn => {
                 btn.addEventListener("click", async () => {
                     const id = btn.getAttribute("data-id");
-                    if (!confirm("Publish this draft to WordPress?")) return;
-                    const res = await fetch(`/api/publish/${id}`, { method: "POST" });
-                    const d   = await res.json();
-                    alert(d.message || "Published!");
-                    loadDraftsPage();
+                    const action = btn.getAttribute("data-action");
+                    if (!confirm(action === 'publish' ? "Publish live to WordPress?" : "Send to WordPress as a Draft?")) return;
+                    
+                    const oldText = btn.innerHTML;
+                    btn.innerHTML = "⏳ Publishing...";
+                    btn.disabled = true;
+                    
+                    try {
+                        const res = await fetch(`/api/publish/${id}?action=${action}`, { method: "POST" });
+                        const d   = await res.json();
+                        
+                        btn.innerHTML = oldText;
+                        btn.disabled = false;
+                        
+                        if (res.ok) {
+                            const successArea = document.getElementById(`draft-success-${id}`);
+                            successArea.classList.remove("hidden");
+                            
+                            if (d.post_url) {
+                                successArea.innerHTML = `✅ Successfully published! <a href="${d.post_url}" target="_blank" style="margin-left:10px; font-weight:bold; color:#28a745; text-decoration:underline;">🌍 View Article</a>`;
+                            } else {
+                                successArea.innerHTML = `✅ ${d.message}`;
+                            }
+                            
+                            // Reload to update status but delay so user sees success message
+                            setTimeout(() => loadDraftsPage(), 5000);
+                        } else {
+                            alert(d.detail || "Failed to publish");
+                        }
+                    } catch (e) { 
+                        alert("Failed to publish");
+                        btn.innerHTML = oldText;
+                        btn.disabled = false;
+                    }
                 });
             });
         } catch (e) {}
@@ -1436,3 +1631,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 5000);
 
 }); // end DOMContentLoaded
+
+
+
+// ===================================================================
+// TIMELINE & JOBS LOGIC
+// ===================================================================
+
+document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("view-timeline-btn")) {
+        const jobId = e.target.getAttribute("data-job-id");
+        if (!jobId) return;
+        await showTimeline(jobId);
+    }
+});
+
+async function showTimeline(jobId) {
+    const modal = document.getElementById("timeline-modal");
+    const container = document.getElementById("timeline-events-container");
+    const title = document.getElementById("modal-job-title");
+    if (!modal || !container) return;
+    
+    title.textContent = `Job Event Timeline (${jobId})`;
+    container.innerHTML = `<div style="text-align:center; padding: 20px;">Loading events...</div>`;
+    modal.classList.remove("hidden");
+    
+    try {
+        const res = await fetch(`/api/user/jobs/${jobId}/timeline`);
+        const events = await res.json();
+        if (!Array.isArray(events) || events.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding: 20px; color: rgba(0,0,0,0.5);">No timeline events found.</div>`;
+            return;
+        }
+        
+        container.innerHTML = events.map(ev => {
+            return `
+            <div class="timeline-event" style="margin-bottom: 10px; border-left: 2px solid #3B82F6; padding-left: 10px;">
+                <div style="font-size: 0.8rem; color: #6B7280;">${ev.timestamp || ''}</div>
+                <div><strong>${ev.stage}</strong> - <span style="color: ${ev.status==='FAILED'?'#EF4444':'#10B981'}">${ev.status}</span></div>
+                ${ev.message ? `<div style="font-size: 0.9rem; margin-top: 4px; background: rgba(0,0,0,0.03); padding: 4px 8px; border-radius: 4px;">${ev.message}</div>` : ''}
+            </div>
+            `;
+        }).join("");
+    } catch (e) {
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: #EF4444;">Failed to load timeline.</div>`;
+    }
+}
+
+const closeModalBtn = document.getElementById("close-modal-btn");
+if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", () => {
+        const modal = document.getElementById("timeline-modal");
+        if (modal) modal.classList.add("hidden");
+    });
+}
+
+const clearFinishedBtn = document.getElementById("clear-finished-btn");
+if (clearFinishedBtn) {
+    clearFinishedBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to clear all completed and failed jobs from your view?")) return;
+        try {
+            const res = await fetch("/api/user/jobs/clear", { method: "DELETE" });
+            if (res.ok) {
+                loadActiveJobs();
+            }
+        } catch (e) {}
+    });
+}
+
+const expandJobsBtn = document.getElementById("expand-jobs-btn");
+const collapseJobsBtn = document.getElementById("collapse-jobs-btn");
+const jobsTbody = document.getElementById("active-jobs-tbody");
+
+if (expandJobsBtn && collapseJobsBtn && jobsTbody) {
+    expandJobsBtn.addEventListener("click", () => {
+        jobsTbody.parentElement.style.display = "table";
+    });
+    collapseJobsBtn.addEventListener("click", () => {
+        jobsTbody.parentElement.style.display = "none";
+    });
+}

@@ -103,6 +103,11 @@ body {
     gap: 20px;
 }
 
+.header-bar {
+    position: relative;
+    z-index: 1000;
+}
+
 @media (max-width: 900px) {
     .app-container {
         padding: 16px;
@@ -149,6 +154,48 @@ body {
 .nav-btn:hover {
     background: rgba(0,0,0,0.06);
 }
+
+.nav-btn.active {
+    background: rgba(0,0,0,0.08);
+    color: var(--accent-orange-strong);
+}
+
+/* Nav Dropdown Menu */
+.nav-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 8px 0;
+    min-width: 150px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.nav-dropdown-menu .nav-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 16px;
+    border-radius: 0;
+}
+
+.nav-dropdown-menu .nav-btn:hover {
+    background: rgba(0,0,0,0.04);
+}
+
+.hidden {
+    display: none !important;
+}
+
 
 .btn-logout {
     color: #A03B24;

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css?v=13">
+    <link rel="stylesheet" href="/static/styles.css?v=15">
 </head>
 <body>
     <div class="bg-blobs">
@@ -593,6 +593,20 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=19"></script>
+    <script src="/static/app.js?v=20"></script>
+
+    <!-- Timeline Modal -->
+    <div id="timeline-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="modal-job-title" style="margin: 0;">Job Event Timeline</h3>
+                <button id="close-modal-btn" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="timeline-events-container" class="timeline-container" style="max-height: 400px; overflow-y: auto; padding: 10px;">
+                <!-- Timeline events will be inserted here -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -55,6 +55,16 @@ def init_db(db_path=DB_PATH, schema_path=SCHEMA_PATH):
             conn.execute("ALTER TABLE user_settings ADD COLUMN default_tone TEXT DEFAULT 'professional'")
         if 'default_keyword_density' not in us_cols:
             conn.execute("ALTER TABLE user_settings ADD COLUMN default_keyword_density TEXT DEFAULT '1.2'")
+        if 'airtable_api_key' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN airtable_api_key TEXT DEFAULT NULL")
+        if 'airtable_base_id' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN airtable_base_id TEXT DEFAULT NULL")
+        if 'airtable_table_name' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN airtable_table_name TEXT DEFAULT 'Links'")
+        if 'theme_type' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN theme_type TEXT DEFAULT 'standard'")
+        if 'seo_plugin' not in us_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN seo_plugin TEXT DEFAULT 'none'")
             
         conn.commit()
     logger.info("Database initialized with column migrations.")

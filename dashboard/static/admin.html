@@ -31,6 +31,7 @@
                 <button id="admin-nav-pipeline" class="nav-btn">Workflow Pipeline</button>
                 <button id="admin-nav-errors" class="nav-btn">Error Center</button>
                 <button id="admin-nav-audit" class="nav-btn">Audit Logs</button>
+                <button id="admin-nav-users" class="nav-btn">Users & Quotas</button>
                 <a href="/dashboard" class="nav-btn" style="color: #60A5FA; text-decoration: none;">👤 User View</a>
                 <button id="admin-logout-btn" class="nav-btn btn-logout">Logout</button>
             </div>
@@ -153,6 +154,28 @@
                 </div>
             </section>
 
+            
+            <!-- Users & Quotas Section -->
+            <section id="users-section" class="glass-panel" style="display: none;">
+                <h3 class="panel-header">👥 Users & Quotas Management</h3>
+                <table class="table-styled">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Plan</th>
+                            <th>Monthly Usage</th>
+                            <th>Limit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <tr><td colspan="7" style="text-align: center;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
             <!-- Audit Logs Section -->
             <section id="audit-section" class="glass-panel">
                 <h3 class="panel-header">📜 Security Audit Log Trail</h3>
@@ -188,5 +211,38 @@
     </div>
 
     <script src="/static/admin.js?v=3"></script>
+
+    <!-- Edit User Modal -->
+    <div id="admin-user-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <h3 style="margin-top: 0;">Edit User / Quota</h3>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                
+                <label style="display:block; margin-bottom: 5px;">Role</label>
+                <select id="edit-user-role" class="form-input" style="width: 100%; margin-bottom: 15px;">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                
+                <label style="display:block; margin-bottom: 5px;">Plan</label>
+                <select id="edit-user-plan" class="form-input" style="width: 100%; margin-bottom: 15px;">
+                    <option value="free">Free</option>
+                    <option value="starter">Starter</option>
+                    <option value="pro">Pro</option>
+                    <option value="business">Business</option>
+                </select>
+                
+                <label style="display:block; margin-bottom: 5px;">Article Limit / Month</label>
+                <input type="number" id="edit-user-limit" class="form-input" style="width: 100%; margin-bottom: 15px;">
+                
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-secondary" id="close-user-modal-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

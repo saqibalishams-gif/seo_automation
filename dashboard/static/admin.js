@@ -259,3 +259,77 @@ document.addEventListener("DOMContentLoaded", () => {
         loadSystemJobs();
     }, 5000);
 });
+
+
+
+    // Load Users & Quotas
+    async function loadUsers() {
+        const tbody = document.getElementById("users-tbody");
+        if (!tbody) return;
+        try {
+            const res = await fetch("/api/admin/users");
+            const users = await res.json();
+            if (!Array.isArray(users) || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No users found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><strong>${u.id}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.role === 'admin' ? 'badge-warning' : 'badge-info'}">${u.role}</span></td>
+                    <td><code>${u.plan}</code></td>
+                    <td>${u.monthly_usage} / ${u.article_limit}</td>
+                    <td>${u.article_limit}</td>
+                    <td>
+                        <button class="nav-btn edit-user-btn" data-id="${u.id}" data-role="${u.role}" data-plan="${u.plan}" data-limit="${u.article_limit}" style="color: #10B981;">✏ Edit</button>
+                    </td>
+                </tr>
+            `).join("");
+        } catch (e) {
+            console.error("Failed to load users", e);
+        }
+    }
+
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("edit-user-btn")) {
+            const id = e.target.getAttribute("data-id");
+            document.getElementById("edit-user-id").value = id;
+            document.getElementById("edit-user-role").value = e.target.getAttribute("data-role");
+            document.getElementById("edit-user-plan").value = e.target.getAttribute("data-plan");
+            document.getElementById("edit-user-limit").value = e.target.getAttribute("data-limit");
+            document.getElementById("admin-user-modal").classList.remove("hidden");
+        }
+    });
+
+    const editUserForm = document.getElementById("edit-user-form");
+    if (editUserForm) {
+        editUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit-user-id").value;
+            const payload = {
+                role: document.getElementById("edit-user-role").value,
+                plan: document.getElementById("edit-user-plan").value,
+                article_limit: parseInt(document.getElementById("edit-user-limit").value)
+            };
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    document.getElementById("admin-user-modal").classList.add("hidden");
+                    loadUsers();
+                }
+            } catch (err) {}
+        });
+    }
+
+    const closeUserModalBtn = document.getElementById("close-user-modal-btn");
+    if (closeUserModalBtn) {
+        closeUserModalBtn.addEventListener("click", () => {
+            document.getElementById("admin-user-modal").classList.add("hidden");
+        });
+    }

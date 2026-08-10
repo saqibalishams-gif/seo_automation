@@ -70,8 +70,8 @@ class ContentAgent:
             '  "introduction": "2-3 long paragraphs introducing the game/platform (use <p> tags)",\n'
             '  "sections": [\n'
             '    {\n'
-            '      "section_id": "sec-xxx",\n'
-            '      "heading": "Features of Game",\n'
+            '      "section_id": "MUST exactly match the section_id provided in the instructions",\n'
+            '      "heading": "Must exactly match the Heading provided in the instructions",\n'
             '      "content": "<p>Intro to features</p>",\n'
             '      "subsections": []\n'
             '    }\n'
@@ -87,16 +87,33 @@ class ContentAgent:
         user_prompt = f"Game: {candidate.game_name}\nProvider: {candidate.provider}\nContext: {json.dumps(context)}\nVerified Facts: {json.dumps(verified_facts)}"
         
         try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                max_tokens=8000,
-                response_format={"type": "json_object"}
-            )
+            try:
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=4500,
+                    response_format={"type": "json_object"}
+                )
+            except Exception as e:
+                if '429' in str(e) or 'rate_limit' in str(e).lower():
+                    logger.warning("Groq rate limit hit for 70b model. Falling back to llama-3.1-8b-instant...")
+                    response = client.chat.completions.create(
+                        model="llama-3.1-8b-instant",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=4000,
+                        response_format={"type": "json_object"}
+                    )
+                else:
+                    raise e
+
             raw_json = response.choices[0].message.content
             raw_json = raw_json.strip()
             if raw_json.startswith("```json"):
@@ -106,9 +123,19 @@ class ContentAgent:
                 
             data = json.loads(raw_json)
             
+            # Groq sometimes double-encodes: the result is a string instead of a dict
+            if isinstance(data, str):
+                data = json.loads(data)
+            
+            if not isinstance(data, dict):
+                raise ValueError(f"Groq returned unexpected type: {type(data)}")
+            
             clean_game_name = candidate.game_name.replace('-', ' ').title()
             
-            seo = SeoMetadata(**data.get("seo_metadata", {"focus_keyword": clean_game_name, "meta_description": ""}))
+            seo_raw = data.get("seo_metadata", {})
+            if not isinstance(seo_raw, dict):
+                seo_raw = {"focus_keyword": clean_game_name, "meta_description": ""}
+            seo = SeoMetadata(**seo_raw)
             
             sections = []
             tmpl_secs_by_name = {}
@@ -117,8 +144,12 @@ class ContentAgent:
                     tmpl_secs_by_name[ts.get("name", "").lower().strip()] = ts.get("id", "")
 
             for sec in data.get("sections", []):
+                if not isinstance(sec, dict):
+                    continue
                 subsections = []
                 for sub in sec.get("subsections", []):
+                    if not isinstance(sub, dict):
+                        continue
                     sub_c = sub.get("content", "")
                     if isinstance(sub_c, list):
                         sub_c = "\n".join(sub_c)
@@ -129,7 +160,15 @@ class ContentAgent:
                     sec_c = "\n".join(sec_c)
                     
                 heading_text = sec.get("heading", "")
-                sec_id = sec.get("section_id") or sec.get("id") or tmpl_secs_by_name.get(heading_text.lower().strip(), "")
+                sec_id_from_ai = sec.get("section_id") or sec.get("id") or ""
+                # Force heading match if available
+                sec_id = tmpl_secs_by_name.get(heading_text.lower().strip(), "")
+                if not sec_id:
+                    # If heading didn't match, maybe AI kept the section_id but changed heading
+                    if str(sec_id_from_ai) in [str(x) for x in tmpl_secs_by_name.values()]:
+                        sec_id = str(sec_id_from_ai)
+                    else:
+                        sec_id = sec_id_from_ai
                 
                 sections.append(Section(
                     section_id=sec_id,
@@ -138,7 +177,11 @@ class ContentAgent:
                     subsections=subsections
                 ))
                 
-            faqs = [FAQ(**faq) for faq in data.get("faqs", [])]
+            faqs_raw = data.get("faqs", [])
+            faqs = []
+            for faq in faqs_raw:
+                if isinstance(faq, dict):
+                    faqs.append(FAQ(**faq))
             
             intro_data = data.get("introduction", "")
             if isinstance(intro_data, list):

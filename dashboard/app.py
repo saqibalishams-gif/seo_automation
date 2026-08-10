@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from utils.db import get_db_connection, init_db
-from utils.db_models import SessionLocal, User, UserSettings, WordPressSite, ContentDraft, PublishHistory, Job, JobEvent, Worker, AuditLog, Subscription, UsageRecord, SystemErrorLog, CostRecord
+from utils.db_models import SessionLocal, User, UserSettings, WordPressSite, ContentDraft, PublishHistory, Job, JobEvent, Worker, AuditLog, Subscription, UsageRecord, SystemErrorLog, CostRecord, ImageAsset, ImageAssignment, TemplateSection, ContentTemplate
 from dashboard.auth import hash_password, verify_password, generate_session_token, get_current_user_id, get_current_user, require_admin, log_audit_event, get_user_settings
 from utils.crypto import encrypt_credential, decrypt_credential
 from utils.queue import enqueue_job, is_redis_available
@@ -177,13 +177,35 @@ def logout(response: Response, user_id: int = Depends(get_current_user_id), requ
 def update_settings(settings: SettingsUpdate, user_id: int = Depends(get_current_user_id)):
     encrypted_password = encrypt_credential(settings.wp_app_password)
     with SessionLocal() as db:
+        # Upsert UserSettings safely
         s = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
-        if not s:
-            s = UserSettings(user_id=user_id)
-            db.add(s)
-        s.wp_url = settings.wp_url
-        s.wp_username = settings.wp_username
-        s.wp_app_password = encrypted_password
+        if s:
+            s.wp_url = settings.wp_url
+            s.wp_username = settings.wp_username
+            s.wp_app_password = encrypted_password
+            s.theme_type = settings.theme_type
+            s.seo_plugin = settings.seo_plugin
+            db.commit()
+        else:
+            try:
+                s = UserSettings(
+                    user_id=user_id,
+                    wp_url=settings.wp_url,
+                    wp_username=settings.wp_username,
+                    wp_app_password=encrypted_password,
+                    theme_type=settings.theme_type,
+                    seo_plugin=settings.seo_plugin
+                )
+                db.add(s)
+                db.commit()
+            except Exception:
+                db.rollback()
+                s = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                if s:
+                    s.wp_url = settings.wp_url
+                    s.wp_username = settings.wp_username
+                    s.wp_app_password = encrypted_password
+                    db.commit()
         
         # Upsert WordPressSite record
         site = db.query(WordPressSite).filter(WordPressSite.user_id == user_id, WordPressSite.site_url == settings.wp_url).first()
@@ -254,7 +276,7 @@ def trigger_run(config: RunConfig, user_id: int = Depends(get_current_user_id)):
     payload = {
         "job_id": job_id,
         "user_id": user_id,
-        "url": config.url,
+        "url": getattr(config, 'url', None),
         "game_name": config.game_name or "Sweet Bonanza",
         "provider": config.provider or "Pragmatic Play",
         "target_market": config.market,
@@ -308,7 +330,7 @@ def set_user_active_format(req: ActiveFormatRequest, user_id: int = Depends(get_
             settings.active_format_mode = req.mode
             settings.active_template_id = req.template_id
             db.commit()
-            log_audit_event(user_id, "ACTIVE_FORMAT_SAVED", "UserSettings", str(settings.id), details={"mode": req.mode, "template_id": req.template_id})
+            log_audit_event(user_id, "ACTIVE_FORMAT_SAVED", "UserSettings", str(user_id), details={"mode": req.mode, "template_id": req.template_id})
             
         return {
             "message": "Active format updated in database",
@@ -349,11 +371,25 @@ def set_user_content_settings(req: ContentSettingsRequest, user_id: int = Depend
             if req.default_tone: settings.default_tone = req.default_tone
             if req.default_keyword_density: settings.default_keyword_density = req.default_keyword_density
             db.commit()
-            log_audit_event(user_id, "CONTENT_SETTINGS_SAVED", "UserSettings", str(settings.id), details=req.dict())
+            log_audit_event(user_id, "CONTENT_SETTINGS_SAVED", "UserSettings", str(user_id), details=req.dict())
             
         return {"message": "Content setup settings saved to database successfully"}
 
 # --- TENANT-ISOLATED USER DASHBOARD APIS ---
+
+@app.get("/api/user/jobs")
+@app.delete("/api/user/jobs/clear")
+def clear_user_jobs(user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        # Delete jobs that are COMPLETED, FAILED, or PENDING_REVIEW
+        jobs_to_delete = db.query(Job).filter(
+            Job.user_id == user_id,
+            Job.status.in_(["COMPLETED", "FAILED", "PENDING_REVIEW"])
+        ).all()
+        for j in jobs_to_delete:
+            db.delete(j)
+        db.commit()
+        return {"status": "success", "deleted": len(jobs_to_delete)}
 
 @app.get("/api/user/jobs")
 def get_user_jobs(status_filter: Optional[str] = None, user_id: int = Depends(get_current_user_id)):
@@ -448,24 +484,71 @@ def get_user_errors(user_id: int = Depends(get_current_user_id)):
 @app.get("/api/drafts")
 def get_drafts(user_id: int = Depends(get_current_user_id)):
     with SessionLocal() as db:
-        drafts = db.query(ContentDraft).filter(ContentDraft.user_id == user_id, ContentDraft.status == "draft").all()
-        return [
-            {
+        drafts = db.query(ContentDraft).filter(ContentDraft.user_id == user_id).order_by(ContentDraft.created_at.desc()).all()
+        result = []
+        for d in drafts:
+            doc = None
+            if d.document_json:
+                try:
+                    doc = json.loads(d.document_json)
+                except:
+                    pass
+            
+            result.append({
                 "id": d.id,
                 "game_name": d.game_name,
                 "provider": d.provider,
-                "created_at": d.created_at.strftime("%Y-%m-%d %H:%M:%S") if d.created_at else None,
-                "document": json.loads(d.document_json) if d.document_json else None
-            }
-            for d in drafts
-        ]
+                "status": d.status,
+                "title": doc.get("title", "") if doc else "",
+                "html_content": doc.get("html_content", "") if doc else "",
+                "created_at": d.created_at.strftime("%Y-%m-%d %H:%M") if d.created_at else None
+            })
+        return result
+
+class DraftUpdate(BaseModel):
+    title: str
+    html_content: str
+
+@app.put("/api/drafts/{draft_id}")
+def update_draft(draft_id: int, payload: DraftUpdate, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        draft = db.query(ContentDraft).filter(ContentDraft.id == draft_id, ContentDraft.user_id == user_id).first()
+        if not draft:
+            raise HTTPException(status_code=404, detail="Draft not found")
+        
+        doc = {}
+        if draft.document_json:
+            try:
+                doc = json.loads(draft.document_json)
+            except:
+                pass
+        
+        doc["title"] = payload.title
+        doc["html_content"] = payload.html_content
+        draft.document_json = json.dumps(doc)
+        
+        db.commit()
+        return {"message": "Draft updated successfully"}
+
+@app.delete("/api/drafts/{draft_id}")
+def delete_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        draft = db.query(ContentDraft).filter(ContentDraft.id == draft_id, ContentDraft.user_id == user_id).first()
+        if not draft:
+            raise HTTPException(status_code=404, detail="Draft not found")
+        # Also delete associated image assignments
+        db.query(ImageAssignment).filter(ImageAssignment.draft_id == draft_id).delete()
+        db.delete(draft)
+        db.commit()
+        return {"message": "Draft deleted successfully"}
 
 @app.post("/api/publish/{draft_id}")
-def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
+def publish_draft(draft_id: int, action: str = "publish", user_id: int = Depends(get_current_user_id)):
     from core.universal_model import ContentDocument
     from agents.wordpress_agent import WordPressPublisher
     
     with SessionLocal() as db:
+        from utils.db_models import ContentDraft, PublishHistory, ImageAssignment, ImageAsset, WordPressSite
         draft_record = db.query(ContentDraft).filter(ContentDraft.id == draft_id, ContentDraft.user_id == user_id).first()
         if not draft_record:
             raise HTTPException(status_code=404, detail="Draft not found")
@@ -477,45 +560,91 @@ def publish_draft(draft_id: int, user_id: int = Depends(get_current_user_id)):
         if not user_settings or not user_settings.get('wp_url'):
             raise HTTPException(status_code=400, detail="No WordPress site configured in user settings.")
             
+        wp_site = db.query(WordPressSite).filter(WordPressSite.user_id == user_id).first()
+        active_theme = wp_site.active_theme if wp_site and wp_site.active_theme else "appyn"
+
         site_profile = {
             "site_url": user_settings.get('wp_url', ''),
             "username": user_settings.get('wp_username', ''),
             "app_password": user_settings.get('wp_app_password', ''),
             "editor_type": user_settings.get('theme_type', 'classic'),
             "seo_plugin": user_settings.get('seo_plugin', 'none'),
-            "active_theme": "standard"
+            "active_theme": active_theme
         }
         
         doc_data = json.loads(draft_record.document_json)
         doc = ContentDocument(**doc_data)
         
+        # Load Image Assignments
+        assignments_db = db.query(ImageAssignment).filter(ImageAssignment.draft_id == draft_id).all()
+        if not assignments_db and draft_record.job_id:
+            assignments_db = db.query(ImageAssignment).filter(ImageAssignment.job_id == draft_record.job_id).all()
+            
+        image_assignments = []
+        for a in assignments_db:
+            image_asset = db.query(ImageAsset).filter(ImageAsset.id == a.image_id).first()
+            if image_asset:
+                image_assignments.append({
+                    "section_id": a.section_id,
+                    "section_name": "", 
+                    "url": None,
+                    "file_path": image_asset.file_path,
+                    "alignment": a.alignment,
+                    "size": a.size,
+                    "custom_width": a.custom_width,
+                    "custom_height": a.custom_height,
+                    "position": a.position,
+                    "fallback_behavior": a.fallback_behavior
+                })
+        
         wp_publisher = WordPressPublisher(site_profile=site_profile)
-        article_id = wp_publisher.publish(doc)
+        article_id = wp_publisher.publish(doc, image_assignments, post_status=action)
         
         if not article_id:
             raise HTTPException(status_code=500, detail="Failed to publish to WordPress. Check logs.")
             
         draft_record.status = "published"
         
-        new_history = PublishHistory(
-            user_id=user_id,
-            game_name=draft_record.game_name,
-            provider=draft_record.provider,
-            article_id=int(article_id) if str(article_id).isdigit() else 0
-        )
-        db.add(new_history)
+        existing_history = db.query(PublishHistory).filter(
+            PublishHistory.user_id == user_id,
+            PublishHistory.game_name == draft_record.game_name,
+            PublishHistory.provider == draft_record.provider
+        ).first()
+        
+        if existing_history:
+            existing_history.article_id = int(article_id) if str(article_id).isdigit() else 0
+            existing_history.published_at = datetime.datetime.utcnow()
+        else:
+            new_history = PublishHistory(
+                user_id=user_id,
+                game_name=draft_record.game_name,
+                provider=draft_record.provider,
+                article_id=int(article_id) if str(article_id).isdigit() else 0
+            )
+            db.add(new_history)
         db.commit()
         
         log_audit_event(user_id, "POST_PUBLISHED", "ContentDraft", str(draft_id), details={"article_id": article_id})
-        return {"message": f"Successfully published. WordPress Post ID: {article_id}"}
+        
+        post_url = f"{site_profile['site_url']}/?p={article_id}" if site_profile['site_url'] else ""
+        return {"message": f"Successfully published. WordPress Post ID: {article_id}", "post_url": post_url}
 
-class RunConfig(BaseModel):
-    url: Optional[str] = None
-    market: str = "UK"
-    volume: int = 2
-    game_name: Optional[str] = None
-    provider: Optional[str] = None
-    site_id: Optional[int] = None
+class ImageAssignmentCreate(BaseModel):
+    image_id: str
+    section_id: str
+    template_id: Optional[str] = None
+    job_id: Optional[str] = None
+    draft_id: Optional[int] = None
+    position: str = "after_heading"
+    size: str = "medium"
+    alignment: str = "center"
+    custom_width: Optional[int] = None
+    custom_height: Optional[int] = None
+    fallback_behavior: str = "do_not_publish"
+
+class LinkJobImagesRequest(BaseModel):
+    job_id: str
+    image_ids: List[str]
     dry_run: bool = False
 
 @app.post("/api/links")
@@ -575,6 +704,17 @@ async def add_link(
             db.add(new_job)
             db.add(JobEvent(job_id=job_id, user_id=user_id, event_type="JOB_CREATED", stage="QUEUED", status="QUEUED", message=f"Queued URL: {url}"))
             db.add(JobEvent(job_id=job_id, user_id=user_id, event_type="JOB_QUEUED", stage="QUEUED", status="QUEUED", message="Enqueued into Redis worker queue."))
+            
+            # Associate any orphaned image assignments with this new job
+            from utils.db_models import ImageAssignment
+            orphaned_assignments = db.query(ImageAssignment).filter(
+                ImageAssignment.user_id == user_id,
+                ImageAssignment.job_id.is_(None),
+                ImageAssignment.draft_id.is_(None)
+            ).all()
+            for assignment in orphaned_assignments:
+                assignment.job_id = job_id
+            
             db.commit()
             
         payload = {
@@ -618,6 +758,50 @@ def get_logs(user_id: int = Depends(get_current_user_id)):
         return {"error": str(e)}
 
 # --- ADMIN DASHBOARD & MONITORING APIS ---
+
+@app.get("/api/admin/users")
+def admin_get_users(admin_id: int = Depends(require_admin)):
+    with SessionLocal() as db:
+        users = db.query(User).all()
+        result = []
+        for u in users:
+            sub = db.query(Subscription).filter(Subscription.user_id == u.id).first()
+            result.append({
+                "id": u.id,
+                "email": u.email,
+                "role": u.role,
+                "plan": sub.plan if sub else "free",
+                "article_limit": sub.article_limit if sub else 5,
+                "monthly_usage": sub.monthly_usage if sub else 0,
+                "is_active": u.is_active,
+                "created_at": u.created_at.strftime("%Y-%m-%d") if u.created_at else None
+            })
+        return result
+
+class AdminUserUpdate(BaseModel):
+    role: str
+    plan: str
+    article_limit: int
+
+@app.put("/api/admin/users/{user_id}")
+def admin_update_user(user_id: int, payload: AdminUserUpdate, admin_id: int = Depends(require_admin)):
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user.role = payload.role
+        
+        sub = db.query(Subscription).filter(Subscription.user_id == user_id).first()
+        if sub:
+            sub.plan = payload.plan
+            sub.article_limit = payload.article_limit
+        else:
+            new_sub = Subscription(user_id=user_id, plan=payload.plan, article_limit=payload.article_limit)
+            db.add(new_sub)
+            
+        db.commit()
+        return {"status": "success"}
 
 @app.get("/api/admin/stats")
 def get_admin_stats(admin = Depends(require_admin)):
@@ -964,6 +1148,20 @@ def assign_image_to_section(payload: ImageAssignmentCreate, user_id: int = Depen
         db.commit()
         log_audit_event(user_id, "IMAGE_ASSIGNED", "ImageAssignment", str(assignment.id), details={"section_id": payload.section_id})
         return {"message": "Image assignment saved", "assignment_id": assignment.id}
+
+# --- LINK UPLOADED IMAGES TO A JOB ---
+@app.post("/api/images/link-job")
+def link_images_to_job(payload: LinkJobImagesRequest, user_id: int = Depends(get_current_user_id)):
+    with SessionLocal() as db:
+        for img_id in payload.image_ids:
+            assignment = db.query(ImageAssignment).filter(
+                ImageAssignment.user_id == user_id,
+                ImageAssignment.image_id == str(img_id)
+            ).first()
+            if assignment:
+                assignment.job_id = payload.job_id
+        db.commit()
+    return {"status": "ok", "job_id": payload.job_id}
 
 # --- VALIDATION & PREVIEW APIS ---
 

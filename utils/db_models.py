@@ -72,6 +72,9 @@ class UserSettings(Base):
     airtable_base_id = Column(String, nullable=True)
     airtable_table_name = Column(String, default="Links")
     
+    theme_type = Column(String, default="standard")
+    seo_plugin = Column(String, default="none")
+    
     active_format_mode = Column(String, default="default") # "default" or "custom"
     active_template_id = Column(Integer, nullable=True)
     

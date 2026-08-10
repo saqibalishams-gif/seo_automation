@@ -206,10 +206,44 @@ def execute_job_task(job_id: str, payload: Dict[str, Any]):
             trusted_facts = {}
         emit_job_event(job_id, user_id, "FACT_PROCESSING_COMPLETED", "FACT_PROCESSING", "PROCESSING", "Fact processing complete.")
         
+        
+        # Load Template
+        from utils.db_models import UserSettings, ContentTemplate, TemplateSection
+        with SessionLocal() as db:
+            settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+            template_id = settings.active_template_id if settings else None
+            template_dict = None
+            tmpl = None
+            if template_id:
+                tmpl = db.query(ContentTemplate).filter(ContentTemplate.id == template_id).first()
+            if not tmpl:
+                # Mimic UI fallback so image assignment section_ids perfectly match generated draft section_ids
+                tmpl = db.query(ContentTemplate).filter(ContentTemplate.user_id == user_id, ContentTemplate.is_default == True).first()
+                if not tmpl:
+                    tmpl = db.query(ContentTemplate).filter(ContentTemplate.user_id == user_id).first()
+                if not tmpl:
+                    tmpl = db.query(ContentTemplate).first()
+                    
+            if tmpl:
+                secs = []
+                for s in tmpl.sections:
+                    secs.append({
+                        "id": str(s.id),
+                        "name": s.name,
+                        "required": s.required,
+                        "content_type": s.content_type,
+                        "ai_instruction": s.ai_instruction
+                    })
+                template_dict = {
+                    "id": tmpl.id,
+                    "name": tmpl.name,
+                    "sections": secs
+                }
+
         # 4. Content Generation Stage (Calls Groq with prompt instructions)
         emit_job_event(job_id, user_id, "CONTENT_GENERATION_STARTED", "CONTENT_GENERATION", "PROCESSING", "Generating 1500+ word review with Groq LLM.")
         content_agent = ContentAgent()
-        draft_doc = content_agent.draft_article(candidate, context, trusted_facts)
+        draft_doc = content_agent.draft_article(candidate, context, trusted_facts, template=template_dict)
         emit_job_event(job_id, user_id, "CONTENT_GENERATION_COMPLETED", "CONTENT_GENERATION", "PROCESSING", f"Article generated: '{draft_doc.title}'")
         
         # 5. Image Processing Stage
