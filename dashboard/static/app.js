@@ -9,14 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const navHome          = document.getElementById("nav-home");
     const navCreate        = document.getElementById("nav-create");
     const navTemplates     = document.getElementById("nav-templates");
-    const navMedia         = document.getElementById("nav-media");
     const navHistory       = document.getElementById("nav-history");
     const navSettings      = document.getElementById("nav-settings");
     const navAdmin         = document.getElementById("nav-admin");
-    const navWebsites      = document.getElementById("nav-websites");
     const navDrafts        = document.getElementById("nav-drafts");
-    const navMoreBtn       = document.getElementById("nav-more-btn");
-    const navMoreMenu      = document.getElementById("nav-more-menu");
     const devModeCheckbox  = document.getElementById("dev-mode-checkbox");
     const devModeDrawer    = document.getElementById("dev-mode-drawer");
     const devUuidContainer = document.getElementById("dev-uuid-lookup-container");
@@ -112,14 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===================================================================
-    // NAV DROPDOWN
-    // ===================================================================
-    if (navMoreBtn && navMoreMenu) {
-        navMoreBtn.addEventListener("click", (e) => { e.stopPropagation(); navMoreMenu.classList.toggle("hidden"); });
-        document.addEventListener("click", () => navMoreMenu.classList.add("hidden"));
-    }
-
-    // ===================================================================
     // TAB SWITCHER
     // ===================================================================
     function switchTab(viewName, navBtn) {
@@ -127,17 +115,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const target = document.getElementById(`view-${viewName}`);
         if (target) target.classList.remove("hidden");
 
-        [navHome, navCreate, navTemplates, navHistory, navWebsites, navMedia, navDrafts, navSettings, navAdmin]
+        [navHome, navCreate, navTemplates, navHistory, navDrafts, navSettings, navAdmin]
             .forEach(b => { if (b) b.classList.remove("active"); });
         if (navBtn) navBtn.classList.add("active");
-        if (navMoreMenu) navMoreMenu.classList.add("hidden");
         window.scrollTo({ top: 0, behavior: "smooth" });
 
         if      (viewName === "home")      { loadUsage(); loadJobsHome(); }
         else if (viewName === "create")    { initCreateView(); }
         else if (viewName === "templates") { loadFormatsListView(); }
-        else if (viewName === "websites")  { loadWebsitesView(); }
-        else if (viewName === "media")     { loadMediaGallery(); }
         else if (viewName === "drafts")    { loadDraftsPage(); }
         else if (viewName === "history")   { loadHistory(); }
         else if (viewName === "settings")  { loadSettings(); }
@@ -147,8 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (navCreate)    navCreate.addEventListener("click",    () => switchTab("create",    navCreate));
     if (navTemplates) navTemplates.addEventListener("click", () => switchTab("templates", navTemplates));
     if (navHistory)   navHistory.addEventListener("click",   () => switchTab("history",   navHistory));
-    if (navWebsites)  navWebsites.addEventListener("click",  () => switchTab("websites",  navWebsites));
-    if (navMedia)     navMedia.addEventListener("click",     () => switchTab("media",     navMedia));
     if (navDrafts)    navDrafts.addEventListener("click",    () => switchTab("drafts",    navDrafts));
     if (navSettings)  navSettings.addEventListener("click",  () => switchTab("settings",  navSettings));
 
@@ -1154,35 +1137,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===================================================================
     // MEDIA LIBRARY
     // ===================================================================
-    async function loadMediaGallery() {
-        try {
-            const res    = await fetch("/api/images");
-            const assets = await res.json();
-            const c      = document.getElementById("media-gallery-container");
-            if (!c || !Array.isArray(assets)) return;
-            c.innerHTML = assets.length === 0
-                ? `<p style="color:var(--text-secondary);">No images uploaded yet.</p>`
-                : assets.map(a => `
-                    <div style="background:white;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px;width:140px;text-align:center;">
-                        <img src="${a.url}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;">
-                        <div style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px;">${a.filename}</div>
-                        <div style="font-size:0.75rem;color:var(--text-muted);">${a.width} × ${a.height}</div>
-                    </div>`).join("");
-        } catch (e) {}
-    }
-
-    const mediaUploadForm = document.getElementById("media-upload-form");
-    if (mediaUploadForm) {
-        mediaUploadForm.addEventListener("submit", async e => {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append("file", document.getElementById("media_upload_file")?.files[0]);
-            try {
-                const res = await fetch("/api/images/upload", { method: "POST", body: fd });
-                if (res.ok) loadMediaGallery();
-            } catch (e) {}
-        });
-    }
 
     // ===================================================================
     // HISTORY (with checkboxes)
@@ -1539,20 +1493,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (err) {}
         });
-    }
-
-    // ===================================================================
-    // WEBSITES
-    // ===================================================================
-    async function loadWebsitesView() {
-        try {
-            const res  = await fetch("/api/settings");
-            const data = await res.json();
-            const urlEl  = document.getElementById("site_display_url");
-            const userEl = document.getElementById("site_display_user");
-            if (urlEl  && data.wp_url)      urlEl.textContent  = data.wp_url;
-            if (userEl && data.wp_username) userEl.textContent = `Username: ${data.wp_username}`;
-        } catch (e) {}
     }
 
     // ===================================================================

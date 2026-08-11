@@ -23,26 +23,13 @@
                 <div class="status-dot-container"><div class="status-dot"></div></div>
                 <h1 style="font-size: 1.15rem;">SEO AUTO</h1>
             </div>
-            <div class="status-pills" style="align-items: center;">
-                <button id="nav-home" class="nav-btn active">🏠 Dashboard</button>
-                <button id="nav-create" class="nav-btn" style="color: #FF7A3D; font-weight: 700;">✍ Create Article</button>
-                <button id="nav-templates" class="nav-btn">🎨 Content Formats</button>
-                <button id="nav-history" class="nav-btn">📜 History</button>
-                <button id="nav-websites" class="nav-btn">🌐 Websites</button>
-
-                <div class="nav-dropdown-container">
-                    <button id="nav-more-btn" class="nav-btn">More ⋯</button>
-                    <div id="nav-more-menu" class="nav-dropdown-menu hidden">
-                        <button id="nav-media" class="nav-btn" style="width: 100%; text-align: left;">🖼 Media</button>
-                        <button id="nav-drafts" class="nav-btn" style="width: 100%; text-align: left;">📄 Drafts</button>
-                        <button id="nav-settings" class="nav-btn" style="width: 100%; text-align: left;">⚙ Settings</button>
-                        <button id="nav-admin" class="nav-btn hidden" style="width: 100%; text-align: left; color: #F59E0B;">⚡ Admin</button>
-                        <label class="dev-mode-toggle" style="font-size: 0.8rem; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text-muted); padding: 6px 12px;">
-                            <input type="checkbox" id="dev-mode-checkbox"> ⚙ Dev Mode
-                        </label>
-                    </div>
-                </div>
-
+            <div class="status-pills" style="align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button id="nav-home" class="nav-btn active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-5H9v5H4a1 1 0 0 1-1-1V10.5z"/></svg></span>Overview</button>
+                <button id="nav-create" class="nav-btn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>Create Article</button>
+                <button id="nav-templates" class="nav-btn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg></span>Templates</button>
+                <button id="nav-drafts" class="nav-btn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 7h8"/><path d="M8 12h6"/></svg></span>Drafts</button>
+                <button id="nav-history" class="nav-btn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/></svg></span>History</button>
+                <button id="nav-settings" class="nav-btn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.66 1.66 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.66 1.66 0 0 0-1.82-.33 1.66 1.66 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.66 1.66 0 0 0-1-1.51 1.66 1.66 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.66 1.66 0 0 0 .33-1.82 1.66 1.66 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.66 1.66 0 0 0 1.51-1 1.66 1.66 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.66 1.66 0 0 0 1.82.33H9a1.66 1.66 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.66 1.66 0 0 0 1 1.51 1.66 1.66 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.66 1.66 0 0 0-.33 1.82V9a1.66 1.66 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.66 1.66 0 0 0-1.51 1z"/></svg></span>Settings</button>
                 <div class="status-pill" id="user-plan-pill" style="margin-left: 6px;">Plan: FREE</div>
                 <div class="status-pill" id="user-quota-pill">Quota: 0 / 5</div>
                 <button id="logout-btn" class="nav-btn btn-logout">Log Out</button>
@@ -142,21 +129,22 @@
             <!-- ================= VIEW 2: AUTOMATE & PUBLISH ================= -->
             <div id="view-create" class="tab-view hidden">
                 <section class="glass-panel" id="automation-fast-track">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem; gap: 12px;">
                         <div>
-                            <h2 style="margin: 0 0 4px 0; color: var(--text-primary);">🚀 Quick Automate</h2>
-                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Fill in the article details and start automation.</p>
+                            <div class="section-subtitle">Step 1 of 3</div>
+                            <h2 style="margin: 0 0 4px 0; color: var(--text-primary);">Quick article setup</h2>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Provide the article details, choose the format, then publish.</p>
                         </div>
-                        <button id="btn-open-advanced-setup" class="btn-secondary-sm" style="padding: 8px 16px;">⚙️ Advanced Configuration</button>
+                        <button id="btn-open-advanced-setup" class="btn-secondary-sm" style="padding: 8px 16px;">Advanced configuration</button>
                     </div>
 
                     <!-- 1. Execution Details -->
                     <div class="workflow-section">
                         <div class="workflow-section-title">
-                            <span class="section-icon">📝</span>
+                            <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.999H4v-3L16.5 3.5z"/></svg></span>
                             <div>
-                                <h3>Article Details</h3>
-                                <p class="section-desc">What is this specific article about?</p>
+                                <h3>Article details</h3>
+                                <p class="section-desc">Describe the article and the target page.</p>
                             </div>
                         </div>
 
@@ -194,10 +182,10 @@
                     <!-- 2. Images (Clean Hybrid Model) -->
                     <div class="workflow-section">
                         <div class="workflow-section-title">
-                            <span class="section-icon">🖼</span>
+                            <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
                             <div>
-                                <h3>Article Images</h3>
-                                <p class="section-desc">Upload multiple images at once, then assign them to format sections.</p>
+                                <h3>Media uploads</h3>
+                                <p class="section-desc">Upload images and assign them to sections.</p>
                             </div>
                         </div>
                         
@@ -229,10 +217,10 @@
                     <!-- 3. Current Setup Summary -->
                     <div class="workflow-section">
                         <div class="workflow-section-title">
-                            <span class="section-icon">⚙</span>
+                            <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.66 1.66 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.66 1.66 0 0 0-1.82-.33 1.66 1.66 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.66 1.66 0 0 0-1-1.51 1.66 1.66 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.66 1.66 0 0 0 .33-1.82 1.66 1.66 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.66 1.66 0 0 0 1.51-1 1.66 1.66 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.66 1.66 0 0 0 1.82.33H9a1.66 1.66 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.66 1.66 0 0 0 1 1.51 1.66 1.66 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.66 1.66 0 0 0-.33 1.82V9a1.66 1.66 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.66 1.66 0 0 0-1.51 1z"/></svg></span>
                             <div>
-                                <h3>Configuration Used</h3>
-                                <p class="section-desc">This article will be written using your active settings.</p>
+                                <h3>Active configuration</h3>
+                                <p class="section-desc">This article will use your current defaults.</p>
                             </div>
                         </div>
                         <div id="fast-track-setup-summary" style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px;">
@@ -395,29 +383,6 @@
                 </script>
             </div>
 
-            <!-- ================= VIEW 4: MEDIA LIBRARY ================= -->
-            <div id="view-media" class="tab-view hidden">
-                <section class="glass-panel">
-                    <h3 class="panel-header">🖼 Image Library &amp; Section Assignments</h3>
-                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                        <form id="media-upload-form" class="run-form" style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
-                            <h4 style="margin-bottom: 0.5rem;">Upload Image Asset</h4>
-                            <div class="form-group">
-                                <label>Image File (JPG, PNG, WEBP)</label>
-                                <input type="file" id="media_upload_file" accept="image/*" required>
-                            </div>
-                            <button type="submit" class="btn-primary" style="padding: 8px; margin-top: 0.5rem;">Upload Image Asset</button>
-                        </form>
-                        <div style="flex: 2; min-width: 300px;">
-                            <h4 style="margin-bottom: 0.8rem;">Uploaded Image Assets:</h4>
-                            <div id="media-gallery-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <p style="color: var(--text-secondary);">No images uploaded yet.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
             <!-- ================= VIEW 5: HISTORY ================= -->
             <div id="view-history" class="tab-view hidden">
                 <section class="glass-panel">
@@ -450,22 +415,6 @@
                 </section>
             </div>
 
-            <!-- ================= VIEW 6: WEBSITES ================= -->
-            <div id="view-websites" class="tab-view hidden">
-                <section class="glass-panel">
-                    <h3 class="panel-header">🌐 Connected WordPress Websites</h3>
-                    <div id="websites-list-container" style="margin-bottom: 1.5rem;">
-                        <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong id="site_display_url" style="font-size: 1.1rem; color: var(--text-primary);">Configured WordPress Site</strong>
-                                <div id="site_display_user" style="font-size: 0.85rem; color: var(--text-secondary);">Connected</div>
-                            </div>
-                            <span class="badge badge-success">Active</span>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
             <!-- ================= VIEW 7: DRAFTS ================= -->
             <div id="view-drafts" class="tab-view hidden">
                 <section class="glass-panel">
@@ -477,7 +426,17 @@
             <!-- ================= VIEW 8: SETTINGS ================= -->
             <div id="view-settings" class="tab-view hidden">
                 <section class="glass-panel">
-                    <h3 class="panel-header">⚙ WordPress Connection Settings</h3>
+                    <h3 class="panel-header">Settings</h3>
+                    <div id="settings-summary" style="margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                        <div style="flex: 1; min-width: 220px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">Connected WordPress site</div>
+                            <div id="settings-site-url" style="font-weight: 700; color: var(--text-primary); word-break: break-all;">Not configured yet</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); padding: 16px; border-radius: 12px; min-width: 220px;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">SEO plugin</div>
+                            <div id="settings-seo-plugin" style="font-weight: 700; color: var(--text-primary);">None</div>
+                        </div>
+                    </div>
                     <form id="setup-form" class="run-form">
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div class="form-group" style="flex: 2; min-width: 200px;">
